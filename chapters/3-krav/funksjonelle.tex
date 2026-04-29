@@ -1,16 +1,43 @@
-\section{Innledning}
-\label{sec:krav-innledning}
+\section{Funksjonelle krav}
+\label{sec:krav-funksjonelle}
 
-Kravspesifikasjonen ble utarbeidet av HDO ved prosjektstart og 
-dannet grunnlaget for all videre utvikling. Kravene ble mottatt 
-fra Magne Henriksen og dekker funksjonalitet, sikkerhet, 
-infrastruktur og observability \cite{hdo_kravspec}.
+VideoAPI tilbyr et standardisert REST API som abstraherer 
+forskjellene mellom AntMedia Server og NHN Video. Kravene 
+definerer kjerneoperasjonene som måtte støttes for å dekke 
+HDOs bruksbehov i akuttmedisinske kontrollrom.
 
-Kravene er organisert i følgende kategorier:
+\subsection{Oppretting av videorom (F1.1)}
+\label{subsec:krav-f11}
 
-\begin{itemize}
-    \item Funksjonelle krav (F1.1--F1.5)
-    \item Sikkerhetskrav (S1.1--S1.2)
-    \item Infrastrukturkrav (I1.1--I1.2)
-    \item Observability-krav (O1.1--O1.3)
-\end{itemize}
+AMK-operatører initierer videostrømming ved å sende en 
+SMS-lenke til innringeren. Videorommet opprettes dynamisk 
+uten manuell prekonfigurasjon. VideoAPI støtter oppretting 
+av nye rom og returnerer informasjon som tillater tilkobling. 
+Dersom klienten ikke sender med et rom-navn, genererer 
+mellomvaren et unikt navn og returnerer dette.
+
+\subsection{Sletting av videorom (F1.2)}
+\label{subsec:krav-f12}
+
+Etter endt samtale slettes videorommet for å frigjøre 
+ressurser på backend-tjenestene. API-et aksepterer rom-ID 
+som parameter og videresender slettingen til riktig backend.
+
+\subsection{Henting av roominformasjon (F1.3)}
+\label{subsec:krav-f13}
+
+Operatører trenger oversikt over aktive videorom under 
+pågående hendelser. VideoAPI returnerer strukturert 
+roominformasjon, herunder antall deltakere, 
+strømmingskvalitet og tilkoblingsstatus, normalisert 
+på tvers av de to backendene.
+
+\subsection{Start og stopp av videostrøm (F1.4, F1.5)}
+\label{subsec:krav-f14-f15}
+
+Operatører må kunne starte og stoppe videostrømming 
+eksplisitt. AntMedia er strøm-orientert og har egne 
+start/stopp-operasjoner; NHN Video er møte-orientert 
+og rommet er klart når det opprettes. Start og stopp 
+er derfor implementert ulikt per provider, noe som 
+var en av driverne for plugin-arkitekturen.
