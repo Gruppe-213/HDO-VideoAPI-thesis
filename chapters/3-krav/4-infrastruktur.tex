@@ -1,35 +1,21 @@
 \section{Infrastrukturkrav}
 \label{sec:krav-infrastruktur}
 
-Infrastrukturkravene sikrer at VideoAPI kan deployes og skaleres i HDOs 
-driftsmiljø.
-
 \subsection{Containerisering (I1.1)}
 \label{subsec:krav-i11}
 
-Mellomvaren skal kunne kjøres som Docker-image.
-
-\textbf{Rasjonale:} HDO bruker containerbasert deployment for enklere 
-vedlikehold og konsistent kjøremiljø på tvers av test- og produksjonsmiljø.
-
-\textbf{Implementasjon:} VideoAPI leveres som Docker image med tilhørende 
-Docker Compose-oppsett for lokal testing.
+Mellomvaren skal kunne kjøres som Docker-image. VideoAPI leveres 
+som Docker-image med tilhørende Docker Compose-oppsett for lokal 
+kjøring og testing.
 
 \subsection{Stateless design og skalerbarhet (I1.2)}
 \label{subsec:krav-i12}
 
-Mellomvaren skal være stateless (ingen state kun i minne per instans). 
-Dersom state er nødvendig, lagres dette i en delt komponent (f.eks. Redis 
-eller en database). Konfigurasjon skal komme via miljøvariabler.
+Mellomvaren skal være stateless — ingen tilstand lagres i minne 
+per instans. Dersom state er nødvendig, lagres dette i en delt 
+komponent som Redis eller en database. All konfigurasjon leses 
+fra miljøvariabler.
 
-\textbf{Rasjonale:} Stateless design tillater horisontal skalering ved 
-å kjøre flere instanser av VideoAPI bak en load balancer. Dette sikrer 
-høy tilgjengelighet i kritisk infrastruktur.
-
-\textbf{Implementasjon:} VideoAPI lagrer ingen tilstand internt. All 
-konfigurasjon (API-nøkler, backend-URLer, JWT-issuer) leses fra miljøvariabler. 
-State (f.eks. aktive rom) ligger hos backend-tjenestene (AntMedia/NHN Video).
-
-\textbf{Arkitektonisk konsekvens:} Stateless-kravet forsterker behovet for 
-en plugin-basert arkitektur der hver provider håndterer sin egen state 
-uavhengig av VideoAPI-laget.
+VideoAPI lagrer ingen tilstand internt. API-nøkler, backend-URLer 
+og JWT-issuer konfigureres via miljøvariabler. State, som aktive 
+videorom, ligger hos backend-tjenestene.

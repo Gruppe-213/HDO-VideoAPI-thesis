@@ -1,36 +1,23 @@
 \section{Sikkerhetskrav}
 \label{sec:krav-sikkerhet}
 
-VideoAPI opererer i et kritisk helsedomene hvor uautorisert tilgang til 
-videostrømmer kan utgjøre alvorlige personvernbrudd. Sikkerhetskravene 
-sikrer at kun autoriserte brukere kan opprette, administrere og delta i 
-videorom.
+VideoAPI opererer i akuttmedisinsk sammenheng hvor uautorisert 
+tilgang til videostrømmer kan utgjøre alvorlige personvernbrudd. 
+Sikkerhetskravene definerer hvem som kan bruke API-et og hvordan 
+tilgang til individuelle videorom kontrolleres.
 
 \subsection{API-autentisering (S1.1)}
 \label{subsec:krav-s11}
 
-API-et skal være beskyttet med token-basert autentisering (OAuth 2.0), 
-der alle endepunkter (unntatt helsesjekk-endepunkter) krever gyldig 
-tilgangstoken.
-
-\textbf{Rasjonale:} Kun autoriserte AMK/LVS-systemer skal kunne opprette 
-og administrere videorom. Token-basert autentisering sikrer at kun HDOs 
-egne systemer kan kommunisere med VideoAPI.
-
-\textbf{Implementasjon:} VideoAPI bruker JWT Bearer Authentication for 
-å validere innkommende forespørsler.
+Alle endepunkter unntatt helsesjekk krever et gyldig Bearer-token 
+utstedt via OAuth~2.0. Dette begrenser tilgangen til VideoAPI til 
+HDOs egne systemer og forhindrer uautorisert opprettelse av videorom.
 
 \subsection{Romtoken for videostrømmer (S1.2)}
 \label{subsec:krav-s12}
 
-Hvert videorom skal tildeles en sikkerhetstoken slik at ikke uvedkommende 
-kan få tilgang til strømmen.
-
-\textbf{Rasjonale:} Når AMK-operatør sender SMS-lenke til innringer/pasient, 
-må lenken inneholde en token som sikrer at kun mottaker kan delta i 
-videorommet. Dette forhindrer at uvedkommende kan gjette rom-ID og få 
-tilgang til sensitiv video.
-
-\textbf{Implementasjon:} AntMedia bruker JWT-baserte viewer tokens, mens 
-NHN Video bruker Pexip Guest PINs. VideoAPI abstraherer disse forskjellene 
-og returnerer en uniform tilkoblingslenke uavhengig av backend.
+Hvert videorom tildeles en sikkerhetstoken slik at kun mottakeren 
+av SMS-lenken kan delta i strømmen. AntMedia bruker JWT-baserte 
+viewer tokens; NHN Video bruker Pexip Guest PINs. VideoAPI 
+abstraherer disse forskjellene og returnerer en uniform 
+tilkoblingslenke uavhengig av backend.
