@@ -1,0 +1,5 @@
+\section{Teststrategi}
+\label{sec:teststrategi}
+Kode skal skrives med mål om å kunne lage og kjøre tester. Enhets-testing skal bli implementert på kritiske komponenter og funksjoner i kodebasen, og de ikke-kritiske komponentene hvis det er tid. I workflows vil disse enhets testene bli kjørt automatisk og må være godkjent før det er å lov å endre kode i develop og main branch.
+
+Integrasjonstesting brukes for å verifisere at VideoAPI fungerer korrekt i samspill med de eksterne videomotorene, og det er derfor opprettet separate testmiljøer for begge motorene levert av oppdragsgiver. Testing i disse miljøene gjør det mulig å kontrollere at API-et håndterer kommunikasjon, responser og eventuelle feil fra videomotorene på en robust måte. Integrasjonstesting gjennomføres jevnlig gjennom utviklingsperioden, spesielt ved større endringer i funksjonalitet eller når nye endepunkter legges til. Dette sikrer at VideoAPI er kompatibel med begge videomotorene før løsning tas i bruk i produksjon.

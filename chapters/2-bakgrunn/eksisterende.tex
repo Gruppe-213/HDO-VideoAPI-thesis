@@ -1,4 +1,22 @@
-\section{Eksisterende løsninger}
-\label{sec:eksisterende}
+\section{Eksisterende videoløsninger}
+\label{sec:eksisterende-videolosninger}
 
-% Hjelp113 Video, SMS til Video
+HDO leverer i dag to separate videoløsninger til den 
+akuttmedisinske kjede. Begge bruker WebRTC for å strømme 
+video fra innringers mobilkamera til operatøren, og begge 
+følger samme arbeidsflyt: operatøren sender en SMS-lenke 
+til innringeren, som godtar kameradeling og starter 
+videostrømmen. Videostrømmen er kryptert og går via en 
+sentralisert videomotor; lyd overføres via den ordinære 
+telefonsamtalen \cite{hdo_oppgave}.
+
+Til tross for lik funksjonalitet benytter de to løsningene 
+forskjellig infrastruktur og videomotorer: AntMedia Server 
+og NHN Video. Hver motor har sitt eget API og sine egne 
+integrasjonsmetoder, noe som innebærer at ny funksjonalitet 
+må implementeres separat for begge, og at driftspersonell 
+må forholde seg til to ulike systemer \cite{hdo_oppgave}.
+
+VideoAPI-prosjektet ble initiert for å løse dette: én 
+mellomvare som abstraherer forskjellene mellom motorene, 
+slik at fremtidige endringer kan gjøres ett sted.

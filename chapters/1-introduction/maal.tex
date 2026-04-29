@@ -1,4 +1,37 @@
-\section{Mål og avgrensninger}
-\label{sec:maal}
+\subsection{Effektmål}
 
-% Mål og avgrensninger
+VideoAPI skal på sikt gi HDO mulighet til å integrere nye 
+videomotorer uten å skrive om eksisterende løsninger, og til å 
+bytte leverandør basert på pris eller funksjonalitet uten å låse 
+seg til én teknologi. Dette prosjektet leverer en 
+proof-of-concept; realisering av disse gevinstene krever 
+produksjonssetting og videreutvikling hos HDO.
+
+\subsection{Resultatmål}
+
+Prosjektet leverte følgende:
+
+\begin{enumerate}
+    \item Et REST API med plugin-arkitektur, OAuth2/JWT-autentisering, 
+          health-endepunkter, strukturert logging og Prometheus-monitorering.
+    \item Provider-adapters for AntMedia Server og NHN Video.
+    \item En enkel demo-frontend for å demonstrere API-et i praksis.
+    \item OpenAPI/Swagger-dokumentasjon beregnet på eksterne leverandører.
+    \item README, deployment-guide og utviklerguide for videre arbeid.
+    \item Containerisert løsning med Docker og CI/CD via GitHub Actions.
+    \item Denne bachelorrapport.
+\end{enumerate}
+
+Produktet ble levert til HDO 1. mai 2026. Rapporten leveres 
+20. mai 2026.
+
+\subsection{Læringsmål}
+
+Teamet hadde ingen erfaring med C\# eller .NET fra før. 
+De første sprintene ble derfor brukt til å lære språket og 
+økosystemet parallelt med utvikling. I løpet av prosjektet 
+opparbeidet teamet praktisk erfaring med .NET~10, ASP.NET~Core, 
+REST API-design, plugin-arkitektur, Docker, GitHub Actions, 
+og Prometheus/Grafana. Samarbeidet med HDO som ekstern 
+oppdragsgiver ga også erfaring med kravhåndtering og 
+leveransepress i et reelt prosjekt.

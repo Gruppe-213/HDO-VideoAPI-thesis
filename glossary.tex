@@ -1,35 +1,34 @@
+% glossary.tex - Ordliste og forkortelser for HDO VideoAPI
 
-% From https://www.overleaf.com/learn/latex/Glossaries
+% ============================================================================
+% FORKORTELSER - kun domenespesifikke og ikke-opplagte
+% ============================================================================
 
-\makeglossaries % Prepare for adding glossary entries
+% Helsevesen
+\newacronym{hdo}{HDO}{Helsetjenestens driftsorganisasjon for nødnett HF}
+\newacronym{amk}{AMK}{Akuttmedisinsk kommunikasjonssentral}
+\newacronym{lvs}{LVS}{Legevaktsentral}
+\newacronym{nhn}{NHN}{Norsk Helsenett}
 
+% Tekniske
+\newacronym{jwt}{JWT}{JSON Web Token}
+\newacronym{webrtc}{WebRTC}{Web Real-Time Communication}
 
-\newglossaryentry{latex}
-{
-        name=latex,
-        description={Is a mark up language specially suited for
-scientific documents}
+% ============================================================================
+% FAGTERMER - kun prosjektspesifikke
+% ============================================================================
+
+\newglossaryentry{videomotor}{
+    name={videomotor},
+    description={Backend-system som håndterer videostrømming. I dette prosjektet: AntMedia Server og NHN Video (Pexip)}
 }
 
-\newglossaryentry{bibliography}
-{
-        name=bibliography,
-        plural=bibliographies,
-        description={A list of the books referred to in a scholarly work,
-typically printed as an appendix}
+\newglossaryentry{provider}{
+    name={provider},
+    description={Komponent som implementerer integrasjon mot en spesifikk videomotor via \texttt{IVideoProvider}-grensesnittet}
 }
 
-\newglossaryentry{maths}
-{
-    name=mathematics,
-    description={Mathematics is what mathematicians do}
+\newglossaryentry{broadcast}{
+    name={broadcast},
+    description={AntMedia-terminologi for en videostrøm eller et videorom}
 }
-
-
-% --------------------
-% ----- Acronyms -----
-% --------------------
-
-\newacronym{phd}{PhD}{philosophiae doctor}
-\newacronym{CoPCSE}{CoPCSE@NTNU}{Community of Practice in Computer ScienceEducation at NTNU}
-\newacronym{gcd}{GCD}{Greatest Common Divisor}

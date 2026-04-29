@@ -1,4 +1,26 @@
 \section{Bakgrunn}
 \label{sec:bakgrunn}
 
-% Hvorfor HDO trenger VideoAPI
+Helsetjenestens driftsorganisasjon for nødnett HF (HDO) leverer 
+kommunikasjonsløsninger til norsk akuttmedisin og drifter 
+videoløsninger for 109 akuttmedisinske kommunikasjonssentraler 
+(AMK) og legevaktsentraler (LVS) over hele Norge 
+\cite{hdo_kravspec}. Løsningene brukes daglig i akutte situasjoner 
+der operatører sender en SMS-lenke til innringeren, som deretter 
+kan sende videostrøm tilbake til sentralen. Lyd går via ordinær 
+telefonsamtale; video brukes som beslutningsstøtte ved hendelser 
+som hjertestans, trafikkulykker og fødsler.
+
+HDO benytter to separate videomotorer: AntMedia Server og NHN 
+Video (basert på Pexip). De to motorene har ulike API-er og 
+integrasjonsmetoder, noe som medfører at ny funksjonalitet må 
+implementeres to ganger, opplæring og vedlikehold skjer i to 
+separate systemer, og terskelen for å bytte eller legge til 
+videomotorer er høy. Siden systemet brukes i akuttmedisinsk 
+sammenheng hele døgnet, stiller HDO strenge krav til stabilitet 
+og tilgjengelighet.
+
+For å løse dette ønsket HDO en mellomvare som skjuler forskjellene 
+mellom videomotorene bak ett felles API. Dette prosjektet 
+utviklet og leverte en slik mellomvare — VideoAPI — med integrasjon 
+mot begge motorene.

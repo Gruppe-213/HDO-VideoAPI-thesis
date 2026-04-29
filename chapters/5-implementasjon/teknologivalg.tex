@@ -1,4 +1,108 @@
-\section{Teknologivalg}
+\section{Dokumentasjon, standarder og verktøy}
 \label{sec:teknologivalg}
+\subsubsection{Dokumentasjon}
+Rapport skrives i Latex med bruk av Overleaf, som gjør det lett for gruppemedlemmene å skrive samtidig. Overleaf dokumentet vil bli synkronisert med et separat GitHub Repo for ekstra backup. 
 
-% Hvorfor .NET 10, etc.
+Notion er et samarbeids notatverktøy som skal bli brukt for intern informasjon som møtereferater og generell informasjon som blir delt mellom gruppen.
+
+\subsubsection{Kodestandarder}
+% Beskriv:
+% - Navnekonvensjoner
+% - Kommentering
+% - Formatting
+% - Linting
+Prosjektet følger i hovedsak Microsoft sine anbefalte konvensjoner for C\#. Public typer og medlemmer navngis med PascalCase, mens private felt benytter camelCase. Det brukes file-scoped namespaces for en tydelig og moderne kodeorganisering.
+
+Asynkrone metoder implementeres i tråd med etablerte async/await-prinsipper, og prosjektet unngår blokkering gjennom bruk av Task.Result og .Wait()
+
+\subsubsection{Bruk av AI-verktøy}
+
+I prosjektet benytter gruppen AI-verktøy som ChatGPT og Claude som støtte i arbeidsprosessen. ChatGPT brukes hovedsakelig til idéutvikling, strukturering av tekst og forbedring av dokumentasjon. Claude benyttes i tillegg som støtte ved idéutvikling og til hjelp med koding og tekniske problemstillinger. AI-verktøyene fungerer som assistenter i utviklingsarbeidet, og alle forslag blir vurdert og kvalitetssikret av gruppemedlemmene før de tas i bruk
+
+\subsubsection{Versjonskontroll (Git)}
+
+Prosjektet vil benytte Git og Github som versjonkontrollsystem. Dette vil sikre strukturert utvikling og samarbeid. Vi bruker en branch strategi hvor main vil være protected slik at man kun kan gjøre endringer i kode gjennom Pull requests der minst ett annet gruppemedlem må godkjenne det. En develop branch som brukes til utvikling og integrasjon av koden, og spesifikke funksjoner utvikles i egne feature-branches.
+
+Commit-meldinger skal være profesjonelle og forklare hver endring i kodebasen.
+
+\subsubsection{GitHub Actions}
+Prosjektet bruker Github, og for å sikre kontinuerlig kvalitet av kode, bruker vi GitHub Actions med automatiserte workflows som kjøres på en GitHub runner. Workflows vil aktivere ved push til repository og opprettelse av pull requests. Disse workflowene vil blant annet utføre:
+\begin{itemize}
+    \item Kodevalidering
+    \item Automatiserte tester
+    \item Sjekk standarder og formatering
+\end{itemize}
+
+
+% Repository: GitHub
+% Branching-strategi:
+% - main
+% - develop
+% - feature/[navn]
+% - hotfix/[navn]
+%
+% Commit-meldinger format
+% Pull Request-prosess
+
+\subsubsection{Konfigurasjonsstyring}
+% Environment variables
+Miljøspesifikk konfigurasjon håndteres som miljøvariabler, dette gjør at koden kan kjøres i ulike miljøer (lokalt, develop, main) uten kodeendringer. Miljøvariabler blir ikke lagret i repoet.
+
+
+% Secrets håndtering
+Hemmeligheter som tokens, API-nøkler og passord skal aldri lagres i koden eller i konfigurasjonsfiler i GitHub. I CI brukes GitHub Secrets for å legge inn nødvendige secrets ved kjøring av workflows. Tilgang til secrets vil endres og begrenses til de relevante workflows eller branches ved behov.
+
+
+% Dependencies
+Avhengigheter vil håndteres gjennom pakkehåndtering NuGet og låses til versjoner for å sikre at koden kan kjøres overalt.
+
+% Docker images SKREV IKKE NOE
+
+\subsubsection{Verktøy}
+\sloppy
+\begin{table}[H]
+\centering
+\renewcommand{\arraystretch}{1.4}
+
+\begin{tabular}{l p{5cm} p{6cm}}
+\hline
+\textbf{Navn} & \textbf{Beskrivelse} & \textbf{Bruksområde} \\
+\hline
+
+Overleaf & Nettbasert LaTeX-editor for å skrive og kompilere dokumenter. 
+& Prosjektrapport. \\
+
+Draw.io & Gratis verktøy for å lage diagrammer og flytskjema. 
+& UML og andre diagrammer. \\
+
+Visual Studio Code & IDE for utvikling. 
+& API-utvikling. \\ 
+
+Docker & Plattform for å kjøre applikasjoner i containere. 
+& Containerization av VideoAPI. \\
+
+GitHub & Plattform for versjonskontroll og samarbeid med Git. 
+& Lagring av kode, samarbeid og prosjektstyring. \\
+
+Postman & Verktøy for testing av API-er. 
+& Utvikling og feilsøking av REST API-er. \\
+
+OpenStack & Infrastruktur som tjeneste (IaaS). 
+& Hosting av GitHub Runner. \\
+
+Jira & Prosjektstyringsverktøy med Scrumboard og issue tracking. 
+& Prosjektstyring. \\
+
+Teams & Kommunikasjons\-applikasjon. & Samarbeid og kommunikasjon. \\
+
+Notion & Nettbasert notatverktøy med samarbeidsmuligheter. 
+& Dokumentasjon og notater. \\
+
+ChatGpt 5.2 & AI-språkmodell fra OpenAI & Ideutvikling og støtte i tekst \\
+
+Claude & AI-språkmodell fra Anthropic & Ideutvikling og støtte i kode \\
+
+\hline
+\end{tabular}
+
+\end{table}

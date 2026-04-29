@@ -1,4 +1,16 @@
 \chapter{API-dokumentasjon}
 \label{app:api-dokumentasjon}
 
-% API-referanse
+Interaktiv API-dokumentasjon er tilgjengelig via Swagger UI på
+\url{https://video-backend.hdolab.no/swagger/index.html}.
+Swagger UI krever autentisering — et Bearer JWT-token hentes via
+\texttt{POST /auth/token} og limes inn i Authorize-dialogen uten
+\texttt{Bearer}-prefiks. OpenAPI-spesifikasjonen i JSON-format
+ligger på \texttt{/swagger/v1/swagger.json}.
+
+For integrasjon mot VideoAPI henvises til prosjektets
+dokumentasjonsmappe på GitHub:
+\url{https://github.com/Gruppe-213/HDO-VideoAPI/tree/main/docs}.
+Mappen dekker autentiseringsflyt, rom-ID-format,
+provider-kapabilitetsmatrise, Docker-oppsett, observability
+og sikkerhet.

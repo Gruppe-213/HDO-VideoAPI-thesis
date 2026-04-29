@@ -1,4 +1,49 @@
 \section{Observability-krav}
-\label{sec:observability-krav}
+\label{sec:krav-observability}
 
-% O1.1--O1.3
+Driftspersonell må kunne overvåke og feilsøke VideoAPI uten 
+tilgang til kildekoден. Kravene under beskriver logging, 
+helsesjekk og metrikker.
+
+\subsection{Logging av drifts- og sikkerhetshendelser (O1.1)}
+\label{subsec:krav-o11}
+
+VideoAPI logger sikkerhets- og driftsrelevante hendelser med 
+strukturerte log-nivåer (Info, Warning, Error). Følgende 
+hendelser logges: autentiseringsforsøk (suksess og feil), 
+opprettelse og sletting av videorom med rom-ID og provider, 
+start og stopp av videostrømmer, samt feil i kommunikasjon 
+med backend-tjenestene. API-nøkler, JWT-tokens og 
+pasientinformasjon logges aldri.
+
+Kravet om å ikke logge hemmeligheter er særlig viktig i 
+helsedomenet, der sporing av hendelser må balanseres mot 
+personvern og pasientsikkerhet.
+
+\subsection{Health check-endepunkter (O1.2)}
+\label{subsec:krav-o12}
+
+API-et eksponerer to endepunkter: \texttt{/health/live} 
+returnerer HTTP~200 hvis prosessen kjører, og 
+\texttt{/health/ready} returnerer HTTP~200 hvis API-et 
+kan nå begge backend-tjenestene. Endepunktene krever ikke 
+autentisering slik at overvåkingssystemer kan bruke dem 
+uten å håndtere tokens.
+
+\subsection{Prometheus-metrikker (O1.3)}
+\label{subsec:krav-o13}
+
+API-et eksponerer et \texttt{/metrics}-endepunkt som 
+Prometheus skraper. Implementerte metrikker er:
+
+\begin{itemize}
+    \item \texttt{hdo\_active\_rooms\_total\{provider\}}: 
+          gauge for antall aktive rom per provider
+    \item \texttt{http\_requests\_total\{method,endpoint,status\}}: 
+          counter for HTTP-forespørsler
+    \item \texttt{http\_request\_duration\_seconds}: 
+          histogram for responstider
+\end{itemize}
+
+Metrikkene visualiseres i et Grafana-dashboard og gir 
+driftspersonell løpende oversikt over systemtilstand.

@@ -1,4 +1,37 @@
 \section{Problemstilling}
 \label{sec:problemstilling}
 
-% Problemdefinisjon
+HDO har to videomotorer i drift med hvert sitt API og sine egne 
+integrasjonsmetoder. Eksisterende løsninger er tett koblet til 
+én backend om gangen, noe som gjør det vanskelig å bytte 
+leverandør, legge til nye tjenester eller standardisere 
+funksjonaliteten på tvers. Siden systemet er i daglig bruk i 
+akuttmedisinsk sammenheng, må enhver endring ivareta høye krav 
+til sikkerhet, stabilitet og responstid.
+
+Dette prosjektet utviklet og evaluerte en plugin-basert 
+mellomvare, VideoAPI, som standardiserer tilgang til ulike 
+videomotorer. Løsningen ble implementert som proof-of-concept 
+med støtte for AntMedia Server og NHN Video.
+
+Det sentrale spørsmålet oppgaven besvarer er:
+
+\begin{quote}
+\textit{I hvilken grad kan en plugin-basert mellomvare-arkitektur 
+redusere integrasjonskompleksitet og gjøre det mulig å støtte 
+flere videomotorer uten å endre kjernelogikken i VideoAPI?}
+\end{quote}
+
+Vi evaluerte løsningen langs tre dimensjoner: om et felles API 
+faktisk klarer å abstrahere over forskjellene mellom motorene, 
+hvor enkelt det er å legge til en ny motor uten å røre 
+eksisterende kode, og om mellomvaren holder HDO sine krav til 
+autentisering, logging og responstid.
+
+Oppgavens hovedpåstand er:
+
+\begin{quote}
+\textit{En modulær mellomvare med plugin-arkitektur kan 
+standardisere tilgang til heterogene videoløsninger i kritisk 
+helseteknologi, uten å kompromittere sikkerhet eller ytelse.}
+\end{quote}
