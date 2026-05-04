@@ -1,7 +1,7 @@
 \section{Authentication}
 \label{sec:impl-auth}
 
-Backendet bruker Keycloak for autentisering.
+Backendet bruker Keycloak for autentisering. Keycloak
 Alle kall mot /api/rooms/* må ha et JWT Bearer-token i
   Authorization-headeren, ellers returnerer serveren 401 eller 403.
 
