@@ -1,4 +1,100 @@
 \section{Prosjektstruktur}
 \label{sec:prosjektstruktur}
 
+Løsningen består av ett enkelt .NET-prosjekt med tilhørende testprosjekt,
+organisert i et flatt mappehierarki der ansvar er separert etter teknisk rolle
+fremfor feature. Figur~\ref{fig:prosjektstruktur} viser de sentrale mappene.
+
+Kildekoden ligger i rotkatalogen til \texttt{HDO-VideoAPI}-prosjektet.
+\texttt{Controllers/} inneholder de to kontrollerene som eksponerer REST-API-et
+utad: \texttt{RoomsController} håndterer romoperasjoner, mens
+\texttt{AuthController} tilbyr et hjelpepunkt for tokenhenting under utvikling.
+Forretningslogikken er fullstendig skilt fra HTTP-laget ved at kontrollerne
+delegerer alle operasjoner til en \texttt{IVideoProvider} hentet gjennom
+\texttt{IVideoProviderFactory}.
+
+\texttt{Providers/} er kjernen i plugin-arkitekturen. Mappen inneholder
+grensesnittene \texttt{IVideoProvider} og \texttt{IVideoProviderFactory}, samt
+én undermappe per backend: \texttt{AntMedia/} og \texttt{NHN/}. Hver undermappe
+samler all kode som er spesifikk for den aktuelle videomotoren — konfigurasjon,
+datamodeller, autentiseringshåndterer og selve providerimplementasjonen. En ny
+backend kan legges til ved å opprette en tilsvarende undermappe uten å røre
+eksisterende kode.
+
+\texttt{Extensions/} inneholder én fil per tjenestekategori, slik at
+\texttt{Program.cs} kan begrenses til drøyt 20 linjer. Oppstart skjer i en
+fast rekkefølge: miljøvariabler lastes, Kestrel konfigureres, tjenester
+registreres og middleware-kjeden bygges. Denne inndelingen gjør det enkelt å
+finne og endre én avgrenset del av oppstartslogikken uten å forstyrre de andre.
+
+Krysskuttende bekymringer som feilhåndtering, metrikk og helsesjekker er
+plassert i egne mapper — \texttt{Middleware/}, \texttt{Metrics/} og
+\texttt{HealthChecks/} — slik at de forblir uavhengige av både kontrollere og
+providers. Konfigurasjon hentes utelukkende fra miljøvariabler og
+\texttt{appsettings}-filer, i tråd med krav I1.2 fra kravspesifikasjonen.
+
+Testprosjektet \texttt{HDO-VideoAPI.Tests/} speiler mappestrukturen til
+hovedprosjektet. Hver produksjonskatalog har en korresponderende testkatalog,
+noe som gjorde det enkelt å holde oversikt over testdekning under utvikling.
 % Løsningsstruktur
+\begin{figure}[htbp]
+\centering
+\begin{minipage}[t]{0.48\textwidth}
+\dirtree{%
+.1 HDO-VideoAPI/.
+tfgcv vgyhb bijn  n+pl, .2 Extensions/.
+.3 HostingExtensions.cs.
+.3 RateLimitingExtensions.cs.
+.3 VideoApiCoreExtensions.cs.
+.3 CorsExtensions.cs.
+.3 ProviderExtensions.cs.
+.3 HealthCheckExtensions.cs.
+.3 KeycloakExtensions.cs.
+.3 ApplicationExtensions.cs.
+.2 Controllers/.
+.3 RoomsController.cs.
+.3 AuthController.cs.
+.2 Providers/.
+.3 IVideoProvider.cs.
+.3 IVideoProviderFactory.cs.
+.3 VideoProviderFactory.cs.
+.3 AntMedia/.
+.4 AntMediaProvider.cs.
+.4 AntMediaAuthHandler.cs.
+.4 AntMediaConfig.cs.
+.3 NHN/.
+.4 NHNVideoProvider.cs.
+.4 NHNAuthHandler.cs.
+.4 NHNTokenCache.cs.
+.2 HealthChecks/.
+.2 Metrics/.
+.2 Middleware/.
+.2 Models/.
+.2 Services/.
+}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.48\textwidth}
+\dirtree{%
+.1 HDO-VideoAPI.Tests/.
+.2 Controllers/.
+.3 RoomsControllerTests.cs.
+.3 AuthControllerTests.cs.
+.3 SecurityBehaviorTests.cs.
+.3 RateLimitingTests.cs.
+.2 Providers/.
+.3 AntMediaProviderTests.cs.
+.3 AntMediaAuthHandlerTests.cs.
+.3 NHNVideoProviderTests.cs.
+.3 VideoProviderFactoryTests.cs.
+.2 Extensions/.
+.2 HealthChecks/.
+.2 Middleware/.
+.2 Services/.
+.2 CustomWebApplicationFactory.cs.
+}
+\end{minipage}
+\caption{Mappestruktur for \texttt{HDO-VideoAPI} (venstre) og
+\texttt{HDO-VideoAPI.Tests} (høyre).}
+\label{fig:prosjektstruktur}
+\end{figure}

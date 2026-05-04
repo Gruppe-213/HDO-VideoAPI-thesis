@@ -1,4 +1,111 @@
 \section{Enhetstester}
 \label{sec:enhetstester}
 
-% Unit tests
+Enhetstestene er skrevet med xUnit og bruker Moq for mocking 
+av avhengigheter. HTTP-laget mockes med egne 
+\texttt{StubHttpMessageHandler}-klasser som returnerer 
+forhåndsdefinerte responser uten nettverkskall.
+
+Følgende komponenter har dedikerte enhetstester:
+provider-laget (\texttt{AntMediaProvider}, \texttt{NHNVideoProvider}), 
+autentiseringshåndterere (\texttt{AntMediaAuthHandler}, 
+\texttt{NHNAuthHandler}), \texttt{VideoProviderFactory}, 
+helsesjekker, \texttt{GlobalExceptionHandler}, 
+DI-registreringer og egendefinerte exception-typer.
+
+Et eksempel på en happy path-test verifiserer at 
+\texttt{CreateRoomAsync} sender riktig request-body 
+og mapper responsen korrekt:
+
+\begin{lstlisting}[language={[Sharp]C}, caption={AntMediaProviderTests — CreateRoomAsync happy path}]
+[Fact]
+public async Task CreateRoomAsync_Success_ReturnsCreatedRoom()
+{
+    string? requestBody = null;
+    using var client = new HttpClient(new StubHttpMessageHandler(
+        async request =>
+        {
+            requestBody = await request.Content!.ReadAsStringAsync();
+            return new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(
+                    "{\"streamId\":\"room-1\",\"name\":\"Demo Room\"," +
+                    "\"status\":\"created\"}")
+            };
+        })) { BaseAddress = new Uri("https://antmedia.test/") };
+
+    var sut = new AntMediaProvider(
+        client, Mock.Of<ILogger<AntMediaProvider>>());
+
+    var result = await sut.CreateRoomAsync(
+        new CreateRoomRequest { Provider = "antmedia", Name = "Demo Room" });
+
+    Assert.Equal("room-1", result.Id);
+    Assert.Contains("\"type\":\"liveStream\"", requestBody);
+}
+\end{lstlisting}
+
+Feilscenarier testes like systematisk. Følgende test 
+verifiserer at en 500-respons fra AntMedia kaster 
+\texttt{ExternalServiceException} med riktig statuskode:
+
+\begin{lstlisting}[language={[Sharp]C}, caption={AntMediaProviderTests — StopStream feilscenario}]
+[Fact]
+public async Task StopStreamAsync_Upstream500_ThrowsExternalServiceException()
+{
+    using var client = new HttpClient(new StubHttpMessageHandler(_ =>
+        Task.FromResult(new HttpResponseMessage(
+            HttpStatusCode.InternalServerError)
+        {
+            Content = new StringContent("{\"message\":\"stop failed\"}")
+        })));
+    var sut = new AntMediaProvider(
+        client, Mock.Of<ILogger<AntMediaProvider>>());
+
+    var ex = await Assert.ThrowsAsync<ExternalServiceException>(
+        () => sut.StopStreamAsync("room-1"));
+
+    Assert.Equal(500, ex.StatusCode);
+}
+\end{lstlisting}
+
+For NHN Video verifiserer en egen test at operasjoner 
+som ikke er støttet av møte-modellen kaster 
+\texttt{NotSupportedException}:
+
+\begin{lstlisting}[language={[Sharp]C}, caption={NHNVideoProviderTests — ikke-støttede operasjoner}]
+[Fact]
+public async Task UnsupportedOperations_ThrowNotSupportedException()
+{
+    using var client = CreateHttpClient(_ =>
+        Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)));
+    var sut = CreateSut(client);
+
+    await Assert.ThrowsAsync<NotSupportedException>(
+        () => sut.StartStreamAsync("24418"));
+    await Assert.ThrowsAsync<NotSupportedException>(
+        () => sut.StopStreamAsync("24418"));
+    await Assert.ThrowsAsync<NotSupportedException>(
+        () => sut.SetRoomTokenAsync("24418", "token"));
+}
+\end{lstlisting}
+
+\texttt{VideoProviderFactory} testes med mixed-case 
+nøkler for å verifisere at provider-oppslag er 
+case-insensitivt:
+
+\begin{lstlisting}[language={[Sharp]C}, caption={VideoProviderFactoryTests — mixed-case nøkkel}]
+[Fact]
+public void GetProvider_MixedCaseKey_ReturnsRegisteredProvider()
+{
+    var nhnProvider = Mock.Of<IVideoProvider>();
+    var services = new ServiceCollection();
+    services.AddKeyedSingleton<IVideoProvider>("nhn", nhnProvider);
+    using var sp = services.BuildServiceProvider();
+    var sut = new VideoProviderFactory(sp);
+
+    var result = sut.GetProvider("NhN");
+
+    Assert.Same(nhnProvider, result);
+}
+\end{lstlisting}

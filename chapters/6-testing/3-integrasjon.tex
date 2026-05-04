@@ -1,4 +1,99 @@
 \section{Integrasjonstester}
-\label{sec:integrasjon}
+\label{sec:integrasjonstester}
 
-% Integrasjonstester
+Integrasjonstestene bruker \texttt{WebApplicationFactory<Program>} 
+til å starte API-et in-memory. En \texttt{CustomWebApplicationFactory} 
+erstatter alle eksterne avhengigheter med Moq-instanser og 
+simulerer autentisering via en \texttt{TestAuthHandler}. 
+Hver testklasse instansierer sin egen factory for å sikre 
+isolasjon mellom tester.
+
+\begin{lstlisting}[language={[Sharp]C}, caption={RoomsControllerTests — oppsett med per-test isolasjon}]
+public class RoomsControllerTests : IDisposable
+{
+    private readonly CustomWebApplicationFactory _factory;
+    private readonly HttpClient _client;
+
+    public RoomsControllerTests()
+    {
+        _factory = new CustomWebApplicationFactory();
+        _client = _factory.CreateClient();
+    }
+
+    public void Dispose()
+    {
+        _client.Dispose();
+        _factory.Dispose();
+    }
+}
+\end{lstlisting}
+
+En success-test verifiserer at \texttt{POST /api/rooms} 
+returnerer HTTP~201 med en \texttt{Location}-header:
+
+\begin{lstlisting}[language={[Sharp]C}, caption={RoomsControllerTests — CreateRoom success}]
+[Fact]
+public async Task CreateRoom_Success_Returns201WithLocation()
+{
+    _factory.MockVideoProvider
+        .Setup(s => s.CreateRoomAsync(
+            It.IsAny<CreateRoomRequest>(),
+            It.IsAny<CancellationToken>()))
+        .ReturnsAsync(new VideoRoom { Id = "room-1", Name = "test-room" });
+
+    var response = await _client.PostAsJsonAsync(
+        "/api/rooms", new CreateRoomRequest { Name = "test-room" });
+
+    Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+    Assert.NotNull(response.Headers.Location);
+}
+\end{lstlisting}
+
+Feilscenarier testes like grundig. Følgende test verifiserer 
+at en \texttt{ExternalServiceException} fra provider-laget 
+mappes til HTTP~502 med RFC~7807 problem details, inkludert 
+ekstern statuskode fra backend:
+
+\begin{lstlisting}[language={[Sharp]C}, caption={RoomsControllerTests — ExternalServiceException mappes til 502}]
+[Fact]
+public async Task CreateRoom_ServiceThrowsExternalServiceException_Returns502()
+{
+    _factory.MockVideoProvider
+        .Setup(s => s.CreateRoomAsync(
+            It.IsAny<CreateRoomRequest>(),
+            It.IsAny<CancellationToken>()))
+        .ThrowsAsync(
+            new ExternalServiceException("AntMedia", "Upstream error", 503));
+
+    var response = await _client.PostAsJsonAsync(
+        "/api/rooms", new CreateRoomRequest { Name = "test-room" });
+    using var body = await ReadBodyAsync(response);
+
+    Assert.Equal(HttpStatusCode.BadGateway, response.StatusCode);
+    Assert.Equal("application/problem+json",
+        response.Content.Headers.ContentType?.MediaType);
+    Assert.Equal(503,
+        body.RootElement.GetProperty("externalStatusCode").GetInt32());
+}
+\end{lstlisting}
+
+Sikkerhetskrav testes via \texttt{SecurityBehaviorTests}. 
+\texttt{CustomWebApplicationFactory} tar et valgfritt 
+\texttt{apiAccessClaimValue}-argument som styrer hvilke 
+claims \texttt{TestAuthHandler} inkluderer. Følgende test 
+verifiserer at et manglende \texttt{api\_access}-claim 
+resulterer i HTTP~403:
+
+\begin{lstlisting}[language={[Sharp]C}, caption={SecurityBehaviorTests — manglende api\_access-claim}]
+[Fact]
+public async Task ProtectedEndpoint_WithoutApiAccessClaim_Returns403()
+{
+    using var factory = new CustomWebApplicationFactory(
+        apiAccessClaimValue: null);
+    using var client = factory.CreateClient();
+
+    var response = await client.GetAsync("/api/rooms/mock:room-1");
+
+    Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+}
+\end{lstlisting}

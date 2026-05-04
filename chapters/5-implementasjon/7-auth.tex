@@ -1,4 +1,16 @@
-\section{JWT-håndtering}
+\section{Authentication}
 \label{sec:impl-auth}
 
-% JWT-håndtering
+Backendet bruker Keycloak for autentisering.
+Alle kall mot /api/rooms/* må ha et JWT Bearer-token i
+  Authorization-headeren, ellers returnerer serveren 401 eller 403.
+
+  Token hentes via /auth/token, som er åpent uten autentisering. Det endepunktet sender en client
+  credentials-forespørsel til Keycloak og returnerer tokenet tilbake til klienten. Signaturen på innkommende tokens
+  valideres mot Keycloaks JWKS.
+
+  En spesifikk claim avgjør tilgang: api_access må være "true". Et gyldig token uten denne claimen gir 403. Det er ingen
+   rollebasert tilgangsstyring – alle med riktig claim har identiske rettigheter.
+
+  Endepunktene /auth/token, /health/live, /health/ready og /metrics er åpne uten token. Alt annet krever autentisering.
+

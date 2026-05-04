@@ -1,5 +1,43 @@
 \section{Teststrategi}
 \label{sec:teststrategi}
-Kode skal skrives med mål om å kunne lage og kjøre tester. Enhets-testing skal bli implementert på kritiske komponenter og funksjoner i kodebasen, og de ikke-kritiske komponentene hvis det er tid. I workflows vil disse enhets testene bli kjørt automatisk og må være godkjent før det er å lov å endre kode i develop og main branch.
 
-Integrasjonstesting brukes for å verifisere at VideoAPI fungerer korrekt i samspill med de eksterne videomotorene, og det er derfor opprettet separate testmiljøer for begge motorene levert av oppdragsgiver. Testing i disse miljøene gjør det mulig å kontrollere at API-et håndterer kommunikasjon, responser og eventuelle feil fra videomotorene på en robust måte. Integrasjonstesting gjennomføres jevnlig gjennom utviklingsperioden, spesielt ved større endringer i funksjonalitet eller når nye endepunkter legges til. Dette sikrer at VideoAPI er kompatibel med begge videomotorene før løsning tas i bruk i produksjon.
+Testarbeidet er organisert i tre nivåer: enhetstester for 
+isolerte komponenter, integrasjonstester for HTTP-laget, 
+og manuell testing mot faktiske testmiljøer. Alle automatiserte 
+tester kjøres via GitHub Actions ved push til \texttt{main}, 
+\texttt{develop} og feature-brancher, samt ved pull requests.
+
+Testrammeverket er xUnit med Moq for mocking. Eksterne 
+tjenester (AntMedia, NHN Video og Keycloak) er fullstendig 
+mocket i alle automatiserte tester. Ingen tester krever 
+tilgang til faktiske eksterne miljøer.
+
+\subsection{Reprodusere testresultatene}
+\label{subsec:reprodusere-tester}
+
+Testene kan kjøres lokalt med følgende kommandoer:
+
+\begin{lstlisting}[language=bash, caption={Kjøre testsuiten med coverage}]
+# Klon repoet
+git clone https://github.com/Gruppe-213/HDO-VideoAPI.git
+cd HDO-VideoAPI
+
+# Kjør alle tester
+dotnet test
+
+# Kjør med coverage-innsamling
+dotnet test --collect:"XPlat Code Coverage" \
+  --results-directory ./coverage
+
+# Generer lesbar rapport
+reportgenerator \
+  "-reports:./coverage/**/coverage.cobertura.xml" \
+  "-targetdir:./coverage/report" \
+  "-reporttypes:TextSummary"
+
+cat ./coverage/report/Summary.txt
+\end{lstlisting}
+
+Testene krever .NET~10 SDK. Ingen eksterne tjenester 
+er nødvendig — alle avhengigheter er mocket i 
+testmiljøet.

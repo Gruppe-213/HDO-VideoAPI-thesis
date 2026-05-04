@@ -1,0 +1,113 @@
+\section{Ende-til-ende-testing}
+\label{sec:e2e-testing}
+
+Som et supplement til de automatiserte testene ble det 
+utviklet et ende-til-ende-testskript som kjøres mot det 
+deployede systemet på HDOs OpenStack-VM mot faktiske 
+AntMedia- og NHN-testmiljøer. Skriptet ble generert med 
+AI-assistanse basert på teamets spesifikasjon av 
+testscenarier og forventet systemoppførsel, og ligger 
+i prosjektets repositorium under \texttt{e2e-test.sh}.
+
+Skriptet er organisert i ti faser som dekker 
+infrastruktur, autentisering, full livssyklus for begge 
+backends, feilhåndtering, rate limiting, samtidighet, 
+vedvarende last og metrikk-integritet. Hver fase bruker 
+assertions på HTTP-statuskoder, responsbody-innhold og 
+Prometheus-metrikker.
+
+Et eksempel fra fase 3 viser hvordan AntMedia-livssyklusen 
+testes — romopprettelse, WebRTC-lenke og verifisering av 
+responsfelt:
+
+\begin{lstlisting}[language=bash, caption={E2E-test — AntMedia romopprettelse og WebRTC-lenke}]
+R=$(api "POST" "/api/rooms" '{"provider":"antmedia","name":"E2E-Room"}')
+assert_eq "create AM room -> 201" 201 "$(status "$R")"
+ID=$(id_of "$R")
+assert_has "response has id" '"id":"antmedia:' "$(body "$R")"
+
+R=$(api "POST" "/api/rooms/$ID/webrtc-link" '{"type":"publish"}')
+assert_eq "publish link -> 200" 200 "$(status "$R")"
+B=$(body "$R")
+assert_has "has tokenId" '"tokenId"' "$B"
+assert_has "has streamId" '"streamId"' "$B"
+assert_future "$ID publish" "$(numfield "expiresAt" "$B")"
+\end{lstlisting}
+
+NHN-fasen verifiserer at ikke-støttede operasjoner 
+returnerer HTTP~501 som forventet:
+
+\begin{lstlisting}[language=bash, caption={E2E-test — NHN 501-responser}]
+R=$(api "POST" "/api/rooms/$ID/start")
+assert_eq "NHN start -> 501" 501 "$(status "$R")"
+
+R=$(api "POST" "/api/rooms/$ID/stop")
+assert_eq "NHN stop -> 501" 501 "$(status "$R")"
+
+R=$(api "POST" "/api/rooms/$ID/token" '{"token":"ignored"}')
+assert_eq "NHN setToken -> 501" 501 "$(status "$R")"
+\end{lstlisting}
+
+Skriptet kjører i om lag 40 minutter og avsluttes med 
+opprydding av alle opprettede rom og verifisering av at 
+Prometheus-gauger nullstilles. Fullstendig kildekode 
+ligger i prosjektets repositorium:
+
+\begin{center}
+\url{https://github.com/Gruppe-213/HDO-VideoAPI}
+\end{center}
+
+\subsection{API-testing med Postman og .http-filer}
+\label{subsec:postman}
+
+Alle endepunkter ble testet manuelt mot HDOs testmiljøer 
+via \texttt{HDO-VideoAPI.http}-filen i repoet og Postman. 
+Dette dekket komplette arbeidsflyter for begge backends, 
+inkludert autentiseringsflyt mot Keycloak, opprettelse 
+og sletting av rom, start og stopp av strøm, 
+tokengenerering og WebRTC-lenker. Feilscenarier som 
+ugyldige rom-ID-er, manglende tokens og ukjente 
+providere ble verifisert manuelt før de ble formalisert 
+som integrasjonstester.
+
+\subsection{Prometheus og Grafana}
+\label{subsec:grafana}
+
+Prometheus-metrikker og Grafana-dashboardet ble 
+verifisert løpende under utvikling og under kjøring 
+av e2e-skriptet. Følgende ble bekreftet visuelt:
+
+\begin{itemize}
+    \item \texttt{hdo\_active\_rooms\_total} øker ved 
+          romopprettelse og nullstilles etter sletting
+    \item \texttt{http\_requests\_total} reflekterer 
+          faktisk trafikkmønster per endepunkt og 
+          statuskode
+    \item \texttt{http\_request\_duration\_seconds} 
+          viser forventet latens for begge backends
+    \item Rate limiting-metrikker trigges korrekt ved 
+          overskridelse av terskelverdi
+    \item Health check-status for AntMedia og NHN 
+          oppdateres korrekt ved tilgjengelighetsendringer
+\end{itemize}
+
+\subsection{Frontend-demo}
+\label{subsec:frontend-demo}
+
+En enkel frontend ble utviklet for å demonstrere 
+VideoAPI-funksjonaliteten i praksis. Gjennom 
+frontend-demoen ble følgende manuelt verifisert 
+ende-til-ende:
+
+\begin{itemize}
+    \item Opprettelse av videorom via begge backends
+    \item Visning av guestURL og hostURL for NHN Video
+    \item Start og stopp av AntMedia-strøm
+    \item Henting av roominformasjon
+    \item Feilmeldinger ved ugyldig input
+\end{itemize}
+
+Ende-til-ende-testingen bekreftet at begge backends 
+fungerer som forventet under realistiske forhold og 
+at Prometheus-metrikker oppdateres korrekt gjennom 
+hele romlivssyklusen.

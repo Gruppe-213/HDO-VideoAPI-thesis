@@ -1,4 +1,62 @@
-\section{Testresultater og dekning}
+\section{Testresultater}
 \label{sec:testresultater}
 
-% Resultater og dekning
+Testsuiten består av 133 automatiserte tester som alle 
+passerer i CI-pipeline. Testene kjører på 5,9 sekunder 
+og aktiveres ved push til \texttt{main}, \texttt{develop} 
+og feature-brancher via GitHub Actions.
+
+Samlet linjedekning er 56\%, grensesnittdekning 36,7\% 
+og metodedekning 78,7\%. Den lave grensesnittdekningen 
+skyldes primært at mange kodestier kun aktiveres ved 
+spesifikke nettverkstilstander som ikke simuleres i 
+testmiljøet.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{llr}
+\toprule
+\textbf{Komponent} & \textbf{Testtype} & \textbf{Dekning} \\
+\midrule
+AuthController & Integrasjonstest & 100\% \\
+KeycloakService & Enhetstest & 100\% \\
+VideoProviderFactory & Enhetstest & 100\% \\
+AntMediaAuthHandler & Enhetstest & 98\% \\
+NHNAuthHandler & Enhetstest & 97,8\% \\
+NHNVideoProvider & Enhetstest & 94,7\% \\
+ProviderExtensions & Enhetstest & 94,2\% \\
+ApplicationExtensions & Integrasjonstest & 93,7\% \\
+GlobalExceptionHandler & Enhetstest & 89,2\% \\
+RoomsController & Integrasjonstest & 79\% \\
+AntMediaProvider & Enhetstest & 78,8\% \\
+VideoMetrics & Ingen & 0\% \\
+\bottomrule
+\end{tabular}
+\caption{Linjedekning per komponent}
+\label{tab:testresultater}
+\end{table}
+
+Komponentene med 100\% dekning inkluderer alle 
+exception-typer, alle extensions, helsesjekker og 
+provider-factory. \texttt{RoomsController} og 
+\texttt{AntMediaProvider} har noe lavere dekning 
+ettersom enkelte kodestier krever spesifikke 
+nettverkstilstander som ikke er simulert i 
+enhetstestene.
+
+\texttt{VideoMetrics} har 0\% dekning fordi klassen 
+kun brukes via Prometheus sine egne statiske metoder, 
+som ikke er egnet for enhetstesting uten en kjørende 
+Prometheus-instans. De tre klassene med 0\% 
+(\texttt{NHNConference}, \texttt{Microsoft.AspNetCore.OpenApi.Generated} 
+og \texttt{System.Runtime.CompilerServices}) er 
+henholdsvis en ren datamodell og autogenerert kode 
+som ikke inneholder testbar logikk.
+
+Manuell testing mot HDOs testmiljøer for AntMedia og 
+NHN Video ble gjennomført via \texttt{HDO-VideoAPI.http}-filen. 
+Komplette testflyter for begge backends ble verifisert, 
+inkludert opprettelse av rom, henting av roominformasjon, 
+start og stopp av strøm, tokengenerering og sletting. 
+NHN Videos 501-responser for start, stopp og token ble 
+bekreftet som forventet oppførsel.
