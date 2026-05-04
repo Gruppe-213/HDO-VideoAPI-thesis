@@ -113,28 +113,28 @@ datasources:
 
 Det ble laget tre dashboards i Grafana. Overview-dashboardet, vist i figur~\ref{fig:grafana-overview}, ga et raskt bilde av systemtilstanden med providerstatus, aktive rom, request rate og 5xx-feil. Provider Health-dashboardet, vist i figur~\ref{fig:grafana-provider-health}, gikk mer inn på AntMedia og NHN hver for seg. Der kunne man se om en provider var nede, om responstiden økte, og hvordan rommene fordelte seg mellom providerne. Security-dashboardet, vist i figur~\ref{fig:grafana-security}, samlet målinger knyttet til autentisering og tilgangskontroll, blant annet Keycloak-tokenkall, rate limit-avvisninger og exceptions.
 
-\begin{figure}[h]
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=\textwidth]{figures/grafana-overview.png}
     \caption{Overview-dashboardet i Grafana. Dashboardet viste status for AntMedia og NHN, aktive rom, request rate og feilrate for 5xx-responser.}
     \label{fig:grafana-overview}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=\textwidth]{figures/grafana-provider-health.png}
     \caption{Provider Health-dashboardet i Grafana. Dashboardet viste helsestatus for AntMedia og NHN, responstid mot eksterne providere og aktive rom per provider.}
     \label{fig:grafana-provider-health}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[htbp]
     \centering
     \includegraphics[width=\textwidth]{figures/grafana-security.png}
     \caption{Security-dashboardet i Grafana. Dashboardet viste tokenforespørsler, rate limit-avvisninger og feil fordelt på exception-type.}
     \label{fig:grafana-security}
 \end{figure}
 
-Dashboardene kunne også sjekkes direkte i nettleseren på \url{http://video-backend.hdolab.no:3000/dashboards}. Brukernavnet var \texttt{admin}, og passordet var \texttt{gruppe213}.
+Dashboardene kunne også sjekkes direkte i nettleseren på \url{http://video-backend.hdolab.no:3000/dashboards2}. Innlogging ble delt separat med veileder og sensor.
 
 \subsection{Docker Compose-oppsett}
 
