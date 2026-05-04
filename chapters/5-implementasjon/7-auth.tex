@@ -1,16 +1,109 @@
 \section{Authentication}
 \label{sec:impl-auth}
 
-Backendet bruker Keycloak for autentisering. Keycloak
-Alle kall mot /api/rooms/* må ha et JWT Bearer-token i
-  Authorization-headeren, ellers returnerer serveren 401 eller 403.
+Backendet bruker Keycloak som ekstern identitetsleverandør for autentisering,
+basert på OAuth2 client credentials-flyten. Selve tokenet genereres ikke av
+applikasjonen – det hentes fra Keycloak og valideres av ASP.NET Cores innebygde
+JWT Bearer-mellomvare.
 
-  Token hentes via /auth/token, som er åpent uten autentisering. Det endepunktet sender en client
-  credentials-forespørsel til Keycloak og returnerer tokenet tilbake til klienten. Signaturen på innkommende tokens
-  valideres mot Keycloaks JWKS.
+\subsection{Token-flyt}
 
-  En spesifikk claim avgjør tilgang: api_access må være "true". Et gyldig token uten denne claimen gir 403. Det er ingen
-   rollebasert tilgangsstyring – alle med riktig claim har identiske rettigheter.
+Klienter autentiserer seg ved å sende \texttt{clientId} og \texttt{clientSecret}
+til \texttt{POST /auth/token}. Endepunktet videresender forespørselen til
+Keycloaks token-endepunkt som en \texttt{client\_credentials}-forespørsel og
+returnerer \texttt{access\_token} tilbake til klienten. Ingen tokens lagres
+server-side – systemet er fullstendig tilstandsløst.
 
-  Endepunktene /auth/token, /health/live, /health/ready og /metrics er åpne uten token. Alt annet krever autentisering.
+\begin{lstlisting}[language={[Sharp]C}, caption={AuthController.cs – token-endepunkt}]
+[ApiController]
+[Route("auth")]
+public class AuthController(IKeycloakService keycloakService) : ControllerBase
+{
+    [AllowAnonymous]
+    [HttpPost("token")]
+    public async Task<IActionResult> GetToken([FromBody] TokenRequest request)
+    {
+        var token = await keycloakService.GetTokenAsync(
+            request.ClientId, request.ClientSecret);
+        return Ok(new { access_token = token });
+    }
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language={[Sharp]C}, caption={KeycloakService.cs – kall mot Keycloak}]
+public async Task<string> GetTokenAsync(string clientId, string clientSecret)
+{
+    var formData = new Dictionary<string, string>
+    {
+        ["grant_type"] = "client_credentials",
+        ["client_id"] = clientId,
+        ["client_secret"] = clientSecret
+    };
+
+    var response = await httpClient.PostAsync(
+        $"{_config.BaseUrl}/realms/{_config.Realm}/protocol/openid-connect/token",
+        new FormUrlEncodedContent(formData));
+
+    if (!response.IsSuccessStatusCode)
+        throw new ExternalServiceException("Keycloak",
+            await response.Content.ReadAsStringAsync(),
+            (int)response.StatusCode);
+
+    var json = await response.Content.ReadFromJsonAsync<JsonElement>();
+    return json.GetProperty("access_token").GetString()!;
+}
+\end{lstlisting}
+
+\subsection{Tilgangskontroll}
+
+Autorisasjonspolicyen er flat – det er ingen rollebasert tilgangsstyring.
+Alle klienter med et gyldig token og korrekt claim har identiske rettigheter.
+Et gyldig token uten \texttt{api\_access = true} gir 403, mens manglende
+eller ugyldig token gir 401.
+
+\begin{lstlisting}[language={[Sharp]C}, caption={KeycloakExtensions.cs – JWT-validering og autorisasjonspolicy}]
+services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.Authority = $"{baseUrl}/realms/{realm}";
+        options.RequireHttpsMetadata = false;
+        options.TokenValidationParameters = new()
+        {
+            ValidateAudience = false,
+            ValidateIssuer = false
+        };
+    });
+
+services.AddAuthorization(options =>
+{
+    options.DefaultPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .RequireClaim("api_access", "true")
+        .Build();
+});
+\end{lstlisting}
+
+Alle \texttt{/api/rooms/*}-endepunkter er beskyttet med
+\texttt{[Authorize]} på kontrollernivå.
+
+\begin{lstlisting}[language={[Sharp]C}, caption={RoomsController.cs – beskyttede endepunkter}]
+[Authorize]
+[ApiController]
+[Route("api/rooms")]
+public class RoomsController(IVideoProviderFactory factory) : ControllerBase
+{
+    [HttpPost]
+    public async Task<IActionResult> CreateRoom(
+        [FromBody] CreateRoomRequest request) { ... }
+
+    [HttpGet("{roomId}")]
+    public async Task<IActionResult> GetRoom(string roomId) { ... }
+
+    [HttpDelete("{roomId}")]
+    public async Task<IActionResult> DeleteRoom(string roomId) { ... }
+
+    [HttpPost("{roomId}/start")]
+    public async Task<IActionResult> StartStream(string roomId) { ... }
+}
+\end{lstlisting}
 

@@ -1,0 +1,88 @@
+\section{Provider-arkitekturen}
+\label{sec:providers}
+
+Kjernen i plugin-arkitekturen er grensesnittet \texttt{IVideoProvider},
+som definerer åtte asynkrone metoder for romoperasjoner og
+strømstyring. Ingen metoder har default-implementasjon. En provider som
+ikke støtter en operasjon kaster \texttt{NotSupportedException}, som
+\texttt{GlobalExceptionHandler} oversetter til HTTP~501. Provider velges
+ved oppslag i ASP.NET Cores keyed DI-container via
+\texttt{VideoProviderFactory}, som normaliserer nøkkelen til lowercase og
+kaster \texttt{ArgumentException} ved ukjent provider.
+Listing~\ref{lst:ivideoproivder} viser grensesnittet.
+
+\begin{lstlisting}[language={[Sharp]C}, label=lst:ivideoproivder,
+  caption={IVideoProvider-grensesnittet.}]
+public interface IVideoProvider
+{
+    Task<VideoRoom> CreateRoomAsync(CreateRoomRequest request,
+        CancellationToken ct = default);
+    Task<VideoRoom> GetRoomAsync(string roomId,
+        CancellationToken ct = default);
+    Task DeleteRoomAsync(string roomId, CancellationToken ct = default);
+    Task StartStreamAsync(string roomId, CancellationToken ct = default);
+    Task StopStreamAsync(string roomId, CancellationToken ct = default);
+    Task SetRoomTokenAsync(string roomId, string token,
+        CancellationToken ct = default);
+    Task<WebRtcLinkResponse> GenerateWebRtcTokenAsync(string roomId,
+        string type, CancellationToken ct = default);
+    Task<bool> IsAvailableAsync(CancellationToken ct = default);
+}
+\end{lstlisting}
+
+Begge providers registreres med en typed \texttt{HttpClient} og en
+\texttt{DelegatingHandler} for autentisering bakt inn i HTTP-pipelinen,
+som vist i listing~\ref{lst:providerregistrering}.
+
+\begin{lstlisting}[language={[Sharp]C}, label=lst:providerregistrering,
+  caption={Registrering av providers som keyed services.}]
+services.AddTransient<AntMediaAuthHandler>();
+services.AddHttpClient<AntMediaProvider>(client => {
+    client.BaseAddress = new Uri(baseUrl.TrimEnd('/') + "/");
+    client.Timeout = TimeSpan.FromSeconds(10);
+}).AddHttpMessageHandler<AntMediaAuthHandler>();
+services.AddKeyedTransient<IVideoProvider>("antmedia",
+    (sp, _) => sp.GetRequiredService<AntMediaProvider>());
+
+services.AddSingleton<NHNTokenCache>();
+services.AddTransient<NHNAuthHandler>();
+services.AddHttpClient<NHNVideoProvider>(client => {
+    client.BaseAddress = new Uri(baseUrl.TrimEnd('/') + "/");
+    client.Timeout = TimeSpan.FromSeconds(10);
+}).AddHttpMessageHandler<NHNAuthHandler>();
+services.AddKeyedTransient<IVideoProvider>("nhn",
+    (sp, _) => sp.GetRequiredService<NHNVideoProvider>());
+\end{lstlisting}
+
+\texttt{AntMediaProvider} er strømorientert. Kjerneabstraksjonen i
+AntMedia er en \textit{broadcast} med tilstandene \texttt{created},
+\texttt{broadcasting} og \texttt{finished}. Start og stopp er eksplisitte
+API-kall, og aksess skjer via kortlevde WebRTC-tokens med 90 sekunders
+levetid. \texttt{AntMediaAuthHandler} signerer JWT-tokens lokalt med
+HMAC-SHA256 og cacher dem i fem minutter med trådsikker refresh via
+\texttt{SemaphoreSlim}.
+
+\texttt{NHNVideoProvider} er møteorientert. Et NHN-møte er en booking
+med start- og sluttid, og tilgang skjer via en Pexip-basert
+konferanse-URL med innebygd PIN som NHN genererer ved opprettelse. Siden
+møtet er aktivt så lenge bookingen eksisterer, finnes det ingen
+start- eller stopp-operasjon, og \texttt{SetRoomTokenAsync} er heller
+ikke aktuell. Disse tre metodene kaster \texttt{NotSupportedException},
+som listing~\ref{lst:nhnsupported} viser.
+
+\begin{lstlisting}[language={[Sharp]C}, label=lst:nhnsupported,
+  caption={NHN-operasjoner som ikke er støttet.}]
+public Task StartStreamAsync(string roomId, CancellationToken ct = default)
+    => throw new NotSupportedException(
+        "Start stream is not supported for NHN-rom.");
+
+public Task StopStreamAsync(string roomId, CancellationToken ct = default)
+    => throw new NotSupportedException(
+        "Stop stream is not supported for NHN-rom.");
+\end{lstlisting}
+
+Autentisering mot NHN skjer via OAuth~2.0 password grant, og tokenet
+caches i singletonen \texttt{NHNTokenCache} i inntil 13 dager.
+Kontroller-laget ser ingen av disse forskjellene. En ny videomotor kan
+legges til ved å implementere \texttt{IVideoProvider} og registrere den
+med en ny nøkkel i \texttt{ProviderExtensions}.
