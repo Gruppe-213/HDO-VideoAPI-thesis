@@ -11,8 +11,7 @@ Demo-frontenden ble bygd for å oppfylle to behov. Internt i utviklingen ga den 
 \subsection{Teknologivalg}
 \label{subsec:demo-tech}
 
-Tabell~\ref{tab:frontend-tech} oppsummerer de sentrale teknologiene som brukes
-i frontenden. Valgene fulgte to prinsipper: hyllevarekomponenter med god
+Tabell~\ref{tab:frontend-tech} oppsummerer de sentrale teknologiene som brukes i frontenden. Valgene fulgte to prinsipper: off-the-shelf komponenter med god
 dokumentasjon, og verktøy som ikke krever egen byggetjener.
 
 \begin{table}[h]
@@ -20,9 +19,9 @@ dokumentasjon, og verktøy som ikke krever egen byggetjener.
 \caption{Sentrale teknologier i demo-frontenden.}
 \label{tab:frontend-tech}
 \begin{tabular}{l l}
-\hline
+\toprule
 \textbf{Lag} & \textbf{Teknologi} \\
-\hline
+\midrule
 UI-rammeverk        & React 19 + TypeScript \\
 Byggeverktøy        & Vite 7 \\
 Styling             & Tailwind CSS 4 \\
@@ -30,47 +29,30 @@ Ruting              & React Router 7 \\
 WebRTC-klient       & \texttt{@antmedia/webrtc\_adaptor} 2.16 \\
 Produksjonsserver   & nginx (Alpine) \\
 Containerisering    & Docker + Docker Compose \\
-\hline
+\bottomrule
 \end{tabular}
 \end{table}
 
-React med TypeScript ble valgt fordi gruppen hadde tidligere erfaring med
-kombinasjonen, og typesystemet gjorde det enkelt å speile API-ets responsformer
-direkte i klientkoden. Vite gir nær umiddelbar hot reload under utvikling og
-produserer et statisk bundle som kan serveres uten en aktiv Node-prosess i
-produksjon. Tailwind CSS 4 brukes for rask utforming og holder
-presentasjonslogikken nær komponentene.
+React med TypeScript ble valgt fordi gruppen hadde tidligere erfaring med kombinasjonen, og typesystemet gjorde det enkelt å speile API-ets responsformer direkte i klientkoden. Vite gir nær umiddelbar hot reload under utvikling og produserer et statisk bundle som kan serveres uten en aktiv Node-prosess i produksjon. Tailwind CSS 4 brukes for rask utforming og holder presentasjonslogikken nær komponentene.
 
-For selve videostrømmingen ble AntMedia sin offisielle WebRTC-adapter
-(\texttt{@antmedia/webrtc\_adaptor}) brukt direkte. Adapteren håndterer
-ICE-forhandling, signalering og media-tilkobling, og lar koden konsentrere seg
-om brukerflyt og tilstandsovervåkning fremfor lavnivå WebRTC-detaljer.
+For selve videostrømmingen ble AntMedia sin offisielle WebRTC-adapter (\url{@antmedia/webrtc\_adaptor}) brukt direkte. Adapteren håndterer ICE-forhandling, signalering og media-tilkobling, og lar koden konsentrere seg om brukerflyt og tilstandsovervåkning fremfor lavnivå WebRTC-detaljer.
 
 \subsection{Applikasjonsstruktur}
 \label{subsec:demo-struktur}
 
-Kildekoden i \texttt{Frontend/src/} er organisert etter teknisk rolle. Mappen
-\texttt{pages/} inneholder de fem hovedsidene som ruteren betjener
-(\texttt{Login}, \texttt{Dashboard}, \texttt{Room}, \texttt{Broadcast},
-\texttt{Watch}), \texttt{components/} inneholder gjenbrukbare visuelle
-komponenter, \texttt{api/} samler all HTTP-kommunikasjon mot VideoAPI, og
-\texttt{hooks/} huser de tilstandsorienterte hjelperne som
-\texttt{useRoomList} og \texttt{usePolling}. Type-definisjonene i
-\texttt{types/} speiler DTO-ene API-et returnerer, slik at en endring i
-API-kontrakten typisk slår ut som en kompilatorfeil på klientsiden.
+Kildekoden i \texttt{Frontend/src/} er organisert etter teknisk rolle. Mappen \texttt{pages/} inneholder de fem hovedsidene som ruteren betjener (\texttt{Login}, \texttt{Dashboard}, \texttt{Room}, \texttt{Broadcast} og \texttt{Watch}), \texttt{components/} inneholder gjenbrukbare visuelle komponenter, \texttt{api/} samler all HTTP-kommunikasjon mot VideoAPI, og \texttt{hooks/} huser de tilstandsorienterte hjelperne som \texttt{useRoomList} og \texttt{usePolling}. Type-definisjonene i \texttt{types/} speiler DTO-ene API-et returnerer, slik at en endring i API-kontrakten typisk slår ut som en kompilatorfeil på klientsiden.
 
-Rotkomponenten \texttt{App.tsx} definerer fem ruter. To av dem ---
-\texttt{/rooms/:id/broadcast} og \texttt{/rooms/:id/watch} --- er offentlige
-fordi tilgangen styres av en korttidsgyldig token i URL-parameteret
-\texttt{?token=...}, mens resten krever en aktiv innlogget sesjon.
+Rotkomponentet \texttt{App.tsx} definerer fem ruter. To av dem --- \texttt{/rooms/:id/broadcast} og \texttt{/rooms/:id/watch} --- er offentlige fordi tilgangen styres av en korttidsgyldig token i URL-parameteret \texttt{?token=...}, mens resten krever en aktiv innlogget sesjon.
 
-\begin{verbatim}
-/                         -> Dashboard (auth)
-/rooms/:id                -> Room-detalj (auth)
-/rooms/:id/broadcast      -> Broadcast (token i URL)
-/rooms/:id/watch          -> Watch (token i URL)
-*                         -> Login (uautentisert)
-\end{verbatim}
+\begin{center}
+\begin{tabular}{l l}
+\texttt{/}                    & $\rightarrow$ Dashboard (auth) \\
+\texttt{/rooms/:id}           & $\rightarrow$ Room-detalj (auth) \\
+\texttt{/rooms/:id/broadcast} & $\rightarrow$ Broadcast (token i URL) \\
+\texttt{/rooms/:id/watch}     & $\rightarrow$ Watch (token i URL) \\
+\texttt{*}                    & $\rightarrow$ Login (uautentisert) \\
+\end{tabular}
+\end{center}
 
 \subsection{Autentiseringsflyt}
 \label{subsec:demo-auth}
