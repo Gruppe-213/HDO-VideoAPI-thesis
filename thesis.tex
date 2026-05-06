@@ -7,15 +7,39 @@
 \author{}
 \shortauthor{}
 \date{\ntnuthesisdate}
+\usepackage{xcolor}
+\usepackage{listings}
 
+\lstdefinelanguage{CSharp}{
+  language=[Sharp]C,
+  morekeywords={
+    var, async, await, Task, string, bool, default, public, private,
+    interface, class, return, throw, new, null, using
+  }
+}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  columns=fullflexible,
+  frame=single,
+  numbers=left,
+  numberstyle=\tiny,
+  captionpos=b,
+  tabsize=2,
+  showstringspaces=false
+}
 \addbibresource{thesis.bib}
 
 \input{glossary.tex} % add glossary and acronym lists before document
+
+\setcounter{tocdepth}{1}
 
 \begin{document}
 
 \input{chapters/0a-abstract.tex}
 \input{chapters/0b-sammendrag.tex}
+
 
 \tableofcontents
 \listoffigures
@@ -31,11 +55,12 @@
 \include{chapters/1-introduction/_main}
 \include{chapters/2-bakgrunn/_main}
 \include{chapters/3-krav/_main}
-\include{chapters/4-design/_main}
-\include{chapters/5-implementasjon/_main}
-\include{chapters/6-testing/_main}
-\include{chapters/7-diskusjon/_main}
-\include{chapters/8-konklusjon}
+\include{chapters/4-utvikling/_main}
+\include{chapters/5-design/_main}
+\include{chapters/6-implementasjon/_main}
+\include{chapters/7-testing/_main}
+\include{chapters/8-diskusjon/_main}
+% \include{chapters/9-konklusjon}
 
 \chapter*{\bibname}
 \printbibliography[heading=none]

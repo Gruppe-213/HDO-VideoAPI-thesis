@@ -197,7 +197,7 @@
 
 % Roman page numbers from the beginning of the document
 \pagenumbering{roman}
-\setcounter{page}{3}
+\setcounter{page}{2}
 
 % Switch to Arabic page numbering at the beginning of the first numbered chapter
 \newif\iffirstchapter
@@ -331,3 +331,5 @@
 % Renew \glossarysection command to avoid creating a section for the glossary.
 % Using unnumbered chapters for correct chapter name in headings.
 \renewcommand{\glossarysection}[2][]{}
+
+\setcounter{tocdepth}{2}

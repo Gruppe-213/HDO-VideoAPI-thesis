@@ -1,0 +1,54 @@
+\section{Provider-arkitektur}
+\label{sec:provider-pattern}
+
+Provider-arkitekturen er det sentrale designvalget i VideoAPI. Behovet oppstod
+fordi løsningen skulle tilby ett felles API mot klientene, samtidig som kall
+måtte kunne rutes til ulike videomotorer. AntMedia Server og NHN Video har ulike
+API-er og domenemodeller: AntMedia eksponerer REST-endepunkter for blant annet
+broadcast-ressurser, mens NHN Booking API er orientert rundt opprettelse og
+administrasjon av videomøter~\cite{antmedia_rest,nhn_booking}. Samtidig stilte
+kravspesifikasjonen krav om at nye videomotorer bør kunne legges til uten at hele
+mellomvaren må skrives om~\cite{hdo_kravspec}.
+
+Et alternativ var å samle all backend-logikk i én felles serviceklasse og bruke
+betingelser for å skille mellom videomotorene. Dette ville vært enkelt i starten,
+men ville gitt tett kobling til de konkrete backendene og gjort løsningen
+vanskeligere å utvide. Et annet alternativ var å eksponere separate API-er for
+hver backend, for eksempel egne endepunkter for AntMedia og NHN. Dette ville
+gjort backend-forskjellene tydelige, men også flyttet kompleksiteten til
+klienten, som da måtte vite hvilken videomotor som brukes og hvordan responsene
+skal tolkes.
+
+Den valgte løsningen ble derfor å definere et felles
+\texttt{IVideoProvider}-grensesnitt. Hver videomotor implementeres som en egen
+provider, mens controllerne kun forholder seg til grensesnittet. Designet har
+likhetstrekk med adapter-mønsteret, der et felles grensesnitt brukes til å skjule
+forskjeller mellom underliggende implementasjoner~\cite{refactoringguru_adapter}.
+Riktig provider velges av en egen factory-komponent, slik at controllerne ikke
+trenger å kjenne til de konkrete provider-klassene.
+
+Provider-arkitekturen betyr likevel ikke at alle backendene behandles som
+identiske. Enkelte operasjoner har ulik betydning i de to systemene. Start- og
+stoppoperasjoner passer naturlig med AntMedia sin broadcast-modell, mens NHN
+Booking API i større grad beskriver opprettelse og administrasjon av et
+videomøte. Provider-laget skal derfor isolere forskjellene, ikke skjule dem helt.
+Nye videomotorer kan dermed legges til ved å implementere
+\texttt{IVideoProvider}, mens controllerne og klientens API-kontrakt i hovedsak
+kan beholdes uendret.
+
+\begin{lstlisting}[language=CSharp, caption={Felles provider-kontrakt}, label={lst:ivideoprovider}]
+public interface IVideoProvider
+{
+    Task<VideoRoom> CreateRoomAsync(CreateRoomRequest request, CancellationToken ct = default);
+    Task<VideoRoom> GetRoomAsync(string roomId, CancellationToken ct = default);
+    Task DeleteRoomAsync(string roomId, CancellationToken ct = default);
+    Task StartStreamAsync(string roomId, CancellationToken ct = default);
+    Task StopStreamAsync(string roomId, CancellationToken ct = default);
+    Task SetRoomTokenAsync(string roomId, string token, CancellationToken ct = default);
+    Task<WebRtcLinkResponse> GenerateWebRtcTokenAsync(string roomId, string type, CancellationToken ct = default);
+    Task<bool> IsAvailableAsync(CancellationToken ct = default);
+}
+\end{lstlisting}
+Listing~\ref{lst:ivideoprovider} viser grensesnittet alle videomotorer må
+implementere. Dette gjør at controller-laget kan forholde seg til én kontrakt,
+mens backend-spesifikk logikk holdes i providerne.

@@ -1,5 +1,6 @@
 \usetikzlibrary{positioning,arrows.meta}
 \begin{figure}[htbp]
+\caption{Overordnet lagarkitektur for HDO VideoAPI.}
 \centering
 \begin{tikzpicture}[
     >={Stealth[length=2.5mm]},
@@ -43,10 +44,11 @@
 
 % --- External backends at the bottom ---
 \node[ext, fill=orange!25] (ant) at ([xshift=-2.6cm, yshift=-1.4cm]cross.south) {\textbf{AntMedia Server}};
-\node[ext, fill=orange!25] (nhn) at ([xshift= 2.6cm, yshift=-1.4cm]cross.south) {\textbf{NHN Video (Pexip)}};
+\node[ext, fill=orange!25] (nhn) at ([xshift= 2.6cm, yshift=-1.4cm]cross.south) {\textbf{NHN Video}};
 
 % --- External service on the right (Keycloak), aligned with Service-lag ---
-\node[ext, fill=yellow!25] (kc) at ([xshift=4.6cm]svc.east) {\textbf{Keycloak}\\{\footnotesize OAuth2}};
+\node[ext, fill=yellow!25] (kc) at ([xshift=3.2cm]prov.east) {\textbf{Keycloak}\\{\footnotesize OAuth2}};
+
 
 % --- Request arrow (left, downward) ---
 \draw[->, thick, black!55]
@@ -57,15 +59,15 @@
 \draw[->, thick, black!55]
     ([xshift=0.55cm]cross.south east) -- ([xshift=0.55cm]http.north east)
     node[midway, right, arrowlbl] {response};
-
+    
 % --- Provider to backends ---
 \draw[->, black!60] (prov.south -| ant.north) -- (ant.north);
 \draw[->, black!60] (prov.south -| nhn.north) -- (nhn.north);
 
 % --- Service to Keycloak (dashed) ---
-\draw[->, dashed, black!60] (svc.east) -- (kc.west);
+\draw[->, dashed, black!60] (svc.east) -- (kc.north);
 
 \end{tikzpicture}
-\caption{Overordnet lagarkitektur for HDO VideoAPI. Forespørsler traverserer lagene ovenfra og ned; svar returneres oppover. Provider-laget er det eneste som kommuniserer med eksterne videomotorer.}
+\caption{Overordnet lagarkitektur for HDO VideoAPI.}
 \label{fig:lagarkitektur}
 \end{figure}

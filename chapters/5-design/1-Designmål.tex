@@ -1,0 +1,30 @@
+\section{Designmål og begrensninger}
+\label{sec:designmal}
+
+Designet av VideoAPI tok utgangspunkt i kravspesifikasjonen fra HDO. Løsningen
+skulle fungere som en mellomvare mellom eksisterende videoløsninger og
+videomotorene AntMedia Server og NHN Video. Målet var å tilby ett felles API som
+kunne rute kall til valgt backend, uten at klienten måtte kjenne detaljene i hver
+videomotor~\cite{hdo_kravspec}. Dette gjorde det nødvendig å redusere koblingen
+mellom klientene og de konkrete videomotorene. AntMedia og NHN har ulike API-er
+og domenemodeller: AntMedia eksponerer REST-endepunkter for blant annet
+broadcast-ressurser, mens NHN Booking API er orientert rundt opprettelse og
+administrasjon av videomøter~\cite{antmedia_rest,nhn_booking}. Arkitekturen måtte
+derfor skille felles logikk fra backend-spesifikk logikk.
+
+Utvidbarhet var et annet sentralt designmål. Kravspesifikasjonen peker på at nye
+videomotorer bør kunne legges til uten at hele mellomvaren må skrives
+om~\cite{hdo_kravspec}. Dette ledet til en provider-basert arkitektur, der hver
+videomotor implementeres som en egen provider bak et felles grensesnitt. Samtidig
+var sikkerhet og driftbarhet sentrale begrensninger: API-et måtte beskyttes med
+tokenbasert autentisering, tilgang til videorom måtte kontrolleres med
+backend-tilpassede tilgangsmekanismer, og løsningen måtte støtte
+containerisering, helsesjekker, logging og Prometheus-metrikker~\cite{hdo_kravspec}.
+
+Et eget designvalg var å holde mellomvaren stateless. Kravspesifikasjonen åpner
+for Redis eller database dersom delt state er nødvendig, men i denne løsningen
+lagres ikke videorom eller sesjonsdata i VideoAPI. Slik tilstand eies i stedet
+av de eksterne videomotorene, mens konfigurasjon hentes fra miljøvariabler i
+tråd med krav~I1.2~\cite{hdo_kravspec}. Designet ble dermed styrt av fire
+hovedhensyn: et felles API for klientene, isolering av backend-spesifikk logikk,
+sikker tilgangskontroll og en driftsvennlig, utvidbar arkitektur.
