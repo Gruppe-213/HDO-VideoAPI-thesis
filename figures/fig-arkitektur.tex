@@ -1,70 +1,71 @@
+\usetikzlibrary{positioning,arrows.meta}
 \begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[
-  every node/.style={font=\small},
-  layer/.style={
-    draw, rounded corners=4pt,
-    minimum width=11cm, minimum height=1.2cm,
-    text centered, align=center
-  },
-  ext/.style={
-    draw, rounded corners=4pt,
-    minimum width=3.5cm, minimum height=1cm,
-    text centered, align=center
-  }
+    >={Stealth[length=2.5mm]},
+    node distance=0.55cm,
+    layer/.style={
+        draw=black!35,
+        line width=0.4pt,
+        rounded corners=4pt,
+        minimum width=11cm,
+        minimum height=1.35cm,
+        text centered,
+        align=center,
+        inner sep=6pt,
+        font=\small
+    },
+    ext/.style={
+        draw=black!35,
+        line width=0.4pt,
+        rounded corners=4pt,
+        minimum width=3.8cm,
+        minimum height=1.1cm,
+        text centered,
+        align=center,
+        inner sep=4pt,
+        font=\small
+    },
+    arrowlbl/.style={font=\footnotesize\color{black!65}}
 ]
 
-\node[layer, fill=purple!15] (http)
-  at (0, 0)
-  {\textbf{HTTP / pipeline-lag}\\
-   {\footnotesize Kestrel · middleware · autentisering · rate limiting · Prometheus}};
+% --- Layers (top to bottom) ---
+\node[layer, fill=blue!8]                  (http)  {\textbf{HTTP / pipeline-lag}\\[1pt]
+    {\footnotesize Kestrel \textbullet{} middleware \textbullet{} autentisering \textbullet{} rate limiting \textbullet{} Prometheus}};
+\node[layer, fill=teal!12, below=of http]  (ctrl)  {\textbf{Controller-lag}\\[1pt]
+    {\footnotesize RoomsController \textbullet{} AuthController \textbullet{} input-binding}};
+\node[layer, fill=green!10, below=of ctrl] (svc)   {\textbf{Service-lag}\\[1pt]
+    {\footnotesize KeycloakService \textbullet{} OAuth2 client credentials}};
+\node[layer, fill=orange!15, below=of svc] (prov)  {\textbf{Provider-lag (plugin-arkitektur)}\\[1pt]
+    {\footnotesize IVideoProvider \textbullet{} AntMediaProvider \textbullet{} NHNVideoProvider}};
+\node[layer, fill=gray!15, below=of prov]  (cross) {\textbf{Kryssende bekymringer}\\[1pt]
+    {\footnotesize GlobalExceptionHandler \textbullet{} VideoMetrics \textbullet{} HealthChecks}};
 
-\node[layer, fill=teal!15] (ctrl)
-  at (0,-1.6)
-  {\textbf{Controller-lag}\\
-   {\footnotesize RoomsController · AuthController · input-binding · HTTP-svar}};
+% --- External backends at the bottom ---
+\node[ext, fill=orange!25] (ant) at ([xshift=-2.6cm, yshift=-1.4cm]cross.south) {\textbf{AntMedia Server}};
+\node[ext, fill=orange!25] (nhn) at ([xshift= 2.6cm, yshift=-1.4cm]cross.south) {\textbf{NHN Video (Pexip)}};
 
-\node[layer, fill=teal!10] (svc)
-  at (0,-3.2)
-  {\textbf{Service-lag}\\
-   {\footnotesize KeycloakService · OAuth2 client credentials}};
+% --- External service on the right (Keycloak), aligned with Service-lag ---
+\node[ext, fill=yellow!25] (kc) at ([xshift=4.6cm]svc.east) {\textbf{Keycloak}\\{\footnotesize OAuth2}};
 
-\node[layer, fill=orange!20] (prov)
-  at (0,-4.8)
-  {\textbf{Provider-lag (plugin-arkitektur)}\\
-   {\footnotesize IVideoProvider · AntMediaProvider · NHNVideoProvider · Factory}};
+% --- Request arrow (left, downward) ---
+\draw[->, thick, black!55]
+    ([xshift=-0.55cm]http.north west) -- ([xshift=-0.55cm]cross.south west)
+    node[midway, left, arrowlbl] {request};
 
-\node[layer, fill=gray!15] (cross)
-  at (0,-6.4)
-  {\textbf{Kryssende bekymringer}\\
-   {\footnotesize GlobalExceptionHandler · VideoMetrics · HealthChecks · Exceptions}};
+% --- Response arrow (right of layer stack, upward) ---
+\draw[->, thick, black!55]
+    ([xshift=0.55cm]cross.south east) -- ([xshift=0.55cm]http.north east)
+    node[midway, right, arrowlbl] {response};
 
-% Backends
-\node[ext, fill=orange!30] (ant)
-  at (-3,-8.2) {\textbf{AntMedia Server}};
-\node[ext, fill=orange!30] (nhn)
-  at (3,-8.2) {\textbf{NHN Video (Pexip)}};
+% --- Provider to backends ---
+\draw[->, black!60] (prov.south -| ant.north) -- (ant.north);
+\draw[->, black!60] (prov.south -| nhn.north) -- (nhn.north);
 
-% Keycloak ekstern
-\node[ext, fill=orange!25] (kc)
-  at (7.5,-3.2) {\textbf{Keycloak}\\{\footnotesize OAuth2}};
-
-% Request/response piler
-\draw[->, thick, gray]
-  (-6.2,0) -- (-6.2,-6.4)
-  node[midway, left, font=\footnotesize] {request};
-\draw[->, thick, gray]
-  (-5.6,-6.4) -- (-5.6,0)
-  node[midway, left, font=\footnotesize] {response};
-
-% Provider til backends
-\draw[->] (prov.south -| ant) -- (ant.north);
-\draw[->] (prov.south -| nhn) -- (nhn.north);
-
-% Service til Keycloak
-\draw[->, dashed] (svc.east) -- (kc.west);
+% --- Service to Keycloak (dashed) ---
+\draw[->, dashed, black!60] (svc.east) -- (kc.west);
 
 \end{tikzpicture}
 \caption{Overordnet lagarkitektur for HDO VideoAPI. Forespørsler traverserer lagene ovenfra og ned; svar returneres oppover. Provider-laget er det eneste som kommuniserer med eksterne videomotorer.}
-\label{fig:arkitektur}
+\label{fig:lagarkitektur}
 \end{figure}
