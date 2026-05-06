@@ -1,0 +1,31 @@
+\section{Datamodeller}
+\label{sec:datamodeller}
+
+Datamodellene i VideoAPI er utformet for å gi klienten et stabilt og
+backend-uavhengig grensesnitt. Siden AntMedia og NHN representerer videorom på
+ulike måter, eksponeres ikke råresponsene fra backendene direkte. I stedet mapper
+providerne backend-spesifikke svar til felles modeller som kan brukes på tvers av
+videomotorene.
+
+Den viktigste responsmodellen er \texttt{VideoRoom}. Modellen representerer et
+videorom slik VideoAPI eksponerer det til klienten, med blant annet rom-ID,
+provider, status og relevante tilkoblingsfelter. For AntMedia bygges modellen fra
+broadcast-data, mens den for NHN bygges fra booking-data. Dette gjør at klienten
+kan forholde seg til samme responsstruktur, selv om backendene har ulike
+domenemodeller.
+
+Ved opprettelse av rom brukes \texttt{CreateRoomRequest}. Denne modellen
+inneholder valgt provider og valgfritt romnavn. Dersom klienten ikke angir navn,
+genererer mellomvaren et unikt navn. Dette er i tråd med kravspesifikasjonen,
+som beskriver at mellomvaren skal sette navn eller ID dersom dette ikke sendes
+med av klienten~\cite{hdo_kravspec}.
+
+For tilgang til videorom brukes \texttt{WebRtcLinkResponse}. Denne modellen
+normaliserer to ulike tilgangsformer. AntMedia returnerer en kortlivet
+tokenbasert tilgang til en stream, mens NHN returnerer en møte-URL med nødvendig
+tilgangsinformasjon. Modellen gir derfor klienten ett felles svarformat, men
+uten å skjule at verdien må brukes forskjellig avhengig av backend.
+
+Datamodellene er dermed et kompromiss mellom standardisering og presisjon. De
+skjuler unødvendige forskjeller fra klienten, men lar backend-spesifikke
+forskjeller komme frem der de påvirker hvordan operasjonen faktisk brukes.

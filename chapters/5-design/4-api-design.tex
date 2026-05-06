@@ -7,6 +7,19 @@ slette, hente informasjon om, starte og stoppe videorom~\cite{hdo_kravspec}.
 Operasjonene er derfor samlet under \texttt{/api/rooms}, slik at klienten får ett
 felles grensesnitt uavhengig av hvilken videomotor som brukes.
 
+ASP.NET Core støtter både Minimal APIs og controller-baserte API-er. Minimal APIs
+er anbefalt for nye prosjekter der målet er raske HTTP-endepunkter med lite
+oppsett og mindre kode, mens controller-baserte API-er gir en mer strukturert
+modell med egne controller-klasser, attributtbasert routing og innebygd støtte
+for API-spesifikke funksjoner som modellbinding, validering og standardiserte
+feilsvar~\cite{microsoft_aspnet_apis,microsoft_aspnet_webapi}. I VideoAPI ble
+controller-basert API valgt fordi løsningen har flere ressursorienterte
+endepunkter, felles autentisering på controller-nivå og behov for tydelig
+separasjon mellom HTTP-kontrakt og provider-logikk. Minimal APIs kunne vært brukt
+for en mindre prototype, men controller-modellen ga en tydeligere struktur for
+operasjoner som oppretting, sletting, start, stopp, tokenhåndtering og
+WebRTC-lenker for videorom.
+
 Et sentralt designvalg var hvordan API-et skulle bevare informasjon om hvilken
 backend et rom tilhører. Løsningen ble å returnere rom-ID-er på formatet
 \texttt{\{provider\}:\{backendId\}}, for eksempel \texttt{antmedia:abc123} eller
