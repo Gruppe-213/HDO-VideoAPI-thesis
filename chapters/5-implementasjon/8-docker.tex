@@ -40,7 +40,7 @@ Prometheus konfigureres av \texttt{prometheus.yml}, som definerer ett skrape-job
 
 Selv om VideoAPI selv er tilstandsløs (jf.\ krav I1.2 \cite{hdo_kravspec}), skal Prometheus sine egne tidsserier og Grafanas konfigurasjon overleve omstart av containerne. Begge tjenestene bruker derfor navngitte Docker-volumer (\texttt{prometheus\_data} og \texttt{grafana\_data}) som ligger utenfor containerens skrivelag.
 
-Tjenestene starter i kontrollert rekkefølge slik at metrikkstacken ikke logger feil før API-et er klart. \texttt{prometheus} har \texttt{depends\_on: hdo-videoapi} med betingelsen \texttt{service\_healthy}, og \texttt{grafana} har \texttt{depends\_on: prometheus}. Det betyr at Prometheus først starter når API-ets \texttt{/health/live}-endepunkt returnerer 200, og at Grafana først starter etter Prometheus. Selve helsesjekken er definert i Compose-filen og bruker \texttt{curl} til å treffe \texttt{/health/live} hvert tiende sekund med fem sekunders timeout og opp til fem nye forsøk før containeren markeres som \texttt{unhealthy}.
+Tjenestene starter i kontrollert rekkefølge slik at metrikkstacken ikke logger feil før API-et er klart. \texttt{prometheus} har \texttt{depends\_on: hdo-videoapi} med betingelsen \texttt{service\_healthy}, og \texttt{grafana} har \texttt{depends\_on: prometheus}. Det betyr at Prometheus først starter når API-ets \texttt{/health/live}-endepunkt returnerer HTTPS-status \texttt{200 OK}, og at Grafana først starter etter Prometheus. Selve helsesjekken er definert i Compose-filen og bruker \texttt{curl} til å treffe \texttt{/health/live} hvert tiende sekund med fem sekunders timeout og opp til fem nye forsøk før containeren markeres som \texttt{unhealthy}.
 
 \begin{figure}[h]
     \centering
@@ -54,9 +54,9 @@ Alle tre tjenestene bruker \texttt{restart: unless-stopped}, slik at de kommer o
 \subsection{Ressurskontroll og sikkerhet}
 \label{subsec:docker-security}
 
-For å hindre at en enkelt container uttømmer hostens ressurser, settes \texttt{deploy.resources.limits} per tjeneste: VideoAPI begrenses til 512~MB minne og én CPU-kjerne, Prometheus til 256~MB, og Grafana til 1~GB. Verdiene er forankret i den observerte ressursbruken under last- og integrasjonstesting (kapittel~\ref{ch:testing}), og gir tydelige grenser for systemovervåkningen.
+For å hindre at en enkelt container uttømmer hostens ressurser, settes \texttt{deploy.resources.limits} per tjeneste: VideoAPI begrenses til 512~MB minne og én CPU-kjerne, Prometheus til 256~MB, og Grafana til 1~GB. Verdiene er forankret i den observerte ressursbruken under last- og integrasjonstesting (se kapittel~\ref{ch:testing}), og gir tydelige grenser for systemovervåkningen.
 
-Sikkerhetsmessig hviler stacken på flere lag. API-et selv kjører som ikke-priviligert bruker (UID 1654 i .NET-imaget), TLS-sertifikatene monteres skrivebeskyttet, hemmeligheter ligger kun i \texttt{.env}, og \texttt{appsettings.Docker.json} inneholder kun ikke-hemmelige produksjonsoverstyringer. Prometheus eksponerer ingen autentisering ut av boksen og må derfor regnes som halvoffentlig; Grafana beskyttes av eget brukernavn og passord satt via miljøvariabler.
+Sikkerhetsmessig hviler stacken på flere lag. API-et selv kjører som ikke-priviligert bruker (\texttt{UID 1654} i .NET-imaget), TLS-sertifikatene monteres skrivebeskyttet, hemmeligheter ligger kun i \texttt{.env}, og \texttt{appsettings.Docker.json} inneholder kun ikke-hemmelige produksjonsoverstyringer. Prometheus eksponerer ingen autentisering ut av boksen og må derfor regnes som halvoffentlig; Grafana beskyttes av eget brukernavn og passord satt via miljøvariabler.
 
 \subsection{Driftsflyt}
 \label{subsec:docker-ops}

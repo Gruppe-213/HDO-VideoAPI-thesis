@@ -1,8 +1,8 @@
 \section{Observability med Prometheus og Grafana}
 
-For å kunne følge med på hvordan VideoAPI-et oppførte seg i drift, ble det lagt inn støtte for helsesjekker, Prometheus-metrikker og Grafana-dashboards. Poenget var å gjøre vanlige feil synlige før man måtte begynne å lese containerlogger. API-et eksponerte derfor informasjon om tre ting: om prosessen kjørte, om AntMedia og NHN svarte, og hvordan trafikk, feil, autentisering og rate limiting utviklet seg over tid.
+For å overvåke VideoAPI-ets oppførsel i drift ble det implementert støtte for helsesjekker, Prometheus-metrikker og Grafana-dashboards. Formålet var å gjøre avvik og feil synlige uten å måtte analysere containerlogger. API-et eksponerer derfor informasjon om tre områder: prosessens helsetilstand, tilgjengeligheten til AntMedia og NHN, samt utviklingen av trafikk, feil, autentisering og rate limiting over tid.
 
-Løsningen ble bygget rundt \texttt{prometheus-net}. I request-pipelinen ble \texttt{UseHttpMetrics()} brukt for å samle inn HTTP-metrikker automatisk, mens \texttt{MapMetrics()} eksponerte metrikker på \texttt{/metrics}. Prometheus kunne dermed hente data fra API-et med faste intervaller, uten at API-et selv måtte sende data ut.
+Løsningen er bygget rundt \texttt{prometheus-net}. I request-pipelinen brukes \texttt{UseHttpMetrics()} for automatisk innsamling av HTTP-metrikker, mens \texttt{MapMetrics()} eksponerer metrikker på \texttt{/metrics}. Prometheus kan dermed hente data fra API-et med faste intervaller, uten at API-et selv trenger å sende ut data.
 
 \begin{lstlisting}[
     language={[Sharp]C},
@@ -17,7 +17,7 @@ app.MapVideoHealthChecks();
 
 \subsection{Helsesjekker}
 
-API-et hadde to helsesjekk-endepunkter. \texttt{/health/live} sjekket bare om selve API-prosessen kjørte. Den kjørte ingen kall mot AntMedia eller NHN, og passet derfor som liveness check for containeren. \texttt{/health/ready} sjekket derimot om API-et faktisk var klart til å håndtere trafikk. Den brukte egne health checks for AntMedia og NHN, og kalte \texttt{IsAvailableAsync()} på hver provider.
+API-et eksponerer to helsesjekk-endepunkter. \texttt{/health/live} verifiserer kun om API-prosessen kjører, uten å utføre kall mot AntMedia eller NHN, og fungerer dermed som en liveness check for containeren. \texttt{/health/ready} verifiserer derimot om API-et er klart til å håndtere trafikk. Denne sjekken benytter dedikerte health checks for AntMedia og NHN, og kaller \texttt{IsAvailableAsync()} på hver provider.
 
 \begin{lstlisting}[
     language={[Sharp]C},
@@ -29,11 +29,11 @@ healthChecks
     .AddCheck<NHNHealthCheck>("nhn", tags: ["ready"]);
 \end{lstlisting}
 
-Health check-resultatene ble også videresendt til Prometheus med \texttt{ForwardToPrometheus()}. Det gjorde at Grafana kunne vise providerstatus som måleverdier. Verdien \texttt{2} betydde healthy, \texttt{1} betydde degraded, og \texttt{0} betydde unhealthy. Den samme informasjonen kunne derfor leses direkte fra API-et og vises historisk i Grafana.
+Health check-resultatene videresendes også til Prometheus via \texttt{ForwardToPrometheus()}. Dette gjør det mulig for Grafana å presentere provider-status som måleverdier. Verdien \texttt{2} indikerer healthy, \texttt{1} degraded og \texttt{0} unhealthy. Den samme informasjonen kan dermed leses direkte fra API-et og visualiseres historisk i Grafana.
 
 \subsection{Egne metrikker i API-et}
 
-I tillegg til de innebygde HTTP-metrikkene ble det laget egne metrikker i \texttt{VideoMetrics}. Disse målte ting som var spesifikke for VideoAPI-et: aktive rom per provider, antall feil per exception-type, Keycloak-tokenkall og rate limit-avvisninger. \texttt{VideoMetrics} ble registrert som singleton bak grensesnittet \texttt{IVideoMetrics}, slik at controllere og middleware kunne registrere hendelser uten å være koblet direkte til Prometheus.
+I tillegg til de innebygde HTTP-metrikkene ble det implementert egendefinerte metrikker i \texttt{VideoMetrics}. Disse måler VideoAPI-spesifikke hendelser som aktive rom per provider, antall feil per exception-type, Keycloak-tokenkall og rate limit-avvisninger. \texttt{VideoMetrics} registreres som en singleton bak grensesnittet \texttt{IVideoMetrics}, slik at controllere og middleware kan registrere hendelser uten direkte kobling til Prometheus.
 
 \begin{lstlisting}[
     language={[Sharp]C},
@@ -55,7 +55,7 @@ private static readonly Counter _errors =
     );
 \end{lstlisting}
 
-Rommetelleren ble oppdatert i \texttt{RoomsController}. Når et rom ble opprettet, økte telleren for valgt provider. Når et rom ble slettet, ble telleren redusert. Telleren ga ikke en full historisk fasit etter restart, siden den levde i API-prosessen, men den var nyttig for å se aktiviteten mens systemet kjørte.
+Romtellerne oppdateres i \texttt{RoomsController}. Ved opprettelse av et rom inkrementeres telleren for valgt provider, mens den dekrementeres ved sletting. Telleren gir ikke en full historisk oversikt etter restart, ettersom den lever i API-prosessen, men er nyttig for å overvåke aktivitet mens systemet kjører.
 
 \begin{lstlisting}[
     language={[Sharp]C},
@@ -69,11 +69,11 @@ metrics.RoomCreated(providerKey);
 metrics.RoomDeleted(providerKey);
 \end{lstlisting}
 
-Feil ble registrert i \texttt{GlobalExceptionHandler}. Når en exception ble håndtert, ble typen registrert i \texttt{hdo\_errors\_total}. Det gjorde det mulig å skille mellom for eksempel \texttt{ArgumentException}, \texttt{ExternalServiceException}, \texttt{NotFoundException} og \texttt{NotSupportedException} i Grafana. Rate limiting ble målt i \texttt{RateLimitingExtensions}, der avviste kall ble merket med enten \texttt{global} eller \texttt{auth}.
+Feil registreres i \texttt{GlobalExceptionHandler}. Når en exception håndteres, logges typen i \texttt{hdo\_errors\_total}, noe som muliggjør skille mellom for eksempel \texttt{ArgumentException}, \texttt{ExternalServiceException}, \texttt{NotFoundException} og \texttt{NotSupportedException} i Grafana. Rate limiting måles i \texttt{RateLimitingExtensions}, der avviste kall klassifiseres som enten \texttt{global} eller \texttt{auth}.
 
 \subsection{Prometheus}
 
-Prometheus ble kjørt som egen container i Docker Compose. Den hentet metrikker fra API-et hvert 15. sekund gjennom \texttt{/metrics}. Siden containerne lå på samme Docker-nettverk, brukte Prometheus servicenavnet \texttt{hdo-videoapi} i stedet for en ekstern URL. Scrape-trafikken gikk derfor internt mellom containerne.
+Prometheus kjøres som en egen container i Docker Compose og henter metrikker fra API-et hvert 15. sekund via \texttt{/metrics}. Siden containerne ligger på samme Docker-nettverk, benytter Prometheus servicenavnet \texttt{hdo-videoapi} i stedet for en ekstern URL. Scrape-trafikken foregår dermed internt mellom containerne.
 
 \begin{lstlisting}[
     language={},
@@ -91,11 +91,11 @@ scrape_configs:
     metrics_path: /metrics
 \end{lstlisting}
 
-Compose-oppsettet startet Prometheus først etter at API-containeren var healthy. Metrikkdata ble lagret i Docker-volumet \texttt{prometheus\_data}, slik at data overlevde vanlige restarter. Data forsvant først hvis volumet ble slettet, for eksempel med \texttt{docker compose down -v}.
+Compose-oppsettet starter Prometheus først når API-containeren er rapportert som healthy. Metrikkdata lagres i Docker-volumet \texttt{prometheus\_data}, slik at data persisteres mellom normale restarter. Data går kun tapt dersom volumet slettes, for eksempel ved bruk av \texttt{docker compose down -v}.
 
 \subsection{Grafana}
 
-Grafana ble brukt som visningslaget over Prometheus. Datasourcen ble provisionert automatisk fra \texttt{grafana-provisioning/datasources/prometheus.yml}, og pekte på \texttt{http://prometheus:9090}. Dermed trengte man ikke å konfigurere Prometheus manuelt i Grafana etter første oppstart.
+Grafana brukes som visualiseringslag over Prometheus. Datakilden provisioneres automatisk via \url{grafana-provisioning/datasources/prometheus.yml} og peker til \url{http://prometheus:9090}. Dette eliminerer behovet for manuell konfigurering av Prometheus i Grafana etter første oppstart.
 
 \begin{lstlisting}[
     language={},
@@ -111,34 +111,37 @@ datasources:
     isDefault: true
 \end{lstlisting}
 
-Det ble laget tre dashboards i Grafana. Overview-dashboardet, vist i figur~\ref{fig:grafana-overview}, ga et raskt bilde av systemtilstanden med providerstatus, aktive rom, request rate og 5xx-feil. Provider Health-dashboardet, vist i figur~\ref{fig:grafana-provider-health}, gikk mer inn på AntMedia og NHN hver for seg. Der kunne man se om en provider var nede, om responstiden økte, og hvordan rommene fordelte seg mellom providerne. Security-dashboardet, vist i figur~\ref{fig:grafana-security}, samlet målinger knyttet til autentisering og tilgangskontroll, blant annet Keycloak-tokenkall, rate limit-avvisninger og exceptions.
+Det ble utviklet tre dashboards i Grafana. Overview-dashboardet, vist i figur~\ref{fig:grafana-overview}, gir et overordnet bilde av systemtilstanden med providerstatus, aktive rom, request rate og \texttt{5xx}-feil. Provider Health-dashboardet, vist i figur~\ref{fig:grafana-provider-health}, går mer i dybden på AntMedia og NHN hver for seg. Her kan man observere om en provider er nede, om responstiden øker, og hvordan rommene fordeler seg mellom providerne. Security-dashboardet, vist i figur~\ref{fig:grafana-security}, samler målinger knyttet til autentisering og tilgangskontroll, inkludert Keycloak-tokenkall, rate limit-avvisninger og exceptions.
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\textwidth]{figures/grafana-overview.png}
-    \caption{Overview-dashboardet i Grafana. Dashboardet viste status for AntMedia og NHN, aktive rom, request rate og feilrate for 5xx-responser.}
+    \caption{Overview-dashboardet viser status og informasjon for AntMedia og NHN.}
     \label{fig:grafana-overview}
 \end{figure}
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\textwidth]{figures/grafana-provider-health.png}
-    \caption{Provider Health-dashboardet i Grafana. Dashboardet viste helsestatus for AntMedia og NHN, responstid mot eksterne providere og aktive rom per provider.}
+    \caption{Provider Health-dashboardet viser helsestatus for AntMedia og NHN, responstid mot eksterne providere og aktive rom per provider.}
     \label{fig:grafana-provider-health}
 \end{figure}
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\textwidth]{figures/grafana-security.png}
-    \caption{Security-dashboardet i Grafana. Dashboardet viste tokenforespørsler, rate limit-avvisninger og feil fordelt på exception-type.}
+    \caption{Security-dashboardet viser tokenforespørsler, rate limit-avvisninger og feil fordelt på exception-typer.}
     \label{fig:grafana-security}
 \end{figure}
 
-Dashboardene kunne også sjekkes direkte i nettleseren på \url{http://video-backend.hdolab.no:3000/dashboards2}. Innlogging ble delt separat med veileder og sensor.
+\newpage
+
+Dashboardene kan også aksesseres direkte i nettleseren via \url{http://video-backend.hdolab.no:3000/dashboards}
+. Innloggingsinformasjon deles separat med veileder og sensor.
 
 \subsection{Docker Compose-oppsett}
 
-Hele observability-stacken ble kjørt sammen med API-et i Docker Compose. API-et eksponerte port 80 og 443 ut fra hosten, mens Prometheus og Grafana ble eksponert på henholdsvis 9090 og 3000. Prometheus ventet på at API-et var healthy, og Grafana ventet på at Prometheus hadde startet.
+Hele observability-stacken kjøres sammen med API-et i Docker Compose. API-et eksponerer port 80 og 443 på hosten, mens Prometheus og Grafana eksponeres på henholdsvis port 9090 og 3000. Prometheus starter først når API-et rapporteres som healthy, og Grafana starter først når Prometheus er tilgjengelig.
 
 \begin{lstlisting}[
     language={},
@@ -167,4 +170,4 @@ grafana:
     - ./grafana-provisioning:/etc/grafana/provisioning
 \end{lstlisting}
 
-Dette ga en enkel driftsmodell. API-et publiserte helsestatus og metrikker, Prometheus hentet og lagret dem, og Grafana viste dem i ferdige dashboards. Løsningen erstattet ikke logger, men den gjorde det lettere å oppdage feil tidlig og se hvilken del av systemet som feilet.
+Dette ga en enkel driftsmodell. API-et publiserer helsestatus og metrikker, Prometheus henter og lagrer dem, og Grafana visualiserer dem i ferdige dashboards. Løsningen erstatter ikke logging, men gjør det enklere å oppdage feil tidlig og identifisere hvilken del av systemet som feiler.

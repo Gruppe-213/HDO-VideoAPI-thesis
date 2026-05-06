@@ -24,8 +24,8 @@ personvern og pasientsikkerhet.
 \label{subsec:krav-o12}
 
 API-et eksponerer to endepunkter: \texttt{/health/live} 
-returnerer HTTP~200 hvis prosessen kjører, og 
-\texttt{/health/ready} returnerer HTTP~200 hvis API-et 
+returnerer HTTP-status \texttt{200 OK} hvis prosessen kjører, og 
+\texttt{/health/ready} returnerer HTTP-status \texttt{200 OK} hvis API-et 
 kan nå begge backend-tjenestene. Endepunktene krever ikke 
 autentisering slik at overvåkingssystemer kan bruke dem 
 uten å håndtere tokens.

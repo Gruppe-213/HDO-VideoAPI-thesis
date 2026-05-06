@@ -1,0 +1,19 @@
+\section{Metode og evalueringsgrunnlag}
+\label{sec:metode-evaluering}
+
+Prosjektet er gjennomført som et design- og implementasjonsprosjekt med
+empirisk evaluering. Først ble HDOs kravspesifikasjon analysert for å
+identifisere funksjonelle og ikke-funksjonelle krav.
+
+Evalueringen bygger på fire typer grunnlag. For det første ble
+kravoppfyllelse vurdert mot HDOs kravspesifikasjon. For det andre ble
+arkitekturen vurdert ut fra hvor backend-spesifikk logikk er plassert, og
+hvilke endringer som kreves for å støtte en ny videomotor. For det tredje
+ble løsningen testet gjennom automatiserte enhetstester, integrasjonstester
+og manuell ende-til-ende-testing mot testmiljøer. For det fjerde ble
+driftsaspekter vurdert gjennom containerisert kjøring, helsesjekker,
+Prometheus-metrikker og Grafana-dashboard.
+
+Denne tilnærmingen gjør det mulig å vurdere både om VideoAPI oppfyller
+kravene fra HDO, og i hvilken grad provider-arkitekturen faktisk reduserer
+integrasjonskompleksitet.

@@ -1,0 +1,170 @@
+\section{Feilhåndtering og logging}
+\label{sec:errors}
+
+I et mellomvare-API som videresender kall til to eller flere ulike eksterne videomotorer kan feil oppstå i flere lag. Klienten kan sende ugyldige forespørsler, backend-tjenester kan returnere uventede statuskoder eller være utilgjengelige, og konfigurasjonsverdier kan mangle. For å gjøre slike feil håndterbare for både klientutviklere og driftspersonell ble det innført en sentralisert strategi der domenespesifikke exceptions defineres ett sted, controllers fanger ikke feil selv, og alle uhåndterte exceptions blir oversatt til et felles svarformat av en global handler.
+
+\subsection{Strategi: én sentral handler}
+\label{subsec:errors-strategi}
+
+Tilnærmingen bygger på tre prinsipper. For det første skal controllerne ikke fange exceptions; feil får i stedet propagere til middleware-laget. Dette holder controller-koden lesbar og hindrer at hvert endepunkt må implementere samme \texttt{try/catch}-logikk på nytt. For det andre skal all feilrespons ta utganspunkt i RFC~7807, \emph{Problem Details for HTTP APIs} \cite{rfc7807}, slik at klienter får presis og forståelig informasjon om hva som gikk galt. For det tredje skal interne detaljer ikke eksponeres. Feilmeldinger med statuskode \texttt{5xx} erstattes med generisk tekst, mens detaljert informasjon logges internt (jf. kravspesifikasjonen \cite{hdo_kravspec}).
+
+ASP.NET Core 10 har innebygd støtte for dette mønsteret via \texttt{IExceptionHandler}. I oppstartsekvensen registreres handleren som en tjeneste, og middleware-kjeden aktiverer den rett etter routing:
+
+\begin{lstlisting}[language={[Sharp]C}, caption={Registrering av den globale feil-handleren.}, label={lst:register-handler}]
+// Extensions/VideoApiCoreExtensions.cs
+services.AddProblemDetails();
+services.AddExceptionHandler<GlobalExceptionHandler>();
+
+// Extensions/ApplicationExtensions.cs
+app.UseExceptionHandler();
+\end{lstlisting}
+
+\subsection{Domenespesifikke exceptions}
+\label{subsec:errors-exceptions}
+
+For å unngå at provider-koden kaster generiske \texttt{Exception}-objekter som ville endt opp som \texttt{500 Internal Server Error}, defineres fire egendefinerte exceptions i \texttt{Exceptions/VideoApiExceptions.cs}. Hver type representerer en kategori av feil som tilsvarer en bestemt HTTP-status, og bærer med seg strukturert kontekst (ressurs-ID, tjenestenavn, ekstern statuskode, konfigurasjonsnøkkel) som senere kan eksponeres til klienten eller loggføres.
+
+Løsningen er modulær og kan enkelt utvides med nye domenespesifikke exceptions ved behov, uten endringer i eksisterende håndteringslogikk. Tabell~\ref{tab:domain-exceptions} oppsummerer typene.
+
+\begin{table}[htbp]
+\centering
+\caption{Domenespesifikke exceptions og tilhørende HTTP-statuskoder.}
+\label{tab:domain-exceptions}
+\begin{tabular}{l l l}
+\toprule
+\textbf{Exception} & \textbf{HTTP-status} & \textbf{Brukes når \dots} \\
+\midrule
+\texttt{BadRequestException}      & \texttt{400 Bad Request}          & klienten sender ugyldige verdier \\
+\texttt{NotFoundException}        & \texttt{404 Not Found}            & rom eller en booking finnes ikke \\
+\texttt{ExternalServiceException} & \texttt{502 Bad Gateway}          & AntMedia eller NHN feiler \\
+\texttt{ConfigurationException}   & \texttt{503 Service Unavailable}  & ugyldig/manglende konfigurasjon \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\newpage
+I praksis kastes unntakene fra provider-laget og service-laget der feilen faktisk oppdages. Kodeliste~\ref{lst:notfound-throw} viser hvordan AntMedia-provideren oversetter en HTTP-status \texttt{404 Not Found} fra ekstern tjeneste til \texttt{NotFoundException}, og hvordan andre feil pakkes inn som \texttt{ExternalServiceException} med den opprinnelige statuskoden bevart:
+
+\begin{lstlisting}[language={[Sharp]C}, caption={Kasting av domeneeksepsjon i AntMediaProvider.}, label={lst:notfound-throw}]
+// Providers/AntMedia/AntMediaProvider.cs
+if (response.StatusCode == HttpStatusCode.NotFound && roomId is not null)
+    throw new NotFoundException("Room", roomId);
+
+var status = (int)response.StatusCode;
+var body = await response.Content.ReadAsStringAsync(ct);
+throw new ExternalServiceException(
+    "AntMedia",
+    $"AntMedia API returned {status} for {operation}. {body}",
+    status);
+\end{lstlisting}
+
+\subsection{Den globale handleren}
+\label{subsec:errors-handler}
+
+\texttt{GlobalExceptionHandler} implementerer \texttt{IExceptionHandler.TryHandleAsync}. Metoden mottar det fangede exception-et, tilordner det en HTTP-statuskode ved hjelp av et \texttt{switch}-uttrykk (se kodeliste \ref{lst:mapping}), registrerer en metrikk, logger hendelsen med korrekt alvorlighetsgrad og returnerer et \texttt{ProblemDetails}-objekt som JSON til klienten. Koblingen mellom exceptions og HTTP-statuskoder er sentralisert, slik at en ny exception-type kun krever én kodeendring:
+
+\begin{lstlisting}[language={[Sharp]C}, caption={Tilordning fra exception-type til HTTP-statuskode}, label={lst:mapping}]
+// Middleware/GlobalExceptionHandler.cs
+var (statusCode, errorResponse) = exception switch
+{
+    BadRequestException        => (400, new { error = "Bad Request" }),
+    ArgumentException          => (400, new { error = "Invalid Argument" }),
+    NotFoundException          => (404, new { error = "Resource Not Found" }),
+    OperationCanceledException => (499, new { error = "Request was cancelled" }),
+    NotSupportedException      => (501, new { error = "Not Supported" }),
+    ExternalServiceException   => (502, new { error = "External Service Error" }),
+    ConfigurationException     => (503, new { error = "Service Unavailable due to configuration error" }),
+    _                          => (500, new { error = "An unexpected error occurred." })
+};
+\end{lstlisting}
+
+I tillegg til de fire domenespesifikke exception-typene håndteres også \texttt{ArgumentException}, \texttt{OperationCanceledException} og \texttt{NotSupportedException} eksplisitt, slik at vanlige rammeverksunntak ikke returneres som ugjennomsiktige \texttt{500}-svar. Den avsluttende \texttt{\_}-armen fungerer som et sikkerhetsnett: Alle unntak som ikke identifiseres eksplisitt, returneres som \texttt{500 Internal Server Error} med en generisk feilmelding.
+
+\subsection{Svarformat: Problem Details}
+\label{subsec:errors-problemdetails}
+
+Selve responsen bygges som et \texttt{ProblemDetails}-objekt og serialiseres med \texttt{Content-Type: application/problem+json}, slik RFC~7807 krever \cite{rfc7807}. For \texttt{5xx}-feil overskrives \texttt{Detail}-feltet med en generisk tekst, mens \texttt{TraceId} alltid legges inn i utvidelsene. Dette gjør at en supportlogg kan kobles til et bestemt feilrespons uten at sensitive detaljer kommer ut til klienten:
+
+\begin{lstlisting}[language={[Sharp]C}, caption={Bygging av ProblemDetails-respons.}, label={lst:problemdetails}]
+// Middleware/GlobalExceptionHandler.cs
+var problemDetails = new ProblemDetails
+{
+    Status   = statusCode,
+    Title    = errorResponse.error,
+    Type     = $"https://httpstatuses.com/{statusCode}",
+    Detail   = statusCode >= 500
+                 ? "An internal error occurred. See the logs for more detail."
+                 : exception.Message,
+    Instance = httpContext.Request.Path
+};
+problemDetails.Extensions["traceId"] = httpContext.TraceIdentifier;
+
+if (exception is ExternalServiceException ext && ext.StatusCode.HasValue)
+    problemDetails.Extensions["externalStatusCode"] = ext.StatusCode.Value;
+
+httpContext.Response.StatusCode = statusCode;
+await httpContext.Response.WriteAsJsonAsync(
+    problemDetails, options: null,
+    contentType: "application/problem+json", cancellationToken);
+\end{lstlisting}
+
+For \texttt{ExternalServiceException} legges også feltet \texttt{externalStatusCode} til, slik at klienten kan skille mellom for eksempel et \texttt{502 Bad Gateway}-svar som skyldes at AntMedia returnerte \texttt{401 Unauthorized}, og et \texttt{502 Bad Gateway}-svar som skyldes at NHN ga \texttt{500 Internal Server Error}. Et typisk svar fra et oppslag på et ikke-eksisterende rom ser slik ut:
+
+\begin{lstlisting}[caption={Eksempel på Problem Details-respons fra API-et (HTTP 404).}, label={lst:problem-example}]
+HTTP/1.1 404 Not Found
+Content-Type: application/problem+json
+
+{
+  "status": 404,
+  "title":  "Resource Not Found",
+  "type":   "https://httpstatuses.com/404",
+  "detail": "Room with ID 'abc123' was not found.",
+  "instance": "/api/rooms/antmedia:abc123",
+  "traceId":  "00-7c2f...-01"
+}
+\end{lstlisting}
+
+\subsection{Logging og metrikker}
+\label{subsec:errors-observability}
+
+Hver fangede exception registreres som et inkrement i Prometheus-telleren \texttt{hdo\_errors\_total}, etiketten settes til \texttt{exception.GetType().Name}. Det gir et grunnlag for å se hvilke typer feil som dominerer i produksjon uten å måtte parse logger. Logging skjer med to alvorlighetsgrader avhengig av statuskoden, slik at \texttt{4xx}-feil ikke fyller opp varsel-kanalen for ekte produksjonsfeil.
+
+\begin{lstlisting}[language={[Sharp]C}, caption={Differensiert logging i den globale håndtereren.}, label={lst:logging}]
+metrics.ErrorOccurred(exception.GetType().Name);
+
+if (statusCode >= 500)
+    logger.LogError(exception, "An unhandled exception occurred.");
+else
+    logger.LogWarning(exception, "A handled exception occurred");
+\end{lstlisting}
+
+I tråd med krav O1.1 \cite{hdo_kravspec} logges aldri API-nøkler, JWT-tokens eller pasientinformasjon. Exception-typene er bevisst utformet slik at meldingsfeltet kun inneholder ressurs-ID-er og tjenestenavn, og ikke potensielt sensitive verdier.
+
+\subsection{Klientsidens behandling av Problem Details}
+\label{subsec:errors-client}
+
+Demo-frontenden speiler kontrakten i en liten hjelper i \texttt{Frontend/src/utils/errors.ts}. Funksjonen \texttt{apiCall} pakker hver \texttt{fetch}-respons og kaster en \texttt{ApiError} som bærer hele \texttt{ProblemDetails}-objektet. Det betyr at sidekomponentene kan vise en brukervennlig tekst med både feilbeskrivelse og \texttt{traceId} uten å bygge parsing-logikk selv:
+
+\begin{lstlisting}[language=JavaScript, caption={Klientsidens tolkning av Problem Details (forenklet).}, label={lst:client-error}]
+// Frontend/src/utils/errors.ts
+export async function apiCall<T>(fn: () => Promise<Response>): Promise<T> {
+  const res = await fn();
+  if (!res.ok) {
+    const problem = await res.json().catch(() => ({
+      status: res.status, title: res.statusText, detail: '', instance: '', traceId: ''
+    }));
+    throw new ApiError(problem);
+  }
+  // ...
+}
+
+export function getErrorMessage(err: unknown): string {
+  if (err instanceof ApiError) {
+    const trace = err.problem.traceId ? ` (Trace: ${err.problem.traceId})` : '';
+    return `${err.problem.detail || err.problem.title}${trace}`;
+  }
+  return err instanceof Error ? err.message : 'An unexpected error occurred.';
+}
+\end{lstlisting}
+
+Det fullstendige bildet er en feilhåndteringskjede der provideren kaster en domenespesifikk exception, middleware-komponenten oversetter denne til et standardisert \texttt{problem+json}-svar, en teller inkrementeres, og klienten viser en menneskelig lesbar melding med referanse til loggingen. Modellen gir tre konkrete fordeler: Nye exception-typer kan legges til uten å endre verken controller- eller provider-kode, klienter trenger kun én parser for alle feiltyper, og driftspersonell kan korrelere en synlig feil i brukergrensesnittet med en spesifikk loggpost via \texttt{traceId}.

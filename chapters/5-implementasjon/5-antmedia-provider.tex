@@ -1,25 +1,11 @@
 \section{AntMediaProvider}
 \label{sec:antmedia-provider}
 
-\texttt{AntMediaProvider} kommuniserer mot AntMedias REST-API via en
-typed \texttt{HttpClient} med \texttt{AntMediaAuthHandler} bakt inn i
-HTTP-pipelinen. Ved oppretting sendes navn og den hardkodede typen
-\texttt{liveStream} til \texttt{broadcasts/create}. Responsen mappes til
-\texttt{VideoRoom} med strøm-spesifikke felter: \texttt{StreamUrl} for
-HLS-avspilling, \texttt{RtmpUrl} for RTMP-ingest og tre
-seertellere per protokoll. Start og stopp er POST-kall uten body mot
-\texttt{broadcasts/\{id\}/start} og \texttt{broadcasts/\{id\}/stop}.
-WebRTC-tokens hentes i to faser: først verifiseres at rommet eksisterer,
-deretter genereres et token med 90 sekunders levetid via
-\texttt{broadcasts/\{id\}/token?expireDate=\{ts\}\&type=\{type\}}.
-Tokensetting mangler et dedikert endepunkt i AntMedia, så løsningen ble å
-legge tokenet i \texttt{metaData}-feltet via PUT mot
-\texttt{broadcasts/\{id\}}.
+\texttt{AntMediaProvider} kommuniserer med AntMedias REST-API via en typet \texttt{HttpClient} der \texttt{AntMediaAuthHandler} er integrert i HTTP-pipelinen. Ved opprettelse sendes navn og den hardkodede typen \texttt{liveStream} til \texttt{broadcasts/create}. Responsen tilordnes til \texttt{VideoRoom} med strømspesifikke felter: \texttt{StreamUrl} for HLS-avspilling, \texttt{RtmpUrl} for RTMP-ingest og tre seertellere per protokoll. Start og stopp utføres som \texttt{POST}-kall uten body mot \texttt{broadcasts/{id}/start} og \texttt{broadcasts/{id}/stop}.
 
-\texttt{AntMediaAuthHandler} signerer JWT-tokens lokalt med HMAC-SHA256
-og cacher dem i fem minutter. Token-genereringen bruker double-check
-locking for å unngå at samtidige forespørsler genererer hvert sitt token
-når cachen utløper, som vist i listing~\ref{lst:antmedia-auth}.
+WebRTC-tokens hentes i to steg: først verifiseres at rommet eksisterer, deretter genereres et token med 90 sekunders levetid via \texttt{broadcasts/{id}/token?expireDate={ts}&type={type}}. Ettersom AntMedia ikke tilbyr et dedikert endepunkt for lagring av token, lagres det i \texttt{metaData}-feltet via en \texttt{PUT}-forespørsel mot \texttt{broadcasts/{id}}.
+
+\texttt{AntMediaAuthHandler} signerer JWT-tokens lokalt med HMAC-SHA256 og cacher dem i fem minutter. Token-genereringen bruker double-check locking for å unngå at samtidige forespørsler genererer hvert sitt token når cachen utløper, som vist i kodeliste~\ref{lst:antmedia-auth}.
 
 \begin{lstlisting}[language={[Sharp]C}, label=lst:antmedia-auth,
   caption={Double-check locking i AntMediaAuthHandler.}]
@@ -54,10 +40,7 @@ finally { _semaphore.Release(); }
 \end{lstlisting}
 
 Tokenet inneholder kun \texttt{iat} og \texttt{exp} — AntMedia krever
-ikke subjekt- eller audience-claims for server-til-server-autentisering.
-Manglende \texttt{JwtSecret} i konfigurasjon kaster
+ikke subject- eller audience-claims for server-til-server-autentisering.
+Manglende \texttt{JwtSecret} i konfigurasjonen kaster
 \texttt{ConfigurationException}, som \texttt{GlobalExceptionHandler}
-oversetter til HTTP~503. Feil fra AntMedia-APIet mappes av den private
-hjelperen \texttt{EnsureSuccessOrThrowAsync}: 404 gir
-\texttt{NotFoundException}, alt annet gir \texttt{ExternalServiceException}
-med original statuskode bevart.
+oversetter til HTTP-status \texttt{503 Service Unavailable}. Feil fra AntMedia-API-et håndteres av den private hjelpefunksjonen \texttt{EnsureSuccessOrThrowAsync}: HTTP-statuskoden \texttt{404 Not Found} kaster \texttt{NotFoundException}, mens øvrige feil kaster \texttt{ExternalServiceException} med original statuskode bevart.

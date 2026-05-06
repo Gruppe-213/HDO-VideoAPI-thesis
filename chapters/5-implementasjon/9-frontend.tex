@@ -1,18 +1,25 @@
 \section{Demo-frontend}
 \label{sec:demo-frontend}
 
-VideoAPI er først og fremst et mellomvare-API uten eget brukergrensesnitt, men for å kunne demonstrere systemet for HDO og bruke det under egen testing ble det utviklet en frontend i et separat prosjekt. Frontenden fungerer som en referanseklient som dekker hele den forventede arbeidsflyten, inkludert innlogging, romadministrasjon, sending og visning. Den verifiserer i praksis at API-ets endepunkter er anvendbare slik de er spesifisert.
-
-\subsection{Formål og avgrensning}
-\label{subsec:demo-formal}
-
-Demo-frontenden ble bygd for å oppfylle to behov. Internt i utviklingen ga den en rask måte å verifisere at hver ny endring i API-et fortsatt lot seg bruke fra en virkelig klient, fremfor bare å være korrekt i isolerte tester. Eksternt ga den HDO et synlig og kjørbart bevis på at de fleste mulighetene API-et spesifiserer faktisk fungerer ende-til-ende --- fra autentisering via romoppretting til en live WebRTC-strøm i nettleseren. Frontenden er ikke en del av leveransen i seg selv og er bevisst holdt enkel: ingen backend-for-frontend, ingen permanent lagring utover sesjonen, og ingen forretningslogikk som ikke finnes i API-et.
+VideoAPI er et mellomvare-API uten eget brukergrensesnitt. For å kunne
+demonstrere systemet for HDO og verifisere at endepunktene fungerer
+ende-til-ende ble det utviklet en enkel referanseklient i et separat prosjekt.
+Frontenden dekker hele den forventede arbeidsflyten --- innlogging,
+romadministrasjon, sending og visning --- og er bevisst holdt enkel uten
+forretningslogikk utover det API-et selv tilbyr. Den er ikke en del av
+leveransen i seg selv.
 
 \subsection{Teknologivalg}
 \label{subsec:demo-tech}
 
-Tabell~\ref{tab:frontend-tech} oppsummerer de sentrale teknologiene som brukes i frontenden. Valgene fulgte to prinsipper: off-the-shelf komponenter med god
-dokumentasjon, og verktøy som ikke krever egen byggetjener.
+Tabell~\ref{tab:frontend-tech} oppsummerer de sentrale teknologiene.
+React med TypeScript ble valgt på bakgrunn av tidligere gruppeerfaring, og
+typesystemet gjør det enkelt å speile API-ets responsformer direkte i
+klientkoden. Vite gir rask hot reload under utvikling og produserer et statisk
+bundle som kan serveres uten en aktiv Node-prosess. For WebRTC-strømmingen
+brukes AntMedias offisielle adapter, som håndterer ICE-forhandling og
+signalering slik at koden kan konsentrere seg om brukerflyt fremfor
+lavnivå-detaljer.
 
 \begin{table}[h]
 \centering
@@ -32,107 +39,29 @@ Containerisering    & Docker + Docker Compose \\
 \bottomrule
 \end{tabular}
 \end{table}
+\newpage
 
-React med TypeScript ble valgt fordi gruppen hadde tidligere erfaring med kombinasjonen, og typesystemet gjorde det enkelt å speile API-ets responsformer direkte i klientkoden. Vite gir nær umiddelbar hot reload under utvikling og produserer et statisk bundle som kan serveres uten en aktiv Node-prosess i produksjon. Tailwind CSS 4 brukes for rask utforming og holder presentasjonslogikken nær komponentene.
-
-For selve videostrømmingen ble AntMedia sin offisielle WebRTC-adapter (\url{@antmedia/webrtc\_adaptor}) brukt direkte. Adapteren håndterer ICE-forhandling, signalering og media-tilkobling, og lar koden konsentrere seg om brukerflyt og tilstandsovervåkning fremfor lavnivå WebRTC-detaljer.
-
-\subsection{Applikasjonsstruktur}
+\subsection{Applikasjonsstruktur og autentisering}
 \label{subsec:demo-struktur}
 
-Kildekoden i \texttt{Frontend/src/} er organisert etter teknisk rolle. Mappen \texttt{pages/} inneholder de fem hovedsidene som ruteren betjener (\texttt{Login}, \texttt{Dashboard}, \texttt{Room}, \texttt{Broadcast} og \texttt{Watch}), \texttt{components/} inneholder gjenbrukbare visuelle komponenter, \texttt{api/} samler all HTTP-kommunikasjon mot VideoAPI, og \texttt{hooks/} huser de tilstandsorienterte hjelperne som \texttt{useRoomList} og \texttt{usePolling}. Type-definisjonene i \texttt{types/} speiler DTO-ene API-et returnerer, slik at en endring i API-kontrakten typisk slår ut som en kompilatorfeil på klientsiden.
+Applikasjonen har fem sider: \texttt{Login}, \texttt{Dashboard}, \texttt{Room},
+\texttt{Broadcast} og \texttt{Watch}. Kildekoden er organisert etter teknisk
+rolle med mapper for sider, komponenter, API-kall, hooks og typedefinisjoner.
+Typedefinisjonene speiler API-ets DTO-er direkte, slik at endringer i
+API-kontrakten typisk gir kompilatorfeil på klientsiden.
 
-Rotkomponentet \texttt{App.tsx} definerer fem ruter. To av dem --- \texttt{/rooms/:id/broadcast} og \texttt{/rooms/:id/watch} --- er offentlige fordi tilgangen styres av en korttidsgyldig token i URL-parameteret \texttt{?token=...}, mens resten krever en aktiv innlogget sesjon.
+Innlogging skjer mot \texttt{/auth/token} med \texttt{clientId} og \texttt{clientSecret}. Tokenet lagres i \texttt{sessionStorage} og utløper etter fire minutter, noe kortere enn Keycloaks levetid. Brukeren sendes deretter automatisk tilbake til innloggingssiden når sesjonen utløper. Alle API-kall går gjennom en felles hjelper som setter \texttt{Authorization}-headeren og håndterer \texttt{401 Unauthorized}-svar sentralt.
 
-\begin{center}
-\begin{tabular}{l l}
-\texttt{/}                    & $\rightarrow$ Dashboard (auth) \\
-\texttt{/rooms/:id}           & $\rightarrow$ Room-detalj (auth) \\
-\texttt{/rooms/:id/broadcast} & $\rightarrow$ Broadcast (token i URL) \\
-\texttt{/rooms/:id/watch}     & $\rightarrow$ Watch (token i URL) \\
-\texttt{*}                    & $\rightarrow$ Login (uautentisert) \\
-\end{tabular}
-\end{center}
-
-\subsection{Autentiseringsflyt}
-\label{subsec:demo-auth}
-
-Innlogging skjer mot API-ets \texttt{/auth/token}-endepunkt, der frontenden
-poster en \texttt{clientId} og \texttt{clientSecret}. Det returnerte tokenet
-caches i minne og i \texttt{sessionStorage} med en TTL på fire minutter ---
-kortere enn Keycloaks egen levetid, slik at sesjonen utløper før et token
-rekker å bli forkastet av backend. En timer (\texttt{scheduleExpiry}) trigger
-en \texttt{onSessionExpired}-callback som setter ruteren tilbake til
-\texttt{Login}-siden uten å miste eventuelle ulagrede endringer i ruten først.
-
-Alle kall mot \texttt{/api/rooms/*} går gjennom hjelperen \texttt{withAuth} i
-\texttt{api/rooms.ts}, som henter Bearer-tokenet og setter
-\texttt{Authorization}-headeren. Returnerer API-et \texttt{401 Unauthorized},
-invalideres tokenet umiddelbart og brukeren sendes til innloggingssiden. Denne
-sentraliseringen gjør at hver enkelt sidekomponent kan kalle for eksempel
-\texttt{createRoom} uten å bekymre seg for tokenhåndtering.
-
-For sender- og mottakersidene (\texttt{Broadcast}, \texttt{Watch}) brukes en
-annen mekanisme. I stedet for at frontenden videresender et JWT, kaller den
-API-endepunktet \texttt{POST /api/rooms/\{provider\}:\{id\}/webrtc-link} og
-får tilbake en korttidsgyldig stream-token. Denne tokenen legges som
-\texttt{?token=}-parameter i delelenken, og verifiseres direkte av AntMedia
-ved WebRTC-tilkoblingen. Det betyr at en sender eller seer kan delta uten å ha
-egen Keycloak-konto, samtidig som tilgangen er bundet til ett rom og utløper
-av seg selv.
-
-\subsection{Romadministrasjon og polling}
-\label{subsec:demo-rom}
-
-Dashboardet (\texttt{pages/Dashboard/Dashboard.tsx}) kaller først
-\texttt{getReadyProviders} mot \texttt{/health/ready} for å avgjøre hvilke
-videomotorer som faktisk er operative --- er en provider rapportert
-\texttt{Unhealthy}, fjernes den fra opprett-rom-knappen. Brukeren kan deretter
-opprette nye rom mot den valgte provideren, og en hook
-(\texttt{useRoomList}) henter alle kjente rom periodisk via
-\texttt{Promise.allSettled} slik at ett feilende API-kall ikke stopper resten.
-Rom som returnerer \texttt{404} blir automatisk fjernet fra lokal lagring,
-slik at listen forblir konsistent med tilstanden på API-siden.
-
-Sidene \texttt{Broadcast} og \texttt{Watch} bruker sine respektive komponenter
-(\texttt{WebRTCPublisher} og \texttt{StreamPlayer}). Begge bygger en
-\texttt{wss://}-tilkobling til
-\texttt{\$\{VITE\_ANTMEDIA\_BASE\_URL\}/LiveApp/websocket} ut fra
-miljøvariabelen som er bakt inn ved byggetidspunktet, og sender henholdsvis
-\texttt{publish}- og \texttt{play}-kommandoer via AntMedia-adapteren med
-stream-tokenet fra URL-en. Tilstandsovergangene (\texttt{connecting},
-\texttt{waiting}, \texttt{playing}, \texttt{error}) speiles i UI-et med
-tydelige overlegg, slik at brukeren forstår om ventetiden skyldes at senderen
-ikke har startet ennå eller om noe har gått galt.
+Sender- og mottakersidene (\texttt{Broadcast} og \texttt{Watch}) bruker en
+annen mekanisme: frontenden kaller
+\texttt{POST /api/rooms/\{provider\}:\{id\}/webrtc-link} og får tilbake en
+korttidsgyldig stream-token som legges som \texttt{?token=}-parameter i
+delelenken. Tokenen verifiseres direkte av AntMedia ved WebRTC-tilkoblingen,
+slik at deltakere kan sende eller se uten egen Keycloak-konto.
 
 \subsection{Konfigurasjon og distribusjon}
 \label{subsec:demo-deploy}
 
-To miljøvariabler styrer hvor frontenden snakker hen:
-\texttt{VITE\_API\_BASE\_URL} peker på VideoAPI, og
-\texttt{VITE\_ANTMEDIA\_BASE\_URL} peker på AntMedia-serveren som benyttes
-for WebRTC. Fordi \texttt{VITE\_*}-variabler bakes inn i den ferdige
-JavaScript-bundlen ved kjøring av \texttt{vite build}, er det nødvendig å
-rebygge imaget når disse endres --- en bevisst avveining som gir enklere
-kjøretid på bekostning av rekonfigurerbar produksjonsdistribusjon.
-
-Dockerfilen for frontenden er bygd med tre trinn. Trinn \texttt{deps}
-(\texttt{node:22-alpine}) installerer avhengigheter med \texttt{npm ci}, trinn
-\texttt{build} kompilerer TypeScript og bunter applikasjonen, og det endelige
-trinnet baserer seg på \texttt{nginx:alpine} og serverer kun det statiske
-\texttt{dist/}-resultatet. Det gjør produksjonsbildet lite og fritt for
-kjøretidsavhengigheter.
-
-nginx-konfigurasjonen i \texttt{nginx.conf} redirigerer all HTTP-trafikk på
-port 80 til HTTPS, lytter på 443 med TLS 1.2 og 1.3, og returnerer
-\texttt{index.html} for ukjente ruter for at React Router skal håndtere
-klientside-navigasjon korrekt. HSTS-headeren settes med ett års levetid, og
-sertifikatene leses fra \texttt{/etc/nginx/certs/}, som monteres
-skrivebeskyttet fra hostens \texttt{./certs/}-katalog. HTTPS er ikke valgfritt
-i praksis --- moderne nettlesere tillater ikke tilgang til kamera og mikrofon
-over ukryptert HTTP, hvilket ville gjort \texttt{Broadcast}-siden ubrukelig.
-
-Hele frontenden startes med \texttt{docker compose up -d --build}, og portene
-\texttt{HTTP\_PORT} og \texttt{HTTPS\_PORT} velges via \texttt{.env} slik at
-frontend-stacken kan sameksistere med backend-stacken på samme VM når det er
-ønskelig.
+To miljøvariabler styrer tilkoblingen: \texttt{VITE\_API\_BASE\_URL}, som peker på VideoAPI-domenet, og \texttt{VITE\_ANTMEDIA\_BASE\_URL}, som peker på Ant Media-serveren.
+Siden disse bakes inn i JavaScript-bundlen ved bygging må imaget rebygges ved
+endring. Dockerfilen bruker et flertrinns-bygg der Node kompilerer applikasjonen, og det endelige trinnet baserer seg på \texttt{nginx:alpine}, som kun serverer det statiske resultatet. Dette gir et lite produksjonsimage uten kjøretidsavhengigheter. HTTPS er påkrevd i praksis, siden moderne nettlesere blokkerer kamera- og mikrofontilgang over ukryptert HTTP.

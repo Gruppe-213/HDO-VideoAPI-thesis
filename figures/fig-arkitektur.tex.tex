@@ -1,0 +1,70 @@
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  every node/.style={font=\small},
+  layer/.style={
+    draw, rounded corners=4pt,
+    minimum width=11cm, minimum height=1.2cm,
+    text centered, align=center
+  },
+  ext/.style={
+    draw, rounded corners=4pt,
+    minimum width=3.5cm, minimum height=1cm,
+    text centered, align=center
+  }
+]
+
+\node[layer, fill=purple!15] (http)
+  at (0, 0)
+  {\textbf{HTTP / pipeline-lag}\\
+   {\footnotesize Kestrel · middleware · autentisering · rate limiting · Prometheus}};
+
+\node[layer, fill=teal!15] (ctrl)
+  at (0,-1.6)
+  {\textbf{Controller-lag}\\
+   {\footnotesize RoomsController · AuthController · input-binding · HTTP-svar}};
+
+\node[layer, fill=teal!10] (svc)
+  at (0,-3.2)
+  {\textbf{Service-lag}\\
+   {\footnotesize KeycloakService · OAuth2 client credentials}};
+
+\node[layer, fill=orange!20] (prov)
+  at (0,-4.8)
+  {\textbf{Provider-lag (plugin-arkitektur)}\\
+   {\footnotesize IVideoProvider · AntMediaProvider · NHNVideoProvider · Factory}};
+
+\node[layer, fill=gray!15] (cross)
+  at (0,-6.4)
+  {\textbf{Kryssende bekymringer}\\
+   {\footnotesize GlobalExceptionHandler · VideoMetrics · HealthChecks · Exceptions}};
+
+% Backends
+\node[ext, fill=orange!30] (ant)
+  at (-3,-8.2) {\textbf{AntMedia Server}};
+\node[ext, fill=orange!30] (nhn)
+  at (3,-8.2) {\textbf{NHN Video (Pexip)}};
+
+% Keycloak ekstern
+\node[ext, fill=orange!25] (kc)
+  at (7.5,-3.2) {\textbf{Keycloak}\\{\footnotesize OAuth2}};
+
+% Request/response piler
+\draw[->, thick, gray]
+  (-6.2,0) -- (-6.2,-6.4)
+  node[midway, left, font=\footnotesize] {request};
+\draw[->, thick, gray]
+  (-5.6,-6.4) -- (-5.6,0)
+  node[midway, left, font=\footnotesize] {response};
+
+% Provider til backends
+\draw[->] (prov.south -| ant) -- (ant.north);
+\draw[->] (prov.south -| nhn) -- (nhn.north);
+
+% Service til Keycloak
+\draw[->, dashed] (svc.east) -- (kc.west);
+
+\end{tikzpicture}
+\caption{Overordnet lagarkitektur for HDO VideoAPI. Forespørsler traverserer lagene ovenfra og ned; svar returneres oppover. Provider-laget er det eneste som kommuniserer med eksterne videomotorer.}
+\label{fig:arkitektur}
+\end{figure}

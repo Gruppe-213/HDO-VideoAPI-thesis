@@ -1,4 +1,29 @@
 \section{Sikkerhetsarkitektur}
 \label{sec:design-sikkerhet}
 
-% Auth-arkitektur
+% Auth-arkitektur BOILER PLATE
+\subsubsection{Autentisering og tilgangskontroll}
+
+Autentisering i VideoAPI er basert på OAuth2-standarden, noe som var et eksplisitt krav fra oppdragsgiver. Valget av OAuth2 gir en industristandard tilnærming til tilgangskontroll som er vidt støttet og godt dokumentert, og som muliggjør fremtidig integrasjon med andre systemer uten behov for endringer i API-ets grensesnitt.
+
+\paragraph{Valg av Keycloak som identitetsleverandør}
+
+Som OAuth2-leverandør ble Keycloak valgt. Bakgrunnen for dette valget er at HDO allerede benytter Keycloak som identity provider i sin eksisterende infrastruktur. Ved å ta i bruk det samme systemet unngikk gruppen å innføre ny teknologi i driftsmiljøet, og oppdragsgiver kan selv ta over og tilpasse konfigurasjonen i etterkant uten å måtte sette seg inn i et ukjent verktøy.
+
+OAuth2-flyten som er implementert er \textit{Client Credentials Grant}, også kjent som maskin-til-maskin-autentisering (M2M). Denne flyten er passende for et API uten sluttbrukerpålogging, der klientsystemer autentiserer seg med en klient-ID og klienthemmelighet for å hente et JWT-token. Tokenet brukes deretter som \texttt{Bearer}-token i alle påfølgende API-kall.
+
+\paragraph{Designvalg: minimal claim-struktur}
+
+Et bevisst designvalg i autentiseringsarkitekturen er å holde claim-strukturen enkel. Det er kun én claim som kreves for tilgang: \texttt{api\_access = "true"}. Det er ikke benyttet OAuth2-scopes.
+
+Denne forenklingen er begrunnet i prosjektets kontekst: autentiseringsoppsettet er ment som et midlertidig rammeverk som oppdragsgiver selv skal overta og konfigurere videre med sin egen Keycloak-instans. Å designe et komplekst scope-hierarki som senere ville blitt erstattet ville ført til unødvendig arbeid uten varig verdi. Den ene API-access-claimet fyller rollen som en enkel, binær tilgangskontroll — enten har en klient tilgang, eller så har den det ikke.
+
+Keycloak-klienter som skal ha tilgang til API-et må konfigureres med en protokollmapper som legger til denne claimet i tokens som utstedes. Selve policy-sjekken skjer globalt i API-ets autorisasjonsmiddleware, slik at alle beskyttede endepunkter automatisk krever gyldig token med riktig claim uten at dette må defineres eksplisitt per endepunkt.
+
+\paragraph{Validering og sikkerhetsnivå}
+
+JWT-tokens valideres mot Keycloaks JWKS-endepunkt, som betyr at signaturen verifiseres med Keycloaks offentlige nøkkel ved hvert kall. Audience- og issuer-validering er i det nåværende oppsettet deaktivert, da disse parameterne vil variere avhengig av hvilken Keycloak-instans oppdragsgiver velger å benytte. Signaturvalidering sikrer at tokens ikke kan forfalskes, og at kun tokens utstedt av den konfigurerte Keycloak-realmen godtas.
+
+For å beskytte token-endepunktet mot misbruk er det satt opp en skjerpet hastighetsbegrensning på 10 forespørsler per minutt per IP-adresse, sammenlignet med den generelle grensen på 60 forespørsler per minutt for øvrige endepunkter. Dette reduserer risikoen for credential-stuffing-angrep mot autentiseringsendepunktet.
+
+Samlet utgjør autentiseringsdesignet en pragmatisk løsning som oppfyller kravene fra oppdragsgiver, tilpasser seg eksisterende infrastruktur, og legger til rette for at videre utvikling og herding kan skje på oppdragsgivers egne premisser.

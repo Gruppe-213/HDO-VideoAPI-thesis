@@ -1,18 +1,11 @@
 \section{Authentication}
 \label{sec:impl-auth}
 
-Backendet bruker Keycloak som ekstern identitetsleverandør for autentisering,
-basert på OAuth2 client credentials-flyten. Selve tokenet genereres ikke av
-applikasjonen – det hentes fra Keycloak og valideres av ASP.NET Cores innebygde
-JWT Bearer-mellomvare.
+Backenden bruker Keycloak som ekstern identitetsleverandør for autentisering, basert på OAuth2 client-credentials-flow. Selve tokenet genereres ikke av applikasjonen, men hentes fra Keycloak og valideres av ASP.NET Cores innebygde JWT Bearer-middleware.
 
 \subsection{Token-flyt}
 
-Klienter autentiserer seg ved å sende \texttt{clientId} og \texttt{clientSecret}
-til \texttt{POST /auth/token}. Endepunktet videresender forespørselen til
-Keycloaks token-endepunkt som en \texttt{client\_credentials}-forespørsel og
-returnerer \texttt{access\_token} tilbake til klienten. Ingen tokens lagres
-server-side – systemet er fullstendig tilstandsløst.
+Klienter autentiserer seg ved å sende en \texttt{POST}-forespørsel til \texttt{/auth/token}, der \texttt{clientId} og \texttt{clientSecret} inkluderes i request-bodyen. Endepunktet videresender forespørselen til Keycloaks token-endepunkt som en \texttt{client\_credentials}-forespørsel og returnerer \texttt{access\_token} til klienten. Systemet lagrer ingen tokens server-side og er dermed fullstendig tilstandsløst.
 
 \begin{lstlisting}[language={[Sharp]C}, caption={AuthController.cs – token-endepunkt}]
 [ApiController]
@@ -56,10 +49,7 @@ public async Task<string> GetTokenAsync(string clientId, string clientSecret)
 
 \subsection{Tilgangskontroll}
 
-Autorisasjonspolicyen er flat – det er ingen rollebasert tilgangsstyring.
-Alle klienter med et gyldig token og korrekt claim har identiske rettigheter.
-Et gyldig token uten \texttt{api\_access = true} gir 403, mens manglende
-eller ugyldig token gir 401.
+Autorisasjonspolicyen er flat, uten rollebasert tilgangsstyring. Alle klienter med et gyldig token og korrekt claim har identiske rettigheter. Et gyldig token uten \texttt{api\_access = true} resulterer i \texttt{403 Forbidden}, mens manglende eller ugyldig token gir \texttt{401 Unauthorized}.
 
 \begin{lstlisting}[language={[Sharp]C}, caption={KeycloakExtensions.cs – JWT-validering og autorisasjonspolicy}]
 services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

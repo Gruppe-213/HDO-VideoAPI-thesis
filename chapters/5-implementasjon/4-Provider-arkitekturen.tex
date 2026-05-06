@@ -5,11 +5,11 @@ Kjernen i plugin-arkitekturen er grensesnittet \texttt{IVideoProvider},
 som definerer åtte asynkrone metoder for romoperasjoner og
 strømstyring. Ingen metoder har default-implementasjon. En provider som
 ikke støtter en operasjon kaster \texttt{NotSupportedException}, som
-\texttt{GlobalExceptionHandler} oversetter til HTTP~501. Provider velges
+\texttt{GlobalExceptionHandler} videre oversetter til HTTP-status \texttt{501 Not Implemented}. Provider velges
 ved oppslag i ASP.NET Cores keyed DI-container via
 \texttt{VideoProviderFactory}, som normaliserer nøkkelen til lowercase og
 kaster \texttt{ArgumentException} ved ukjent provider.
-Listing~\ref{lst:ivideoproivder} viser grensesnittet.
+Kodeliste~\ref{lst:ivideoproivder} viser grensesnittet.
 
 \begin{lstlisting}[language={[Sharp]C}, label=lst:ivideoproivder,
   caption={IVideoProvider-grensesnittet.}]
@@ -30,9 +30,9 @@ public interface IVideoProvider
 }
 \end{lstlisting}
 
-Begge providers registreres med en typed \texttt{HttpClient} og en
-\texttt{DelegatingHandler} for autentisering bakt inn i HTTP-pipelinen,
-som vist i listing~\ref{lst:providerregistrering}.
+Begge providers registreres med en typet \texttt{HttpClient} og en
+\texttt{DelegatingHandler} for autentiseringshåndtering integrert i HTTP-pipelinen,
+som vist i kodeliste~\ref{lst:providerregistrering}.
 
 \begin{lstlisting}[language={[Sharp]C}, label=lst:providerregistrering,
   caption={Registrering av providers som keyed services.}]
@@ -54,13 +54,7 @@ services.AddKeyedTransient<IVideoProvider>("nhn",
     (sp, _) => sp.GetRequiredService<NHNVideoProvider>());
 \end{lstlisting}
 
-\texttt{AntMediaProvider} er strømorientert. Kjerneabstraksjonen i
-AntMedia er en \textit{broadcast} med tilstandene \texttt{created},
-\texttt{broadcasting} og \texttt{finished}. Start og stopp er eksplisitte
-API-kall, og aksess skjer via kortlevde WebRTC-tokens med 90 sekunders
-levetid. \texttt{AntMediaAuthHandler} signerer JWT-tokens lokalt med
-HMAC-SHA256 og cacher dem i fem minutter med trådsikker refresh via
-\texttt{SemaphoreSlim}.
+\texttt{AntMediaProvider} er strømorientert. Kjerneabstraksjonen i AntMedia er en broadcast med tilstandene \texttt{created}, \texttt{broadcasting} og \texttt{finished}. Start og stopp utføres som eksplisitte API-kall, og tilgang skjer via kortlevde WebRTC-tokens med 90 sekunders levetid. \texttt{AntMediaAuthHandler} signerer JWT-tokens lokalt med HMAC-SHA256 og cacher dem i fem minutter, med trådsikker oppdatering ved bruk av \texttt{SemaphoreSlim}.
 
 \texttt{NHNVideoProvider} er møteorientert. Et NHN-møte er en booking
 med start- og sluttid, og tilgang skjer via en Pexip-basert
@@ -68,7 +62,7 @@ konferanse-URL med innebygd PIN som NHN genererer ved opprettelse. Siden
 møtet er aktivt så lenge bookingen eksisterer, finnes det ingen
 start- eller stopp-operasjon, og \texttt{SetRoomTokenAsync} er heller
 ikke aktuell. Disse tre metodene kaster \texttt{NotSupportedException},
-som listing~\ref{lst:nhnsupported} viser.
+som kodeliste~\ref{lst:nhnsupported} viser.
 
 \begin{lstlisting}[language={[Sharp]C}, label=lst:nhnsupported,
   caption={NHN-operasjoner som ikke er støttet.}]

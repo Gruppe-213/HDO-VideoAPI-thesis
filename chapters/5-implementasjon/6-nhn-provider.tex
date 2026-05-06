@@ -1,8 +1,8 @@
 \section{NHNProvider}
 \label{sec:NHN-provider}
-\texttt{NHNVideoProvider} bygget rom som bookinger i NHN sitt API. I \texttt{CreateRoomAsync} ble \texttt{startTime} satt til gjeldende UTC-tid, mens \texttt{endTime} ble satt til samme tidspunkt pluss \texttt{MeetingDurationHours} fra konfigurasjonen. Romnavnet ble brukt som \texttt{subject}, og \texttt{TemplateId} ble sendt med som møtemal. Etter POST-kallet til \texttt{api/client/v1/booking/} ble booking-ID, emne, status og URL-er mappet til \texttt{VideoRoom}.
+\texttt{NHNVideoProvider} oppretter rom som bookinger i NHN sitt API. I \texttt{CreateRoomAsync} settes \texttt{startTime} til gjeldende UTC-tid, mens \texttt{endTime} settes til samme tidspunkt pluss \texttt{MeetingDurationHours} fra konfigurasjonen. Romnavnet benyttes som \texttt{subject}, og \texttt{TemplateId} sendes som møtemal. Etter \texttt{POST}-kallet til \texttt{api/client/v1/booking/} tilordnes booking-ID, emne, status og URL-er til \texttt{VideoRoom}.
 
-\begin{lstlisting}[language={[Sharp]C}, label=lst:nhn-create-room]
+\begin{lstlisting}[language={[Sharp]C}, label=lst:nhn-create-room, caption={Opprettelse av NHN Booking Request.}]
 var now = DateTime.UtcNow;
 var body = new CreateNHNBookingRequest
 {
@@ -14,9 +14,9 @@ var body = new CreateNHNBookingRequest
 };
 \end{lstlisting}
 
-WebRTC-lenker ble håndtert enklere enn hos AntMedia. \texttt{GenerateWebRtcTokenAsync} gjorde ikke et eget tokenkall. Den hentet bookingen og returnerte \texttt{GuestUrl} for \texttt{play}, eller \texttt{HostUrl} for andre typer. Siden NHN ikke ga samme type tokenutløp, brukte implementasjonen en fast placeholder-verdi. Før URL-ene ble returnert, gikk de gjennom \texttt{RewriteNhnUrl}. Denne hjelperen skrev om NHN-lenker fra \texttt{/conference?id\&pin=...} til \texttt{?conference=id\&pin=...}. Det var nødvendig fordi klienten forventet konferanse-ID-en som en vanlig query-parameter.
+WebRTC-lenker håndteres enklere enn hos AntMedia. \texttt{GenerateWebRtcTokenAsync} utfører ikke et separat tokenkall, men henter i stedet bookingen og returnerer \texttt{GuestUrl} for avspilling (play) eller \texttt{HostUrl} for øvrige roller. Siden NHN ikke tilbyr tilsvarende mekanisme for tokenutløp, benytter implementasjonen en fast placeholder-verdi. Før URL-ene returneres, transformeres de via \texttt{RewriteNhnUrl}, som omskriver NHN-lenker fra \texttt{/conference?id\&pin=...} til \texttt{?conference=id\&pin=...}. Dette er nødvendig fordi klienten forventer konferanse-ID som en standard query-parameter.
 
-\begin{lstlisting}[language={[Sharp]C}, label=lst:nhn-webrtc]
+\begin{lstlisting}[language={[Sharp]C}, label=lst:nhn-webrtc, caption={Opprettelse av NHN WebRTC-lenke.}]
 var room = await GetRoomAsync(roomId, ct);
 var tokenId = type == "play"
     ? room.GuestUrl ?? string.Empty
@@ -24,9 +24,9 @@ var tokenId = type == "play"
 return new WebRtcLinkResponse(tokenId, roomId, type, NoExpiry);
 \end{lstlisting}
 
-Autentiseringen mot NHN lå i \texttt{NHNAuthHandler}. Handleren hentet bearer-token fra \texttt{/Token} med password grant, basert på brukernavn og passord fra konfigurasjonen. Tokenet ble lagret i \texttt{NHNTokenCache}, slik at flere handler-instansar kunne bruke samme token. Cachen tok hensyn til \texttt{expires\_in} fra NHN, trakk fra fem minutter som sikkerhetsmargin og satte samtidig en øvre grense på 13 dager. Også her ble \texttt{SemaphoreSlim} brukt med double-check pattern for å unngå parallelle tokenfornyelser. \texttt{EnsureSuccessOrThrowAsync} oversatte HTTP 404 til \texttt{NotFoundException("Booking", ...)}, mens andre feil ble gjort om til \texttt{ExternalServiceException("NHN", ...)} med metode, booking-ID, statuskode og responsinnhold.
+Autentiseringen mot NHN håndteres i \texttt{NHNAuthHandler}. Handleren henter bearer-token fra \texttt{/Token} ved bruk av password grant, basert på brukernavn og passord fra konfigurasjonen. Tokenet lagres i \texttt{NHNTokenCache}, slik at flere handler-instansene kan gjenbruke samme token (se kodeliste~\ref{lst:nhn-token-cache}). Cachen tar hensyn til \texttt{expires\_in} fra NHN, trekker fra fem minutter som sikkerhetsmargin og setter samtidig en øvre grense på 13 dager. Også her benyttes \texttt{SemaphoreSlim} med double-check pattern for å unngå parallelle tokenfornyelser. Feil fra NHN-API-et håndteres av den private hjelpefunksjonen\texttt{EnsureSuccessOrThrowAsync}: HTTP-statuskoden \texttt{404 Not Found} kaster \texttt{NotFoundException("Booking", ...)}, mens øvrige feil kaster \texttt{ExternalServiceException("NHN", ...)} med metode, booking-ID, statuskode og responsinnhold.
 
-\begin{lstlisting}[language={[Sharp]C}, label=lst:nhn-token-cache]
+\begin{lstlisting}[language={[Sharp]C}, label=lst:nhn-token-cache, caption={NHN token cache logikk}]
 cache.Token = result!.AccessToken;
 var serverExpiry = DateTime.UtcNow.AddSeconds(
     result.ExpiresIn - TokenExpiryBufferSeconds);

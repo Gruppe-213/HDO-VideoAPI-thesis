@@ -1,34 +1,15 @@
 \section{Controller-laget}
 \label{sec:controllers}
 
-API-et har to kontrollere: \texttt{RoomsController} og
-\texttt{AuthController}. Begge bruker \texttt{[ApiController]}, som gir
-automatisk modellvalidering og standardiserte feilsvar. Kontrollerne er
-tynne: de binder forespørsler, delegerer til provider-laget og logger
-vellykkede operasjoner, men inneholder ingen forretningslogikk og ingen
-\texttt{try/catch}-blokker.
+API-et består av to controllers: \texttt{RoomsController} og \texttt{AuthController}. Begge benytter \texttt{[ApiController]}-attributtet, som gir automatisk modellvalidering og standardiserte feilsvar. Controllerne er tynne og fungerer primært som et bindeledd mellom HTTP-laget og forretningslogikken: De binder innkommende forespørsler, delegerer operasjoner til provider-laget og logger vellykkede operasjoner, uten å inneholde forretningslogikk eller \texttt{try/catch}-blokker.
 
 \texttt{RoomsController} er beskyttet med \texttt{[Authorize]} på
 klassenivå og eksponerer syv endepunkter under \texttt{/api/rooms} som
-dekker kravene F1.1--F1.5 og S1.2 \cite{hdo_kravspec}. Riktig
-videomotor velges via et prefiks kodet inn i ressurs-IDen: ved oppretting
-sendes ønsket provider i request-bodyen og bakes inn i den returnerte
-IDen på formen \texttt{provider:rawId}. På øvrige endepunkter parses
+dekker kravene F1.1--F1.5 og S1.2 \cite{hdo_kravspec}. Videomotor velges via et prefiks kodet inn i ressurs-ID-en: Ved opprettelse sendes ønsket provider i request-bodyen og inkluderes i den returnerte ID-en på formen \texttt{provider:rawId}. På øvrige endepunkter parses
 prefikset ut av \texttt{roomId} og brukes til å slå opp riktig
 \texttt{IVideoProvider} via \texttt{IVideoProviderFactory}.
-Feilhåndtering er sentralisert i \texttt{GlobalExceptionHandler}, som
-mapper typede unntak fra provider-laget til HTTP-statuskoder:
-\texttt{NotFoundException} gir 404, \texttt{NotSupportedException} gir
-501 og \texttt{ExternalServiceException} gir 502. Alle feilsvar følger
-RFC~7807 ProblemDetails-formatet.
+Feilhåndtering er sentralisert i \texttt{GlobalExceptionHandler}, som tilordner domenespesifikke exceptions fra provider-laget til HTTP-statuskoder og returnerer standardiserte feilsvar basert på RFC~7807 ProblemDetails-formatet.
 
 \texttt{AuthController} har ett endepunkt, \texttt{POST /auth/token},
 som henter et Bearer-token via OAuth~2.0 client credentials-flyten.
-Endepunktet er annotert med \texttt{[AllowAnonymous]} siden det må nås
-før et token er tilgjengelig, og med \texttt{[EnableRateLimiting("auth")]}
-for å begrense antall forsøk per IP. Selve kommunikasjonen mot Keycloak
-er delegert til \texttt{KeycloakService}, som POSTer
-\texttt{client\_id} og \texttt{client\_secret} til Keycloaks
-\texttt{/protocol/openid-connect/token}-endepunkt og returnerer
-access-tokenen. Tjenesten er stateless og uten caching — ansvaret for å
-gjenbruke tokenen ligger hos kalleren.
+Endepunktet er annotert med \texttt{[AllowAnonymous]} ettersom det må være tilgjengelig før autentisering er etablert, og med \texttt{[EnableRateLimiting("auth")]} for å begrense antall forespørsler per minutt per IP-adresse. Selve kommunikasjonen mot Keycloak er delegert til \texttt{KeycloakService}, som sender en \texttt{POST}-forespørsel med \texttt{client\_id} og \texttt{client\_secret} til Keycloaks \texttt{/protocol/openid-connect/token}-endepunkt og returnerer access-tokenet. Tjenesten er stateless og uten caching; ansvaret for gjenbruk av token ligger hos kalleren.

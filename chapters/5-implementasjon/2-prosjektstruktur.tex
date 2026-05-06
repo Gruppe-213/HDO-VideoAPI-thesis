@@ -1,37 +1,17 @@
 \section{Prosjektstruktur}
 \label{sec:prosjektstruktur}
 
-Løsningen består av ett enkelt .NET-prosjekt med tilhørende testprosjekt,
-organisert i et flatt mappehierarki der ansvar er separert etter teknisk rolle
-fremfor feature. Figur~\ref{fig:prosjektstruktur} viser de sentrale mappene.
+Løsningen består av ett enkelt .NET-prosjekt med tilhørende testprosjekt, organisert i et flatt mappehierarki der ansvar separeres etter teknisk rolle fremfor funksjonalitet. Figur~\ref{fig:prosjektstruktur} viser de sentrale mappene.
 
-Kildekoden ligger i rotkatalogen til \texttt{HDO-VideoAPI}-prosjektet.
-\texttt{Controllers/} inneholder de to kontrollerene som eksponerer REST-API-et
-utad: \texttt{RoomsController} håndterer romoperasjoner, mens
-\texttt{AuthController} tilbyr et hjelpepunkt for tokenhenting under utvikling.
-Forretningslogikken er fullstendig skilt fra HTTP-laget ved at kontrollerne
-delegerer alle operasjoner til en \texttt{IVideoProvider} hentet gjennom
-\texttt{IVideoProviderFactory}.
+Kildekoden ligger i rotkatalogen til \texttt{HDO-VideoAPI}-prosjektet. \texttt{Controllers/}-mappen inneholder de to controllerne som eksponerer REST-API-et utad: \texttt{RoomsController} håndterer romoperasjoner, mens \texttt{AuthController} tilbyr et hjelpeendepunkt for tokenhenting.
+Forretningslogikken er fullstendig skilt fra HTTP-laget, ved at kontrollerne delegerer alle operasjoner til en \texttt{IVideoProvider} som instansieres via \texttt{IVideoProviderFactory}.
 
-\texttt{Providers/} er kjernen i plugin-arkitekturen. Mappen inneholder
-grensesnittene \texttt{IVideoProvider} og \texttt{IVideoProviderFactory}, samt
-én undermappe per backend: \texttt{AntMedia/} og \texttt{NHN/}. Hver undermappe
-samler all kode som er spesifikk for den aktuelle videomotoren — konfigurasjon,
-datamodeller, autentiseringshåndterer og selve providerimplementasjonen. En ny
-backend kan legges til ved å opprette en tilsvarende undermappe uten å røre
-eksisterende kode.
+\texttt{Providers/}-mappen er kjernen i plugin-arkitekturen. Mappen inneholder grensesnittene \texttt{IVideoProvider} og \texttt{IVideoProviderFactory}, samt én undermappe per backend: \texttt{AntMedia/} og \texttt{NHN/}. Hver undermappe samler all kode som er spesifikk for den aktuelle videomotoren, inkludert konfigurasjon, datamodeller, autentiseringshåndtering og provider-implementasjon. En ny backend kan legges til ved å opprette en tilsvarende undermappe uten å endre eksisterende kode.
 
-\texttt{Extensions/} inneholder én fil per tjenestekategori, slik at
-\texttt{Program.cs} kan begrenses til drøyt 20 linjer. Oppstart skjer i en
-fast rekkefølge: miljøvariabler lastes, Kestrel konfigureres, tjenester
-registreres og middleware-kjeden bygges. Denne inndelingen gjør det enkelt å
-finne og endre én avgrenset del av oppstartslogikken uten å forstyrre de andre.
+\texttt{Extensions/}-mappen inneholder én fil per tjenestekategori, slik at \texttt{Program.cs} kan holdes svært kompakt. Oppstarten følger en fast rekkefølge: miljøvariabler lastes inn, Kestrel konfigureres, tjenester registreres og middleware-kjeden bygges. Denne inndelingen gjør det enkelt å identifisere og endre avgrensede deler av oppstartslogikken uten å påvirke de øvrige delene.
 
-Krysskuttende bekymringer som feilhåndtering, metrikk og helsesjekker er
-plassert i egne mapper — \texttt{Middleware/}, \texttt{Metrics/} og
-\texttt{HealthChecks/} — slik at de forblir uavhengige av både kontrollere og
-providers. Konfigurasjon hentes utelukkende fra miljøvariabler og
-\texttt{appsettings}-filer, i tråd med krav I1.2 fra kravspesifikasjonen.
+Kryssende bekymringer som feilhåndtering, metrikker og helsesjekker er plassert i egne mapper, \texttt{Middleware/}, \texttt{Metrics/} og \texttt{HealthChecks/}, slik at de forblir uavhengige av både controllers og providers. Konfigurasjon hentes utelukkende fra miljøvariabler og
+\texttt{appsettings}-filer, i tråd med krav I1.2 \cite{hdo_kravspec} fra kravspesifikasjonen.
 
 Testprosjektet \texttt{HDO-VideoAPI.Tests/} speiler mappestrukturen til
 hovedprosjektet. Hver produksjonskatalog har en korresponderende testkatalog,
