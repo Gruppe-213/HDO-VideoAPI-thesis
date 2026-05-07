@@ -1,7 +1,10 @@
 \documentclass[norsk,titlepage]{ntnuthesis}
 \usepackage{dirtree}
 \usepackage{longtable}
+\usepackage{adjustbox}
 \usepackage{tikz}  
+\usetikzlibrary{positioning,arrows.meta,calc}
+\usepackage{pdflscape}
 \title{HDO VideoAPI}
 \shorttitle{HDO VideoAPI}
 \author{}
@@ -18,17 +21,17 @@
   }
 }
 
-\lstset{
-  basicstyle=\ttfamily\small,
-  breaklines=true,
-  columns=fullflexible,
-  frame=single,
-  numbers=left,
-  numberstyle=\tiny,
-  captionpos=b,
-  tabsize=2,
-  showstringspaces=false
-}
+% \lstset{
+%   basicstyle=\ttfamily\small,
+%   breaklines=true,
+%   columns=fullflexible,
+%   frame=single,
+%   numbers=left,
+%   numberstyle=\tiny,
+%   captionpos=b,
+%   tabsize=2,
+%   showstringspaces=false
+% }
 \addbibresource{thesis.bib}
 
 \input{glossary.tex} % add glossary and acronym lists before document

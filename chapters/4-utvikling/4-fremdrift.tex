@@ -1,0 +1,11 @@
+\section{Fremdrift: plan versus gjennomføring}
+
+Prosjektperioden ble planlagt i tre faser. Den første fasen fokuserte på arkitekturarbeid og etablering av prosjektets grunnstruktur, inkludert provider-grensesnitt, konfigurasjonssystem, autentisering og CI-oppsett, parallelt med opplæring i C\# og .NET 10. Den andre fasen omfattet implementasjon av provider-adapterne, observability-støtte og containerisering. Den tredje fasen var reservert til testing, rapportskriving og finjustering av løsningen.
+
+Flere eksterne forhold påvirket fremdriften underveis i prosjektet. For AntMedia oppsto det utfordringer knyttet til WebRTC-adapteren og konfigurasjon av STUN- og TURN-servere i HDOs miljø. Dette gjorde det vanskelig å etablere stabile ende-til-ende-forbindelser i testmiljøet og førte til ekstra arbeid med feilsøking og tilpasning av klientkonfigurasjon.
+
+Arbeidet med NHN Video ble også påvirket av forhold utenfor prosjektgruppen. NHN-miljøet var periodevis ustabilt, og enkelte deler av API-et oppførte seg annerledes enn dokumentasjonen beskrev. Samtidig var responstiden på tekniske henvendelser via HDO begrenset, noe som gjorde avklaringer og feilretting tidkrevende. Dette påvirket særlig integrasjonstestingen av NHN-provideren mot slutten av prosjektperioden.
+
+Containerisering, CI/CD og observability-støtte ble derimot implementert raskere enn planlagt. ASP.NET Cores innebygde støtte for helsesjekker og Prometheus-metrikker reduserte behovet for egendefinert infrastrukturkode og gjorde det enklere å etablere et fungerende driftsmiljø tidlig i prosjektet.
+
+Til tross for utfordringene ble de funksjonelle kjernekravene fra HDO levert innenfor prosjektperioden. Økt testdekning av provider-laget og støtte for ytterligere identitetsleverandører ble identifisert som naturlige kandidater for videre arbeid.

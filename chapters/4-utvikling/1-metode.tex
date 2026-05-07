@@ -1,8 +1,9 @@
 \section{Valg av utviklingsmetodikk}
 \label{sec:uvikling-modell}
 
-Prosjektet startet under to sentrale forutsetninger: teamet hadde ingen tidligere erfaring med C\# eller .NET, og kravspesifikasjonen fra HDO definerte et tydelig omfang med faste leveranser. Dette dannet grunnlaget for valg av arbeidsmetode.
+Valget av arbeidsmetode ble gjort på bakgrunn av to sentrale forutsetninger: teamet hadde ingen tidligere erfaring med C\# eller .NET, og kravspesifikasjonen fra HDO definerte et avgrenset omfang med konkrete leveranser. Disse forutsetningene la premissene for hvilken utviklingsmodell som var hensiktsmessig.
 
-En sekvensiell utviklingsmodell, som fossefallsmodellen, ble vurdert, men tidlig forkastet. Uten kjennskap til .NET-økosystemet var det ikke mulig å estimere implementasjonskompleksitet presist ved oppstart. Flere sentrale krav knyttet til håndtering av videostrøm krevde iterative avklaringer med HDO etter hvert som domeneulikhetene mellom AntMedia Server og NHN Video ble tydelige. Dette ville vært utfordrende i en modell der krav fastsettes tidlig.
+En sekvensiell tilnærming, som fossefallsmodellen, ble tidlig forkastet. Uten inngående kjennskap til .NET-økosystemet var det ikke mulig å estimere implementasjonskompleksitet med tilstrekkelig presisjon ved oppstart. Flere krav knyttet til håndtering av videostrøm krevde i tillegg løpende avklaringer med HDO etter hvert som tekniske ulikheter mellom AntMedia Server og NHN Video ble avdekket. I en modell der krav fastlegges tidlig og endringer er kostbare, ville dette vært problematisk.
 
-Prosjektet fulgte derfor en iterativ arbeidsform inspirert av Scrum \cite{scrumguide}, der elementer som sprintinndeling og iterativ planlegging ble benyttet uten full implementering av rammeverkets seremonier og roller. Arbeidet ble organisert i ukentlige sprinter med tydelige mål, og resulterte fortløpende i kjørbar kode og grunnlag for videre prioritering. Dette ga fleksibilitet til å håndtere usikkerhet og løpende avklaringer, samtidig som fremdriften ble opprettholdt.
+Prosjektet fulgte derfor en iterativ arbeidsform inspirert av Scrum \cite{scrumguide}, med ukentlige sprinter, løpende backlog-prioritering og retrospektiver som fast innslag i møtestrukturen. Rammeverkets seremonier og roller ble ikke fullt ut implementert, men arbeidsformen ga fortløpende kjørbar kode og gjorde det mulig å håndtere usikkerhet og avklaringer underveis, samtidig som fremdriften ble opprettholdt.
+

@@ -1,0 +1,6 @@
+\section{Kodehåndtering}
+\label{sec:uvikling-struktur}
+
+Kildekoden ble håndtert i Git med en grenbasert arbeidsflyt. Ny funksjonalitet ble utviklet i egne \texttt{feature/*}-grener, gjennomgått og deretter flettet inn i \texttt{develop}. Endringer til \texttt{main} krevde at alle automatiserte tester passerte, samt godkjenning fra et annet teammedlem.
+
+CI-pipelinen i GitHub Actions kjørte formatkontroll, bygg og testkjøring ved hvert push til \texttt{main}, \texttt{develop} og \texttt{feature/*}-grener. Dette bidro til å avdekke regresjonsfeil tidlig og sikret at \texttt{main} til enhver tid var i en kjørbar tilstand.
