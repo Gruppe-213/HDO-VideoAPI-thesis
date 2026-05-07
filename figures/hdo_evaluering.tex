@@ -1,0 +1,82 @@
+\chapter{Sluttevaluering fra HDO}
+\label{app:hdo-eval}
+
+% =============================================================
+% Vedlegg: Sluttevaluering fra HDO
+% Kompakt oversikt: alle spørsmål og svar i én tabell.
+% =============================================================
+
+Dette vedlegget gjengir den fullstendige sluttevalueringen fra
+oppdragsgiver. Spørreskjemaet ble besvart av to representanter
+fra HDO ved prosjektslutt.Kvantitative spørsmål er besvart på en skala fra 1 til 5, der 5
+betyr fullstendig oppfylt. Antall respondenter er
+begrenset, og evalueringen må derfor leses som en kvalitativ
+ekspertvurdering fra oppdragsgiver, ikke som en statistisk
+representativ undersøkelse.
+
+\begin{table}[!htbp]
+    \centering
+    \footnotesize
+    \renewcommand{\arraystretch}{1.25}
+    \caption{Sluttevaluering fra HDO. Tallverdier er på skala
+    1--5; tekstsvar er gjengitt ordrett. Tomme felter angir at
+    respondenten ikke besvarte spørsmålet.}
+    \label{tab:hdo-eval-full}
+    \begin{tabular}{p{6.2cm} p{4.0cm} p{4.0cm}}
+        \toprule
+        \textbf{Spørsmål} & \textbf{Respondent 1} &
+        \textbf{Respondent 2} \\
+        \midrule
+        \multicolumn{3}{l}{\textit{Kravoppfyllelse}} \\
+        \midrule
+        Dekning av funksjonelle krav (F1.1--F1.5) &
+        5 & 5 \\
+        Savnet funksjonalitet eller prioriteringer for videre
+        utvikling &
+        --- & --- \\
+        Plugin-arkitektur: bytting mellom backends tilstrekkelig
+        isolert &
+        5 & 5 \\
+        Autentiseringsløsning (OAuth2/JWT, romtoken) for
+        AMK/LVS-kontekst (S1.1--S1.2) &
+        4 & 5 \\
+        Logging av drifts- og sikkerhetshendelser (O1.1)
+        tilstrekkelig &
+        5 & 5 \\
+        Prometheus-metrikker og health-endepunkter for
+        driftsapparatet &
+        «Metrics og endepunkt er bra og nødvendig for driften.» &
+        «Ja, fungerer som forventet.» \\
+        API-dokumentasjon (OpenAPI/Swagger) for leverandør
+        (D1.1) &
+        4 & 5 \\
+        Løsning klar for videre integrasjon i HDOs
+        videoløsninger &
+        «Ja, kan tas videre uten store endringer.» &
+        «Ja, men krever noe videreutvikling.» \\
+        \midrule
+        \multicolumn{3}{l}{\textit{Samarbeid og prosess}} \\
+        \midrule
+        Kommunikasjon med prosjektgruppen gjennom perioden &
+        5 & 5 \\
+        Kravspesifikasjonen tydelig nok som grunnlag &
+        «Håper den var tydelig, men er helt sikkert rom for
+        forbedring der også.» &
+        --- \\
+        Forhold som burde vært avklart tidligere &
+        --- & --- \\
+        \midrule
+        \multicolumn{3}{l}{\textit{Samlet vurdering}} \\
+        \midrule
+        Samlet: i hvilken grad innfrir leveransen
+        forventningene &
+        4 & 4 \\
+        Det viktigste HDO tar med seg videre &
+        «Kommer til å benytte kodebasen videre mot våre
+        leverandører. Så det er nok det viktigste.» &
+        «Kodebase, en god POC.» \\
+        Andre kommentarer eller tilbakemeldinger &
+        --- & --- \\
+        \bottomrule
+    \end{tabular}
+\end{table}

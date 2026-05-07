@@ -1,4 +1,26 @@
 \section{Bruk av kunstig intelligens}
 \label{sec:ai-bruk}
 
-% Bruk av AI-verktøy i prosjektet
+KI-verktøy, primært chat-baserte språkmodeller, ble brukt
+aktivt gjennom prosjektet. Siden ingen på teamet hadde
+erfaring med C\# eller .NET fra før, fungerte KI som et raskt
+oppslagsverk for rammeverkskonsepter som dependency injection,
+\texttt{DelegatingHandler}-mønsteret og multi-stage Dockerfiler.
+
+I implementasjonsarbeidet ble KI brukt til generering av
+rutinekode, diskusjon av eksisterende kode og generering av
+testscenarier ut fra teamets spesifikasjoner. Det mest
+omfattende eksempelet er ende-til-ende-testskriptet omtalt i
+seksjon~\ref{sec:e2e-testing}, som ble manuelt validert mot
+reelle testmiljøer før det ble brukt.
+
+KI-forslag ble ikke akseptert ukritisk. Særlig ved integrasjon
+mot AntMedia og NHN var domenekunnskap om faktisk API-oppførsel
+avgjørende, og forslag som ikke samsvarte med testet oppførsel
+ble forkastet. Arkitektur, designvalg og kjernelogikk er
+resultatet av teamets egne vurderinger.
+
+I rapportarbeidet ble KI brukt til \LaTeX-hjelp og språklig
+gjennomgang av tekst gruppen selv hadde skrevet. KI er ikke
+brukt som faktakilde. Alle faglige påstander er forankret i
+siterte kilder eller egen empirisk testing.
