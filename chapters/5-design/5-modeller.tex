@@ -29,3 +29,68 @@ uten å skjule at verdien må brukes forskjellig avhengig av backend.
 Datamodellene er dermed et kompromiss mellom standardisering og presisjon. De
 skjuler unødvendige forskjeller fra klienten, men lar backend-spesifikke
 forskjeller komme frem der de påvirker hvordan operasjonen faktisk brukes.
+
+Tabell~\ref{tab:model-videoroom}–\ref{tab:model-webrtc} oppsummerer de sentrale
+feltene slik de er modellert i API-et (navngiving følger serialiserte
+JSON-/C\#-egenskaper i implementasjonen).
+
+\begin{table}[htbp]
+\centering
+\begin{threeparttable}
+\caption{Felter i responsmodellen \texttt{VideoRoom}. Noen felt er kun relevante for én videomotor.}
+\label{tab:model-videoroom}
+\begin{tabular}{p{3.6cm} p{10cm}}
+\toprule
+\textbf{Felt} & \textbf{Beskrivelse} \\
+\midrule
+\texttt{Id} & Backend-spesifikk rom-ID før prefiks; prefikses av controller til formen \texttt{\{provider\}:\{id\}} i API-respons. \\
+\texttt{Name} & Romnavn eller emne (NHNs booking-\texttt{subject}). \\
+\texttt{Status} & Normalisert status (livssyklus/drift for rommet). \\
+\texttt{StreamUrl} & HLS-strømme-URL (primært AntMedia). \\
+\texttt{RtmpUrl} & RTMP-ingest-URL (primært AntMedia). \\
+\texttt{WebRtcViewerCount}, \texttt{HlsViewerCount}, \texttt{RtmpViewerCount} & Seertall per protokoll fra AntMedia-broadcast. \\
+\texttt{GuestUrl} / \texttt{HostUrl} & NHNs klare møte-URL-er for gjest og vert etter booking. \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\footnotesize
+\item Feltsettet er ikke strengt symmetrisk mellom motorer—felt som mangler i én backend kan være \texttt{null} eller utelatt i JSON.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{Felter i forespørselmodellen \texttt{CreateRoomRequest}.}
+\label{tab:model-createroom}
+\begin{tabular}{p{3.6cm} p{10cm}}
+\toprule
+\textbf{Felt} & \textbf{Beskrivelse} \\
+\midrule
+\texttt{Provider} & Ønsket videomotor (\texttt{antmedia}, \texttt{nhn}, osv.). Dersom feltet utelates brukes standardleverandør (\texttt{antmedia}) i API-laget. \\
+\texttt{Name} & Valgfritt romnavn; genereres av mellomvaren om det ikke sendes~\cite{hdo_kravspec}. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\begin{threeparttable}
+\caption{Felter i \texttt{WebRtcLinkResponse} for WebRTC-/avspillingslenker.}
+\label{tab:model-webrtc}
+\begin{tabular}{p{3.6cm} p{10cm}}
+\toprule
+\textbf{Felt} & \textbf{Beskrivelse} \\
+\midrule
+\texttt{Token} & AntMedia: kortlivet stream-token; NHN: relevant identifikator eller URL-snippet avhengig av rolle (implementasjonen normaliserer til ett felt). \\
+\texttt{RoomId} & Rom-ID som lenken gjelder for (prefiksert ID etter controller-konvensjon). \\
+\texttt{Type} & Rolle eller intensjon (f.\,eks.\ avspilling vs.\ vert), brukt av AntMedia-tokenflyten; NHN mapper til gjest-/vert-URL. \\
+\texttt{ExpiresAt} & Utløpstid for token der motor gir det (AntMedia); NHN kan bruke en teknisk «ingen utløp»-markør når booking-URL ikke har tilsvarende semantikk. \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\footnotesize
+\item Eksakt mapping fra NHNs \texttt{GuestUrl}/\texttt{HostUrl} til feltene beskrives i implementasjonskapittelet; klienten skal likevel kun forholde seg til ett felles svarobjekt.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}

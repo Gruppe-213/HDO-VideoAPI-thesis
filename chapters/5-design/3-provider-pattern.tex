@@ -21,11 +21,14 @@ skal tolkes.
 
 Den valgte løsningen ble derfor å definere et felles
 \texttt{IVideoProvider}-grensesnitt. Hver videomotor implementeres som en egen
-provider, mens controllerne kun forholder seg til grensesnittet. Designet har
-likhetstrekk med adapter-mønsteret, der et felles grensesnitt brukes til å skjule
-forskjeller mellom underliggende implementasjoner~\cite{refactoringguru_adapter}.
-Riktig provider velges av en egen factory-komponent, slik at controllerne ikke
-trenger å kjenne til de konkrete provider-klassene.
+provider som utgjør et \emph{adapter} mot den konkrete videomotor-API-en:
+adapteren oversetter felles kall (\texttt{CreateRoomAsync}, \texttt{GetRoomAsync},
+osv.) til backend-spesifikke forespørsler og mapper svar til felles
+modeller~\cite{refactoringguru_adapter}. Arkitekturen realiserer dermed
+adapter-mønsteret eksplisitt, med \texttt{IVideoProviderFactory} som velger riktig
+adapter-instans ut fra klientens valg av videomotor. Controllerne opererer kun mot
+\texttt{IVideoProvider} og instansierer ikke konkrete provider-klasser direkte,
+som er den vanlige kombinasjonen adapter + factory~\cite{refactoringguru_adapter}.
 
 Provider-arkitekturen betyr likevel ikke at alle backendene behandles som
 identiske. Enkelte operasjoner har ulik betydning i de to systemene. Start- og

@@ -1,18 +1,17 @@
 \section{Sikkerhetsarkitektur}
 \label{sec:design-sikkerhet}
 
-% Auth-arkitektur BOILER PLATE
-\subsubsection{Autentisering og tilgangskontroll}
+\subsection{Autentisering og tilgangskontroll}
 
 Autentisering i VideoAPI er basert på OAuth2-standarden, noe som var et eksplisitt krav fra oppdragsgiver. Valget av OAuth2 gir en industristandard tilnærming til tilgangskontroll som er vidt støttet og godt dokumentert, og som muliggjør fremtidig integrasjon med andre systemer uten behov for endringer i API-ets grensesnitt.
 
-\paragraph{Valg av Keycloak som identitetsleverandør}
+\subsubsection{Valg av Keycloak som identitetsleverandør}
 
 Som OAuth2-leverandør ble Keycloak valgt. Bakgrunnen for dette valget er at HDO allerede benytter Keycloak som identity provider i sin eksisterende infrastruktur. Ved å ta i bruk det samme systemet unngikk gruppen å innføre ny teknologi i driftsmiljøet, og oppdragsgiver kan selv ta over og tilpasse konfigurasjonen i etterkant uten å måtte sette seg inn i et ukjent verktøy.
 
 OAuth2-flyten som er implementert er \textit{Client Credentials Grant}, også kjent som maskin-til-maskin-autentisering (M2M). Denne flyten er passende for et API uten sluttbrukerpålogging, der klientsystemer autentiserer seg med en klient-ID og klienthemmelighet for å hente et JWT-token. Tokenet brukes deretter som \texttt{Bearer}-token i alle påfølgende API-kall.
 
-\paragraph{Designvalg: minimal claim-struktur}
+\subsubsection{Minimal claim-struktur}
 
 Et bevisst designvalg i autentiseringsarkitekturen er å holde claim-strukturen enkel. Det er kun én claim som kreves for tilgang: \texttt{api\_access = true}. Det er ikke benyttet OAuth2-scopes.
 
@@ -20,10 +19,20 @@ Denne forenklingen er begrunnet i prosjektets kontekst: autentiseringsoppsettet 
 
 Keycloak-klienter som skal ha tilgang til API-et må konfigureres med en protokollmapper som legger til denne claimet i tokens som utstedes. Selve policy-sjekken skjer globalt i API-ets autorisasjonsmiddleware, slik at alle beskyttede endepunkter automatisk krever gyldig token med riktig claim uten at dette må defineres eksplisitt per endepunkt.
 
-\paragraph{Validering og sikkerhetsnivå}
+\subsubsection{Validering og sikkerhetsnivå}
 
 JWT-tokens valideres mot Keycloaks JWKS-endepunkt, som betyr at signaturen verifiseres med Keycloaks offentlige nøkkel ved hvert kall. Audience- og issuer-validering er i det nåværende oppsettet deaktivert, da disse parameterne vil variere avhengig av hvilken Keycloak-instans oppdragsgiver velger å benytte. Signaturvalidering sikrer at tokens ikke kan forfalskes, og at kun tokens utstedt av den konfigurerte Keycloak-realmen godtas.
 
-For å beskytte token-endepunktet mot misbruk er det satt opp en skjerpet hastighetsbegrensning på 10 forespørsler per minutt per IP-adresse, sammenlignet med den generelle grensen på 60 forespørsler per minutt for øvrige endepunkter. Dette reduserer risikoen for credential-stuffing-angrep mot autentiseringsendepunktet.
+\subsubsection{Utvalgte angrep og kontroller}
 
-Samlet utgjør autentiseringsdesignet en pragmatisk løsning som oppfyller kravene fra oppdragsgiver, tilpasser seg eksisterende infrastruktur, og legger til rette for at videre utvikling og herding kan skje på oppdragsgivers egne premisser.
+\textit{Token-tyveri.} Dersom et gyldig Bearer-token kommer på avveie, kan angriperen bruke det til API-et inntil token utløper. Tiltak er kort levetid på utstedte access-token (styrt av Keycloak) og signaturvalidering slik at tilfeldig fabrikkerte tokens avvises. Uten streng issuer/ og audience-validering er det likevel viktig å beskytte klient-\emph{secret} og å rotere nøkler i drift; dette er videre diskutert i avsnitt~\ref{sec:trusselmodell}.
+
+\textit{Replay av tokens.} Bearer-token sendes over HTTPS og kan teoretisk gjenbrukes av en som har avlyttet eller tilegnet seg samme token (samme problem som ved tyveri). Det er ikke innført egne anti-replay-mekanismer (f.\,eks.\ engangs-\texttt{jti}-tabell); risiko reduseres først og fremst gjennom TLS, kort levetid og hemmelighold av token.
+
+\textit{Brute-force mot token-endepunktet.} For å beskytte \texttt{POST /auth/token} mot forsøk på å gjette klientlegitimasjon er det satt opp skjerpet hastighetsbegrensning på 10 forespørsler per minutt per IP-adresse, sammenlignet med den generelle grensen på 60 forespørsler per minutt for øvrige endepunkter. Dette er et eksplisitt tiltak mot credential-stuffing og ressursuttømming mot autentiseringslaget.
+
+\textit{Tilgang på tvers av rom (IDOR-lignende risiko).} Autorisasjon er flat: enhver klient med gyldig JWT og \texttt{api\_access} har samme rettigheter. Rom-ID-er er ikke personlige hemmeligheter i seg selv—kjenner en klient en annens prefikserte rom-ID, kan den i utgangspunktet kalle rom-endepunktene med mindre det hindres utenfor VideoAPI (nettverkssegmentering, egne policies i API-gateway, eller utvidet modell med eierskap per klient). Slik rom-spesifikk isolasjon mellom ulike integrasjonsparter er \emph{utenfor} proof-of-conceptets omfang, men er dokumentert her som bevisst avgrensning.
+
+\textit{Logging av sensitive verdier.} Det er et eksplisitt krav i implementasjonen at JWT-tokens, API-nøkler og pasientinformasjon ikke loggføres (se avsnitt~\ref{sec:errors}); feilmeldinger er også utformet slik at logger primært bærer ressurs-ID-er og tjenestenavn.
+
+Samlet utgjør autentiseringsdesignet en pragmatisk løsning som oppfyller kravene fra oppdragsgiver, tilpasser seg eksisterende infrastruktur, og legger til rette for at videre utvikling og herding kan skje på oppdragsgivers egne premisser. En STRIDE-basert oppsummering av trusler og mitigasjoner finnes i avsnitt~\ref{sec:trusselmodell}.

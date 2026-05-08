@@ -1,4 +1,10 @@
 \section{Sekvensdiagrammer}
 \label{sec:sekvensdiagram}
 
+Figur~\ref{fig:sekvens-opprette-rom} viser opprettelse av videorom ut fra klientens
+perspektiv. Flyten forutsetter at klienten allerede har hentet et gyldig
+Bearer-token fra \texttt{/auth/token}, som beskrevet i
+avsnitt~\ref{sec:design-sikkerhet}; alle romkall i diagrammet antar gyldig JWT med
+påkrevd claim.
+
 \input{figures/fig-sekvens-opprette-rom}

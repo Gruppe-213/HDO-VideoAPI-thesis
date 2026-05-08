@@ -33,7 +33,7 @@ public async Task<IActionResult> CreateRoom([FromBody] CreateRoomRequest request
     if (string.IsNullOrWhiteSpace(request.Name))
         request.Name = Guid.NewGuid().ToString();
 
-    var providerKey = (request.Provider ?? "antmedia").ToLowerInvariant();
+    var providerKey = (request.Provider != null ? request.Provider : "antmedia").ToLowerInvariant();
     var provider = factory.GetProvider(providerKey);
     var room = await provider.CreateRoomAsync(request, HttpContext.RequestAborted);
 
