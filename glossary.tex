@@ -57,7 +57,7 @@
 
 \newglossaryentry{mellomvare}{
     name={mellomvare},
-    description={Programvarelag som befinner seg mellom to systemer og håndterer kommunikasjon, oversettelse eller felles funksjonalitet}
+    description={Programvarelag som befinner seg mellom to systemer og håndterer kommunikasjon, oversettelse eller felles funksjonalitet. I denne rapporten: laget som eksponerer ett felles API mot klientene og videresender forespørsler til riktig videomotor}
 }
 
 \newglossaryentry{provider-laget}{
@@ -72,15 +72,15 @@
 
 \newglossaryentry{provider}{
     name={provider},
-    description={Komponent som implementerer integrasjon mot en spesifikk videomotor via \texttt{IVideoProvider}-grensesnittet}
+    description={Komponent som representerer rollen som integrasjonspunkt mot én spesifikk videomotor, implementert via \texttt{IVideoProvider}-grensesnittet}
 }
 
 \newglossaryentry{provider-adapter}{
     name={provider-adapter},
-    description={Konkret implementasjon av en provider som oversetter mellom VideoAPI sitt interne grensesnitt og en spesifikk videomotors protokoll}
+    description={Konkret implementasjon av en provider som oversetter mellom VideoAPI sitt interne grensesnitt og en spesifikk videomotors API og dataformat}
 }
 
 \newglossaryentry{broadcast}{
     name={broadcast},
-    description={AntMedia-terminologi for en videostrøm eller et videorom}
+    description={AntMedia-terminologi for en videostrøm eller et videorom. Brukes i rapporten som synonym for «videorom» der konteksten er AntMedia-spesifikk}
 }
