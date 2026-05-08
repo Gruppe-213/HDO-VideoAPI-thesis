@@ -18,6 +18,8 @@
 \newacronym{rest}{REST}{Representational State Transfer}
 \newacronym{cicd}{CI/CD}{Continuous Integration/ Continuous Delivery}
 \newacronym{vod}{VoD}{Video on Demand}
+\newacronym{ki}{KI}{Kunstig intelligens}
+\newacronym{http}{HTTP}{Hypertext Transfer Protocol}
 
 % ============================================================================
 % FAGTERMER - kun prosjektspesifikke
@@ -28,6 +30,13 @@
     description={API basert på Representational State Transfer (REST), der ressurser aksesseres via standard HTTP-metoder og unike URL-er}
 }
 
+\newglossaryentry{keycloak}{
+    name={Keycloak},
+    description={Åpen kildekode-løsning for identitets- og tilgangsstyring som 
+    støtter OAuth 2.0 og OpenID Connect. Benyttes som 
+    autorisasjonsserver for utstedelse av tilgangstokener til VideoAPI}
+}
+
 \newglossaryentry{prosess-intern-state}{
     name={prosess-intern state},
     description={Data som kun lever i applikasjonsprosessens arbeidsminne og ikke persisteres til ekstern lagring, og derfor går tapt ved omstart av tjenesten}
@@ -35,7 +44,9 @@
 
 \newglossaryentry{demo-frontend}{
     name={demo-frontend},
-    description={}
+    description={En forenklet webapplikasjon utviklet for å demonstrere og 
+    teste funksjonaliteten til VideoAPI. Er ikke ment for produksjonsbruk, 
+    men fungerer som et visuelt grensesnitt mot mellomvare-APIet}
 }
 
 \newglossaryentry{teknologisk-innlåsing}{
@@ -85,7 +96,125 @@
     description={Konkret implementasjon av en provider som oversetter mellom VideoAPI sitt interne grensesnitt og en spesifikk videomotors API og dataformat}
 }
 
-\newglossaryentry{broadcast}{
-    name={broadcast},
-    description={AntMedia-terminologi for en videostrøm eller et videorom. Brukes i rapporten som synonym for «videorom» der konteksten er AntMedia-spesifikk}
+\newglossaryentry{broadcast-service}{
+    name={Broadcast Service},
+    description={AntMedia-tjeneste for administrasjon av direktestrømmer og 
+    videorom. Eksponerer endepunkter for oppretting, administrasjon og 
+    avslutning av strømmer}
+}
+
+\newglossaryentry{vod-service}{
+    name={\gls{vod} Service},
+    description={AntMedia-tjeneste som håndterer forhåndsinnspilt videoinnhold. 
+    Eksponerer endepunkter for opplasting, administrasjon og avspilling av 
+    lagrede videoressurser}
+}
+
+\newglossaryentry{management-service}{
+    name={Management Service},
+    description={AntMedia-tjeneste for serverkonfigurasjon og systemadministrasjon. 
+    Eksponerer endepunkter for administrasjon av serverinnstillinger og 
+    driftsparametere}
+}
+
+\newglossaryentry{sha256}{
+    name={HMAC-SHA256},
+    description={Kryptografisk meldingsautentiseringskode som kombinerer en 
+    hemmelig nøkkel med SHA-256-hashfunksjonen for å verifisere både 
+    dataintegritet og avsenderautentisitet}
+}
+
+\newglossaryentry{password-grant}{
+    name={password grant},
+    description={OAuth 2.0-flyt der klienten sender brukernavn og passord 
+    direkte til autorisasjonsserveren og mottar et tilgangstoken i retur}
+}
+
+\newglossaryentry{token}{
+    name={token},
+    description={Tidsbegrenset dataobjekt som utstedes av en autorisasjonsserver 
+    og benyttes som bevis på at innehaveren har fått tilgang til en bestemt 
+    ressurs eller tjeneste}
+}
+
+\newglossaryentry{sekvensiell}{
+    name={sekvensiell utviklingsmodell},
+    description={Utviklingsmodell der prosjektfasene gjennomføres i fast 
+    rekkefølge, én etter én, uten tilbakevending til tidligere faser}
+}
+
+\newglossaryentry{fossefallsmodellen}{
+    name={fossefallsmodellen},
+    description={Sekvensiell utviklingsmodell der krav fastlegges ved oppstart 
+    og prosjektet gjennomføres fase for fase — fra kravspesifikasjon via 
+    design og implementasjon til testing og levering — uten iterasjon}
+}
+
+\newglossaryentry{iterativ}{
+    name={iterativ arbeidsform},
+    description={Utviklingstilnærming der arbeidet deles inn i kortere sykluser, 
+    der hver syklus produserer kjørbar kode og gir grunnlag for justering av 
+    krav og prioriteringer før neste syklus}
+}
+
+\newglossaryentry{scrum}{
+    name={scrum},
+    description={Agilt rammeverk for iterativ programvareutvikling organisert 
+    rundt kortvarige sprinter, faste seremonier (planlegging, daglig stand-up, 
+    retrospektiv) og løpende backlog-prioritering \cite{scrumguide}}
+}
+
+\newglossaryentry{git}{
+    name={Git},
+    description={Distribuert versjonskontrollsystem der hver utvikler har en 
+    fullstendig kopi av prosjekthistorikken lokalt. Støtter parallell utvikling 
+    via branching og brukes i dette prosjektet for kildekodehåndtering og 
+    samarbeid via GitHub}
+}
+
+\newglossaryentry{pull-request}{
+    name={pull-request},
+    description={Forespørsel om å flette en ferdig utviklet kodegren inn i 
+    an annen. Brukes som kontrollpunkt for kodegjennomgang før endringer 
+    aksepteres i prosjektets felles kodebase}
+}
+
+\newglossaryentry{ci-pipeline}{
+    name={CI-pipeline},
+    description={Automatisert sekvens av steg som kjøres ved endringer i 
+    kodebasen, typisk bygging, testing og distribusjon. I dette prosjektet 
+    brukt via GitHub Actions for å verifisere at koden kompilerer og at 
+    tester passerer ved hver pull request}
+}
+
+\newglossaryentry{regresjonsfeil}{
+    name={regresjonsfeil},
+    description={Feil som oppstår i tidligere fungerende funksjonalitet som 
+    følge av nye kodeendringer. Avdekkes typisk av automatiserte tester som 
+    kjøres ved hver endring i kodebasen}
+}
+
+\newglossaryentry{grenbasert}{
+    name={grenbasert arbeidsflyt},
+    description={Versjonskontrollpraksis der hver oppgave eller funksjonalitet 
+    utvikles i en egen gren, isolert fra hovedgrenen}
+}
+
+\newglossaryentry{LL-HLS}{
+    name={LL-HLS},
+    description={Low-Latency HTTP Live Streaming — en utvidelse av HLS-protokollen 
+    utviklet av Apple for å redusere forsinkelse i videostrømming til under tre sekunder}
+}
+
+\newglossaryentry{LL-DASH}{
+    name={LL-DASH},
+    description={Low-Latency Dynamic Adaptive Streaming over HTTP — en utvidelse 
+    av DASH-protokollen med redusert forsinkelse, standardisert av MPEG}
+}
+
+\newglossaryentry{miljøvar}{
+    name={miljøvariabel},
+    description={Navngitt variabel definert i kjøretidsmiljøet utenfor 
+    applikasjonskoden, brukt til å styre konfigurasjon som API-nøkler, 
+    tilkoblingsstrenger og tjenesteparametere uten å hardkode verdier i kildekoden}
 }
