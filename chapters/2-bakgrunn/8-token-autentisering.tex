@@ -1,0 +1,12 @@
+\section{Tokenbasert autentisering (OAuth 2.0 + JWT)}
+\label{sec:token-autentisering-oauth-jwt}
+
+OAuth 2.0 er et autorisasjonsrammeverk som lar en klient få begrenset tilgang til
+en tjeneste på vegne av en ressurseier \cite{rfc6749}. I maskin-til-maskin-sammenheng
+benyttes \texttt{client\_credentials}-flyten, der klienten autentiserer seg direkte
+mot en autorisasjonsserver og mottar et tilgangstoken uten brukerinteraksjon.
+
+JSON Web Token (JWT) er et kompakt, URL-trygt format for å overføre påstander mellom
+parter som et signert objekt \cite{rfc7519}. Tokenet består av tre deler: header,
+payload og signatur. I VideoAPI valideres JWT-tokens utstedt av Keycloak på hvert
+beskyttet endepunkt, og tilgang krever at tokenet inneholder \texttt{api\_access}-påstanden.

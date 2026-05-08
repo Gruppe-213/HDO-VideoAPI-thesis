@@ -1,0 +1,13 @@
+\section{Mellomvare og REST}
+\label{sec:mellomvare-rest}
+
+Mellomvare er programvare som fungerer som et kommunikasjonslag mellom applikasjoner,
+databaser og operativsystemer. I stedet for at hver applikasjon må koble seg direkte til
+alle andre, kobler de seg til mellomvaren, som håndterer ruting, transformasjon og
+sikkerhet på tvers av systemene \cite{azure_middleware}.
+
+\gls{rest} er en arkitekturstil for distribuerte systemer,
+definert av Roy Fielding i hans doktoravhandling fra 2000. REST bygger på et sett
+constraints: klient-tjener-separasjon, tilstandsløshet, og et uniformt grensesnitt
+basert på ressursidentifikasjon via URI-er \cite{wiki_rest}. VideoAPI følger disse
+prinsippene ved å eksponere videorom som ressurser over HTTP.

@@ -1,0 +1,13 @@
+\section{Observability med Prometheus og Grafana}
+\label{sec:observability-prometheus-grafana}
+
+Observability handler om evnen til å forstå tilstanden til et system basert på
+data det eksponerer. Prometheus er et åpen kildekode-verktøy for systemovervåkning
+som samler inn og lagrer metrikker som tidsseriedata, identifisert med metrikknavn
+og nøkkel-verdi-par kalt labels \cite{prometheus_docs}. Innsamling skjer via en
+pull-modell der Prometheus periodisk henter metrikker fra instrumenterte tjenester.
+
+Grafana brukes til å visualisere disse metrikkene gjennom dashboards sammensatt av
+paneler som spør mot én eller flere datakilder \cite{grafana_docs}. I VideoAPI
+eksponerer applikasjonen metrikker via \texttt{prometheus-net}, som Prometheus
+skraper og Grafana visualiserer i egne dashboards for drifts- og sikkerhetsovervåkning.

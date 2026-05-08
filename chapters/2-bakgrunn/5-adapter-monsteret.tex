@@ -1,0 +1,9 @@
+\section{Adapter-mønsteret}
+\label{sec:adapter-monsteret}
+
+Adapter-mønsteret er ett av de klassiske strukturelle designmønstrene beskrevet av
+Gamma et al. Det løser problemet der to grensesnitt er inkompatible ved å innføre
+et mellomliggende adapter-lag som oversetter kall fra klienten til det formatet
+mottakeren forventer \cite{wiki_adapter}. I VideoAPI realiseres dette gjennom
+\texttt{IVideoProvider}-grensesnittet, der hver provider-implementasjon fungerer som
+en adapter mot sin respektive videomotor.

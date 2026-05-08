@@ -4,10 +4,17 @@
 Dette kapittelet beskriver konteksten VideoAPI ble utviklet i. Først
 introduseres oppdragsgiver HDO og samfunnsoppdraget løsningen inngår i.
 Deretter beskrives de to eksisterende videoløsningene som danner det
-tekniske utgangspunktet for prosjektet, før de to underliggende
-videomotorene AntMedia Server og NHN Video gjennomgås hver for seg.
+tekniske utgangspunktet for prosjektet, før videomotorene AntMedia Server
+og NHN Video gjennomgås hver for seg. Til slutt innføres relevant teknisk
+bakgrunn: mellomvare og REST, adapter-mønsteret, containerisering og
+tilstandsløshet, observability med Prometheus og Grafana, samt tokenbasert
+autentisering med OAuth~2.0 og JWT.
 
-\input{chapters/2-bakgrunn/1-hdo-kontekst}          % 2.1 HDO og kontrollrom
-\input{chapters/2-bakgrunn/2-eksisterende}          % 2.2 Eksisterende videoløsninger
-\input{chapters/2-bakgrunn/3-videomotorer}          % 2.3 Videomotorer (AntMedia + NHN)
-\input{chapters/2-bakgrunn/4-teoretisk-grunnlag}          % 2.3 Videomotorer (AntMedia + NHN)
+\input{chapters/2-bakgrunn/1-hdo-kontekst}
+\input{chapters/2-bakgrunn/2-eksisterende}
+\input{chapters/2-bakgrunn/3-videomotorer}
+\input{chapters/2-bakgrunn/4-mellomvare-rest}
+\input{chapters/2-bakgrunn/5-adapter-monsteret}
+\input{chapters/2-bakgrunn/6-containerisering-statelessness}
+\input{chapters/2-bakgrunn/7-observability}
+\input{chapters/2-bakgrunn/8-token-autentisering}
