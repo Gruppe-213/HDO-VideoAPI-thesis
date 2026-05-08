@@ -1,22 +1,21 @@
-\subsection{Bærekraft}
+\section{Bærekraft}
 \label{sec:bærekraft}
 
-NTNUs emnebeskrivelse krever at bacheloroppgaven reflekterer over oppgavens
-bærekraftsrelevans med utgangspunkt i FNs bærekraftsmål.
+VideoAPI har først og fremst bærekraftsrelevans gjennom sosial og
+organisatorisk nytte. Løsningen inngår i akuttmedisinsk infrastruktur der
+video kan brukes som beslutningsstøtte for AMK- og legevaktoperatører.
+Dette knytter prosjektet til SDG~3, god helse og livskvalitet, men
+prosjektet har ikke målt klinisk effekt og bør derfor ikke overdrive denne
+koblingen.
 
-VideoAPI inngår i akuttmedisinsk infrastruktur der videostrøm brukes som
-beslutningsstøtte for AMK- og legevaktoperatører. Dette knytter prosjektet
-til SDG~3 (God helse og livskvalitet) ved at standardisert og vedlikeholdbar
-tilgang til videoløsningene støtter rask og presis respons i akutte
-situasjoner. Plugin-arkitekturen reduserer teknologisk innlåsing og gir HDO
-større fleksibilitet overfor leverandører, noe som er relevant for SDG~9
-(Industri, innovasjon og infrastruktur). Personvernhensyn — ingen lyd, bilde
-eller pasientopplysninger lagres, og alle endepunkter er autentisert — er i
-tråd med kravene til kritisk helseinfrastruktur under SDG~16 (Velfungerende
-institusjoner).
+Plugin-arkitekturen kan også bidra til mer vedlikeholdbar digital
+infrastruktur. Ved å redusere direkte kobling mellom klienter og
+videoleverandører får HDO større fleksibilitet dersom leverandører eller
+teknologi endres. Dette er relevant for SDG~9, industri, innovasjon og
+infrastruktur.
 
-Stateless arkitektur og containerisering muliggjør effektiv ressursbruk ved
-variabel last. Videostrømming har generelt høy energi- og båndbreddekostnad,
-men dette ligger utenfor mellomvarens kontrollsfære. VideoAPI introduserer
-et ekstra nettverkshopp, men overhead fra API-kallet er neglisjerbart
-sammenlignet med selve videostrømmingen.
+Samtidig introduserer løsningen et nytt driftspunkt som må sikres,
+overvåkes og vedlikeholdes. Videostrømming har også energi- og
+båndbreddekostnader som ligger utenfor mellomvarens kontroll. VideoAPI kan
+derfor ikke beskrives som en direkte miljøforbedring, men som et tiltak
+for mer robust og vedlikeholdbar digital infrastruktur.
