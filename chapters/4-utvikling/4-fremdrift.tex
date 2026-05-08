@@ -37,7 +37,7 @@
 
 % \subsection{Resultat}
 
-% Milepælene M1 gjennom M5 ble nådd innenfor prosjektperioden. Alle funksjonelle kjernekrav fra HDO ble implementert: oppretting, henting og sletting av videorom (F1.1–F1.3), start og stopp av videostrøm (F1.4–F1.5), OAuth~2.0-autentisering (S1.1) og romtokens per provider (S1.2). Infrastrukturkravene om containerisering og stateless design (I1.1–I1.2) ble oppfylt, og observability-kravene om strukturert logging, helseendepunkter og Prometheus-metrikker (O1.1–O1.3) er på plass. Testsuiten teller 166 automatiserte tester fordelt på enhets- og integrasjonstester.
+% Milepælene M1 gjennom M5 ble nådd innenfor prosjektperioden. Alle funksjonelle kjernekrav fra HDO ble implementert: oppretting, henting og sletting av videorom (F1.1–F1.3), start og stopp av videostrøm (F1.4–F1.5), OAuth~2.0-autentisering (S1.1) og romtokens per provider (S1.2). Infrastrukturkravene om containerisering og stateless design (I1.1–I1.2) ble oppfylt, og observability-kravene om strukturert logging, helseendepunkter og Prometheus-metrikker (O1.1–O1.3) er på plass. Testsuiten på leveransegrenen teller 133 automatiserte tester fordelt på enhets- og integrasjonstester; ved \texttt{dotnet test} på den separate valideringsgrenen \texttt{feature/provider-validation} gjaldt et utvidet testsett med 166 automatiserte tester (arkitekturvalidering).
 
 % Ett område ble nedprioritert som følge av tidspresset var at løsningen kun støtter Keycloak som identitetsleverandør. Generell OAuth~2.0-støtte mot vilkårlige utstedere ble vurdert som nyttig, men falt utenfor omfanget. Dette er dokumentert som kandidat for videre arbeid i delkapittel. ~\ref{sec:videre-arbeid}.
 
@@ -116,7 +116,12 @@ kjernekrav fra HDO ble implementert: oppretting, henting og sletting av videorom
 Infrastrukturkravene om containerisering og stateless design (I1.1–I1.2) ble oppfylt,
 og observability-kravene om strukturert logging, helseendepunkter og
 Prometheus-metrikker (O1.1–O1.3) er på plass~\cite{hdo_kravspec}.
-Testsuiten teller 166 automatiserte tester fordelt på enhets- og integrasjonstester.
+Testsuiten på leveransegrenen teller 133 automatiserte tester fordelt på enhets-
+og integrasjonstester.
+Ved kjøring av \texttt{dotnet test} på den separate valideringsgrenen
+\texttt{feature/provider-validation} passerte et utvidet testsett på 166 automatiserte
+tester som del av arkitekturvalideringen med mock- og Daily-provider (ikke del av
+leveransen).
 
 Det eneste området som ble nedprioritert som følge av tidspresset er at løsningen
 kun støtter Keycloak som identitetsleverandør. Generell OAuth~2.0-støtte mot vilkårlige

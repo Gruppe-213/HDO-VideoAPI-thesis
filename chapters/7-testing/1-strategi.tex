@@ -4,8 +4,12 @@ Testarbeidet var organisert i tre nivåer: enhetstester for isolerte
 komponenter, integrasjonstester for HTTP-laget, og manuell testing mot
 faktiske testmiljøer. Alle automatiserte tester kjørte via GitHub Actions
 ved push til \texttt{main}, \texttt{develop} og feature-brancher, samt ved
-pull requests. Suiten besto av 166 tester totalt, og hele suiten passerte
-ved hver kjøring.
+pull requests.
+Den ordinære testsuiten på leveransegrenen omfattet 133 tester, og alle passerte ved
+hver kjøring.
+På den separate valideringsgrenen \texttt{feature/provider-validation} ble testsettet
+utvidet til 166 tester for arkitekturvalidering (se avsnitt~\ref{sec:provider-validering});
+dette inngår ikke i hovedleveransen mot HDO.
 
 Testrammeverket var xUnit med Moq for mocking. Eksterne tjenester
 (AntMedia, NHN Video og Keycloak) var fullstendig mocket i alle

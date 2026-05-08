@@ -46,7 +46,12 @@ legges til uten endringer i controller-laget eller API-kontrakten.
 branchene.
 
 Alle branchene ble bygget og testet lokalt med \texttt{dotnet build} og
-\texttt{dotnet test}. Den samlede valideringsbranchen ble også kjørt på
+\texttt{dotnet test}.
+På valideringsgrenen \texttt{feature/provider-validation} ga \texttt{dotnet test}
+166 passerende automatiserte tester,
+mot 133 på leveransegrenen; økningen skyldtes tester for de to tilleggsproviderne,
+relatert konfigurasjon og DI-/factory-registrering --- ikke ytterligere krav fra HDO.
+Den samlede valideringsbranchen ble også kjørt på
 VM med Docker, der frontend bekreftet at de nye providerne kunne nås via
 det samme API-et.
 

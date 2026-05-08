@@ -1,8 +1,31 @@
 \section{Testresultater}
 \label{sec:testresultater}
 
-Testsuiten består av 166 automatiserte tester, og alle passerer i
-CI-pipeline. Pipeline kjører \texttt{dotnet test}, men samler ikke inn
+Den ordinære testsuiten på leveransegrenen besto av 133 automatiserte tester, og alle
+passerte ved kjøring av \texttt{dotnet test}.
+I den separate valideringsgrenen \texttt{feature/provider-validation} ble testsuiten
+utvidet til 166 tester.
+De ekstra testene dekker \texttt{MockVideoProvider}, \texttt{DailyProvider} og
+tilhørende DI-/factory-oppsett.
+Siden disse providerne ble brukt til arkitekturvalidering og ikke inngår i
+hovedleveransen, rapporteres 133 tester som hovedtallet for leveransen.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{ll}
+\toprule
+\textbf{Gren / bruksområde} & \textbf{Passerende tester (\texttt{dotnet test})} \\
+\midrule
+Leveransegren (HDO-leveranse) & 133 \\
+Separat valideringsgren: arkitektur med mock-/daily-provider & 166 \\
+\bottomrule
+\end{tabular}
+\caption{Antall passerende tester ved \texttt{dotnet test} på leveransegrenen og på den separate valideringsgrenen brukt for arkitekturvalidering.}
+\label{tab:testtall-leveranse}
+\end{table}
+
+På leveransegrenen kjørte CI-pipeline \texttt{dotnet test}, og alle 133 tester
+passerte; pipeline samlet ikke inn
 coverage. Linje- og branch-dekning ble derfor målt lokalt med Coverlet
 (\texttt{--collect:"XPlat Code Coverage"}).
 
