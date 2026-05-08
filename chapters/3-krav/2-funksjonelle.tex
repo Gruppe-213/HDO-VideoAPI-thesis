@@ -51,11 +51,13 @@ dokumentert.
 Krav F1.4 og F1.5 innebærer at mellomvaren skal tilby operasjoner for 
 å starte og stoppe videostrømming for et eksisterende videorom.
 
-Kravene tolkes som backend-avhengige fordi videomotorene har ulike 
-domenemodeller. Dersom en videomotor støtter eksplisitt start og 
-stopp av strøm, skal mellomvaren videresende operasjonen. Dersom en 
-videomotor ikke har tilsvarende operasjon, skal API-et returnere en 
-tydelig og dokumentert feilrespons.
+HDOs kravspesifikasjon~\cite{hdo_kravspec} angir ikke eksplisitt at 
+F1.4 og F1.5 er backend-avhengige. I denne oppgaven tolkes kravene 
+likevel som backend-avhengige fordi videomotorene har ulike 
+domenemodeller og ulik støtte for eksplisitt start og stopp av strøm. 
+Dersom en videomotor støtter slike operasjoner, skal mellomvaren 
+videresende dem. Dersom en videomotor ikke har tilsvarende operasjon, 
+skal API-et returnere en tydelig og dokumentert feilrespons.
 
 Kravene evalueres ved å teste start- og stoppoperasjoner for de 
 videomotorene som støtter dette, og ved å kontrollere at ikke-støttede 
