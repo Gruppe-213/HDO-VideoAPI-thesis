@@ -1,118 +1,48 @@
 \section{Ende-til-ende-testing}
 \label{sec:e2e-testing}
 
-Som et supplement til de automatiserte testene ble det 
-utviklet et ende-til-ende-testskript som kjøres mot det 
-deployede systemet på HDOs OpenStack-VM mot faktiske 
-AntMedia- og NHN-testmiljøer. Skriptet ble generert med 
-AI-assistanse basert på teamets spesifikasjon av 
-testscenarier og forventet systemoppførsel, og ligger 
-i prosjektets repositorium under \texttt{e2e-test.sh}.
-Genereringen foregikk i flere iterasjoner der teamet 
-reviderte og validerte hver fase manuelt mot reelle 
-responsformater fra HDOs testmiljøer før koden ble 
-committet. Assertion-logikken ble spesifikt kontrollert 
-mot dokumenterte HTTP-statuskoder fra AntMedia og NHN, 
-og faser som ikke samsvarte med observert API-oppførsel 
-ble forkastet og regenerert.
+Som supplement til enhets- og integrasjonstestene ble det laget et
+ende-til-ende-testskript som kjøres mot det deployede systemet på HDOs
+OpenStack-VM. Skriptet tester VideoAPI mot faktiske AntMedia- og
+NHN-testmiljøer, og ligger i prosjektets repositorium under
+\texttt{scripts/e2e-test.sh}.
 
-Skriptet er organisert i ti faser som dekker 
-infrastruktur, autentisering, full livssyklus for begge 
-backends, feilhåndtering, rate limiting, samtidighet, 
-vedvarende last og metrikk-integritet. Hver fase bruker 
-assertions på HTTP-statuskoder, responsbody-innhold og 
-Prometheus-metrikker.
+Skriptet dekker autentisering, romlivssyklus for begge backends,
+feilhåndtering, rate limiting, samtidighet, vedvarende funksjonell last
+og Prometheus-metrikker. Hver fase bruker assertions på HTTP-statuskoder,
+utvalgte responsfelt og forventede metrikkendringer.
 
-Et eksempel fra fase 3 viser hvordan AntMedia-livssyklusen 
-testes — romopprettelse, WebRTC-lenke og verifisering av 
-responsfelt:
+For AntMedia testes blant annet opprettelse av rom, generering av
+WebRTC-lenke, start og stopp av strøm, henting av rominformasjon og
+sletting av rom. For NHN testes opprettelse, henting og sletting av rom,
+samt at operasjoner som ikke støttes av NHN, for eksempel start, stopp og
+setting av romtoken, returnerer HTTP~501.
 
-\begin{lstlisting}[language=bash, caption={E2E-test — AntMedia romopprettelse og WebRTC-lenke}]
-R=$(api "POST" "/api/rooms" '{"provider":"antmedia","name":"E2E-Room"}')
-assert_eq "create AM room -> 201" 201 "$(status "$R")"
-ID=$(id_of "$R")
-assert_has "response has id" '"id":"antmedia:' "$(body "$R")"
+Skriptet ble utviklet med KI-assistanse, men testgrunnlaget ble ikke
+akseptert ukritisk. Teamet kontrollerte assertions mot faktiske
+HTTP-statuskoder og responsfelt observert i HDOs testmiljøer. Faser som
+ikke samsvarte med reell API-oppførsel ble endret eller forkastet før
+skriptet ble committet. Validiteten kommer derfor fra gjennomkjøring mot
+testmiljøene, ikke fra KI-genereringen alene.
 
-R=$(api "POST" "/api/rooms/$ID/webrtc-link" '{"type":"publish"}')
-assert_eq "publish link -> 200" 200 "$(status "$R")"
-B=$(body "$R")
-assert_has "has tokenId" '"tokenId"' "$B"
-assert_has "has streamId" '"streamId"' "$B"
-assert_future "$ID publish" "$(numfield "expiresAt" "$B")"
-\end{lstlisting}
+Skriptet kjører i omtrent 40 minutter. Etter gjennomføring rydder det opp
+opprettede rom og kontrollerer at relevante Prometheus-gauger går tilbake
+til forventet verdi. Fasen med vedvarende last gir funksjonell validering
+over tid, men lagrer ikke p95, p99, gjennomstrømming eller maksimalt
+antall samtidige rom som egne resultater. Dette er derfor ikke en
+fullverdig lasttest, men en funksjonell stabilitetstest over tid.
 
-NHN-fasen verifiserer at ikke-støttede operasjoner 
-returnerer HTTP~501 som forventet:
+I tillegg ble API-et verifisert manuelt med \texttt{HDO-VideoAPI.http}
+og ved behov med Postman. Frontend-demoen ble også brukt som manuell
+ende-til-ende-verifisering: gjennom frontend ble det kontrollert at rom
+kunne opprettes, vises og slettes via samme API for begge backends, og at
+backend-spesifikke svar som NHN-lenker og AntMedia-status ble presentert
+riktig for brukeren. Prometheus og Grafana ble verifisert manuelt ved å sammenligne hendelsene
+fra E2E-kjøringen med metrikkendringer i dashboardene.
 
-\begin{lstlisting}[language=bash, caption={E2E-test — NHN 501-responser}]
-R=$(api "POST" "/api/rooms/$ID/start")
-assert_eq "NHN start -> 501" 501 "$(status "$R")"
+Ende-til-ende-testingen viste at VideoAPI kunne kjøres mot begge
+testmiljøene og håndtere de viktigste romoperasjonene gjennom samme API.
+Den viste også at backend-spesifikke begrensninger, særlig NHNs manglende
+støtte for start, stopp og romtoken, ble håndtert med forventede
+HTTP~501-responser.
 
-R=$(api "POST" "/api/rooms/$ID/stop")
-assert_eq "NHN stop -> 501" 501 "$(status "$R")"
-
-R=$(api "POST" "/api/rooms/$ID/token" '{"token":"ignored"}')
-assert_eq "NHN setToken -> 501" 501 "$(status "$R")"
-\end{lstlisting}
-
-Skriptet kjører i om lag 40 minutter og avsluttes med 
-opprydding av alle opprettede rom og verifisering av at 
-Prometheus-gauger nullstilles. Fullstendig kildekode 
-ligger i prosjektets repositorium:
-
-\begin{center}
-\url{https://github.com/Gruppe-213/HDO-VideoAPI}
-\end{center}
-
-\subsection{API-testing med Postman og .http-filer}
-\label{subsec:postman}
-
-Alle endepunkter ble testet manuelt mot HDOs testmiljøer 
-via \texttt{HDO-VideoAPI.http}-filen i repoet og Postman. 
-Dette dekket komplette arbeidsflyter for begge backends, 
-inkludert autentiseringsflyt mot Keycloak, opprettelse 
-og sletting av rom, start og stopp av strøm, 
-tokengenerering og WebRTC-lenker. Feilscenarier som 
-ugyldige rom-ID-er, manglende tokens og ukjente 
-providere ble verifisert manuelt før de ble formalisert 
-som integrasjonstester.
-
-\subsection{Prometheus og Grafana}
-\label{subsec:grafana}
-
-Prometheus- og Grafana-integrasjonen ble verifisert ved å kjøre et kontrollert 
-trafikkmønster gjennom E2E-scriptet og deretter sammenligne forventede hendelser 
-med verdiene i Prometheus og Grafana-dashboardene. Verifiseringen ble gjort manuelt, 
-men etter en fast sjekkliste:
-
-\begin{itemize}
-    \item \texttt{hdo\_active\_rooms\_total} økte ved romopprettelse og gikk tilbake 
-          til null etter sletting
-    \item \texttt{http\_requests\_total} økte for de endepunktene E2E-scriptet traff
-    \item \texttt{http\_request\_duration\_seconds} viste registrerte responstider 
-          for begge backends
-    \item rate limiting-metrikker økte når scriptet overskred definert terskelverdi
-    \item health check-status for AntMedia og NHN samsvarte med tilgjengeligheten 
-          observert fra \texttt{/health/ready}
-\end{itemize}
-
-\subsection{Frontend-demo}
-\label{subsec:frontend-demo}
-
-En enkel frontend ble utviklet for å demonstrere 
-VideoAPI-funksjonaliteten i praksis. Gjennom 
-frontend-demoen ble følgende manuelt verifisert 
-ende-til-ende:
-
-\begin{itemize}
-    \item Opprettelse av videorom via begge backends
-    \item Visning av guestURL og hostURL for NHN Video
-    \item Start og stopp av AntMedia-strøm
-    \item Henting av roominformasjon
-    \item Feilmeldinger ved ugyldig input
-\end{itemize}
-
-Ende-til-ende-testingen bekreftet at begge backends 
-fungerer som forventet under realistiske forhold og 
-at Prometheus-metrikker oppdateres korrekt gjennom 
-hele romlivssyklusen.

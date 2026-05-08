@@ -1,26 +1,22 @@
 \section{Testresultater}
 \label{sec:testresultater}
 
-Testsuiten består av 133 automatiserte tester som alle 
-passerer i CI-pipeline. Testene kjører på 5,9 sekunder 
-og aktiveres ved push til \texttt{main}, \texttt{develop} 
-og feature-brancher via GitHub Actions.
+Testsuiten består av 166 automatiserte tester, og alle passerer i
+CI-pipeline. Pipeline kjører \texttt{dotnet test}, men samler ikke inn
+coverage. Linje- og branch-dekning ble derfor målt lokalt med Coverlet
+(\texttt{--collect:"XPlat Code Coverage"}).
 
-En samlet linjedekning på 56\% vurderes som moderat. Dekningen var tilstrekkelig 
-for å gi trygghet rundt de mest sentrale kodebanene i proof-of-conceptet, men er 
-ikke høy nok til å dokumentere produksjonsmodenhet alene. Gruppen satte ikke et 
-formelt dekningsmål ved prosjektstart, noe som i ettertid vurderes som en svakhet 
-i teststrategien. For en produksjonsnær løsning i akuttmedisinsk kontekst burde 
-det vært definert eksplisitte mål for dekning av kritiske komponenter, særlig 
-controller-laget, provider-laget, autentisering og feilhåndtering.
+Ved siste lokale måling før innlevering var samlet linjedekning om lag 66\,\%
+og branch-dekning om lag 38\,\%. Dekningstallene påvirkes noe av autogenererte
+OpenAPI-filer under \texttt{obj/}, som Coverlet teller med som udekket
+kode selv om de ikke inneholder forretningslogikk.
 
-De viktigste udekkede kodebanene gjelder sjeldne feiltilstander i kommunikasjon 
-med eksterne tjenester, for eksempel timeout, avbrutte forespørsler, uventede 
-responsformater, DNS-/nettverksfeil og enkelte kombinasjoner av HTTP-statuskode 
-og responsbody fra AntMedia eller NHN. Slike tilfeller kan simuleres med mer 
-avanserte stubber eller kontraktstester, men ble ikke fullstendig dekket innenfor 
-prosjektperioden. Dette betyr at testene dokumenterer hovedflyt og flere sentrale 
-feilscenarier, men ikke alle mulige produksjonsfeil.
+Dekningen vurderes som moderat. Den gir god støtte for at sentrale deler
+av proof-of-conceptet fungerer, men den er ikke høy nok til å dokumentere
+produksjonsmodenhet alene. Gruppen satte heller ikke konkrete dekningsmål
+ved prosjektstart. I ettertid vurderes dette som en svakhet, særlig for
+kritiske deler som controller-lag, provider-lag, autentisering og
+feilhåndtering.
 
 \begin{table}[h]
 \centering
@@ -33,11 +29,11 @@ KeycloakService & Enhetstest & 100\% \\
 VideoProviderFactory & Enhetstest & 100\% \\
 AntMediaAuthHandler & Enhetstest & 98\% \\
 NHNAuthHandler & Enhetstest & 97,8\% \\
+RoomsController & Integrasjonstest & 97\% \\
 NHNVideoProvider & Enhetstest & 94,7\% \\
 ProviderExtensions & Enhetstest & 94,2\% \\
 ApplicationExtensions & Integrasjonstest & 93,7\% \\
 GlobalExceptionHandler & Enhetstest & 89,2\% \\
-RoomsController & Integrasjonstest & 79\% \\
 AntMediaProvider & Enhetstest & 78,8\% \\
 \midrule
 VideoMetrics & Ingen & 0\%$^*$ \\
@@ -46,33 +42,28 @@ Microsoft.AspNetCore.OpenApi.Generated & Ingen & 0\%$^\dagger$ \\
 System.Runtime.CompilerServices & Ingen & 0\%$^\dagger$ \\
 \bottomrule
 \end{tabular}
-\caption{Linjedekning per komponent. $^*$~Ikke testet direkte: avhenger av
-Prometheus-instans eller er ren datamodell uten testbar logikk.
-$^\dagger$~Autogenerert kode utenfor prosjektets kontroll.}
+\caption{Linjedekning per komponent ved lokal Coverlet-måling.
+Samlet linjedekning for løsningen var ca.\ 66\,\%. 
+$^*$~Ikke testet direkte. $^\dagger$~Autogenerert kode.}
 \label{tab:testresultater}
 \end{table}
 
-Komponentene med 100\% dekning inkluderer alle 
-exception-typer, alle extensions, helsesjekker og 
-provider-factory. \texttt{RoomsController} og 
-\texttt{AntMediaProvider} har noe lavere dekning 
-ettersom enkelte kodestier krever spesifikke 
-nettverkstilstander som ikke er simulert i 
-enhetstestene.
+Tabell~\ref{tab:testresultater} viser høy dekning for flere sentrale
+komponenter, blant annet autentisering, provider-factory,
+\texttt{RoomsController} og provider-spesifikke auth-handlere. Dette betyr
+likevel ikke at alle mulige driftsscenarioer er testet. Dekningstall viser
+hvilke linjer som er kjørt, ikke om alle relevante kombinasjoner av input,
+nettverksfeil og sikkerhetsscenarioer er undersøkt.
 
-\texttt{VideoMetrics} har 0\% dekning fordi klassen 
-kun brukes via Prometheus sine egne statiske metoder, 
-som ikke er egnet for enhetstesting uten en kjørende 
-Prometheus-instans. De tre klassene med 0\% 
-(\texttt{NHNConference}, \texttt{Microsoft.AspNetCore.OpenApi.Generated} 
-og \texttt{System.Runtime.CompilerServices}) er 
-henholdsvis en ren datamodell og autogenerert kode 
-som ikke inneholder testbar logikk.
+De svakest dekkede områdene er Prometheus-instrumentering,
+nettverksnære feil mot eksterne videomotorer, enkelte exception-grener og
+mer systematisk negativ input. \texttt{AntMediaProvider} har lavere dekning
+enn flere andre komponenter fordi noen grener krever spesifikke
+nettverks- eller backend-tilstander som ikke er simulert i enhetstestene.
 
-Manuell testing mot HDOs testmiljøer for AntMedia og 
-NHN Video ble gjennomført via \texttt{HDO-VideoAPI.http}-filen. 
-Komplette testflyter for begge backends ble verifisert, 
-inkludert opprettelse av rom, henting av roominformasjon, 
-start og stopp av strøm, tokengenerering og sletting. 
-NHN Videos 501-responser for start, stopp og token ble 
-bekreftet som forventet oppførsel.
+Manuell verifisering mot HDOs testmiljøer ble gjort med
+\texttt{HDO-VideoAPI.http}, utforskende kall og frontend-demoen. Dette
+inngår ikke i CI-testsuiten, men ble brukt til å kontrollere komplette
+flyter for begge backends, inkludert autentisering, romlivssyklus og
+forventede \texttt{501}-responser for NHN-operasjoner som ikke støttes.
+

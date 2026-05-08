@@ -1,42 +1,46 @@
 \section{Enhetstester}
 \label{sec:enhetstester}
 
-Enhetstestene er skrevet med xUnit og bruker Moq for mocking 
-av avhengigheter. HTTP-laget mockes med egne 
-\texttt{StubHttpMessageHandler}-klasser som returnerer 
-forhåndsdefinerte responser uten nettverkskall.
+Enhetstestene var skrevet med xUnit og brukte Moq for mocking av
+avhengigheter. HTTP-laget ble mocket med en hjemmelaget
+\texttt{StubHttpMessageHandler}, som tok en lambda
+\texttt{Func<HttpRequestMessage, Task<HttpResponseMessage>>} og lot
+testen kontrollere både request-inspeksjon og response-injeksjon uten
+nettverkskall. Dette gjorde det mulig å verifisere både hva provideren
+sendte og hvordan den behandlet svaret.
 
-Følgende komponenter har dedikerte enhetstester:
-provider-laget (\texttt{AntMediaProvider}, \texttt{NHNVideoProvider}), 
-autentiseringshåndterere (\texttt{AntMediaAuthHandler}, 
-\texttt{NHNAuthHandler}), \texttt{VideoProviderFactory}, 
-helsesjekker, \texttt{GlobalExceptionHandler}, 
-DI-registreringer og egendefinerte exception-typer.
+Komponentene som hadde dedikerte enhetstester var valgt ut fra to
+kriterier: de inneholdt forretningslogikk som lot seg isolere fra
+ASP.NET Cores request-pipeline, og de hadde feilstier som var krevende
+å treffe gjennom integrasjonstester. Provider-laget
+(\texttt{AntMediaProvider}, \texttt{NHNVideoProvider}) og
+autentiseringshåndtererne (\texttt{AntMediaAuthHandler},
+\texttt{NHNAuthHandler}) falt klart innenfor begge kriteriene.
+\texttt{VideoProviderFactory}, helsesjekker, \texttt{GlobalExceptionHandler},
+DI-registreringer og de egendefinerte exception-typene ble enhetstestet
+av samme grunn. \texttt{VideoMetrics} ble bevisst utelatt fra
+enhetstestene fordi klassen instrumenterer Prometheus via statiske
+metoder uten testbar logikk; den ble i stedet verifisert indirekte
+gjennom E2E-fase 9 og manuell Grafana-sjekk (jf.\ avsnitt~\ref{subsec:grafana}).
 
-Et eksempel på en happy path-test verifiserer at 
-\texttt{CreateRoomAsync} sender riktig request-body 
-og mapper responsen korrekt:
+Et eksempel på en happy path-test verifiserte at
+\texttt{CreateRoomAsync} sendte riktig request-body og mappet responsen
+korrekt:
 
-\begin{lstlisting}[language={[Sharp]C}, caption={AntMediaProviderTests — CreateRoomAsync happy path}]
+\begin{lstlisting}[language={[Sharp]C}, caption={AntMediaProviderTests — CreateRoomAsync mapper broadcast til \texttt{VideoRoom}}]
 [Fact]
 public async Task CreateRoomAsync_Success_ReturnsCreatedRoom()
 {
     string? requestBody = null;
-    using var client = new HttpClient(new StubHttpMessageHandler(
-        async request =>
-        {
-            requestBody = await request.Content!.ReadAsStringAsync();
-            return new HttpResponseMessage(HttpStatusCode.OK)
-            {
-                Content = new StringContent(
-                    "{\"streamId\":\"room-1\",\"name\":\"Demo Room\"," +
-                    "\"status\":\"created\"}")
-            };
-        })) { BaseAddress = new Uri("https://antmedia.test/") };
+    using var client = new HttpClient(new StubHttpMessageHandler(async request =>
+    {
+        requestBody = await request.Content!.ReadAsStringAsync();
+        var json = "{\"streamId\":\"room-1\",\"name\":\"Demo Room\",\"status\":\"created\"}";
+        return new HttpResponseMessage(HttpStatusCode.OK)
+            { Content = new StringContent(json) };
+    })) { BaseAddress = new Uri("https://antmedia.test/") };
 
-    var sut = new AntMediaProvider(
-        client, Mock.Of<ILogger<AntMediaProvider>>());
-
+    var sut = new AntMediaProvider(client, Mock.Of<ILogger<AntMediaProvider>>());
     var result = await sut.CreateRoomAsync(
         new CreateRoomRequest { Provider = "antmedia", Name = "Demo Room" });
 
@@ -45,23 +49,23 @@ public async Task CreateRoomAsync_Success_ReturnsCreatedRoom()
 }
 \end{lstlisting}
 
-Feilscenarier testes like systematisk. Følgende test 
-verifiserer at en 500-respons fra AntMedia kaster 
-\texttt{ExternalServiceException} med riktig statuskode:
+Feilscenarier ble testet like systematisk. Følgende test verifiserte at
+en 500-respons fra AntMedia kastet \texttt{ExternalServiceException}
+med original statuskode bevart. Dette lot \texttt{GlobalExceptionHandler}
+senere eksponere den eksterne statuskoden i \texttt{externalStatusCode}-feltet
+i ProblemDetails-responsen (jf.\ kodeliste~\ref{lst:problem-details-response}),
+slik at klienten kunne skille mellom AntMedia-feil og NHN-feil bak en
+felles \texttt{502 Bad Gateway}.
 
-\begin{lstlisting}[language={[Sharp]C}, caption={AntMediaProviderTests — StopStream feilscenario}]
+\begin{lstlisting}[language={[Sharp]C}, caption={AntMediaProviderTests — upstream-feil → \texttt{ExternalServiceException}}]
 [Fact]
 public async Task StopStreamAsync_Upstream500_ThrowsExternalServiceException()
 {
     using var client = new HttpClient(new StubHttpMessageHandler(_ =>
-        Task.FromResult(new HttpResponseMessage(
-            HttpStatusCode.InternalServerError)
-        {
-            Content = new StringContent("{\"message\":\"stop failed\"}")
-        })));
-    var sut = new AntMediaProvider(
-        client, Mock.Of<ILogger<AntMediaProvider>>());
+        Task.FromResult(new HttpResponseMessage(HttpStatusCode.InternalServerError)
+            { Content = new StringContent("{\"message\":\"stop failed\"}") })));
 
+    var sut = new AntMediaProvider(client, Mock.Of<ILogger<AntMediaProvider>>());
     var ex = await Assert.ThrowsAsync<ExternalServiceException>(
         () => sut.StopStreamAsync("room-1"));
 
@@ -69,43 +73,53 @@ public async Task StopStreamAsync_Upstream500_ThrowsExternalServiceException()
 }
 \end{lstlisting}
 
-For NHN Video verifiserer en egen test at operasjoner 
-som ikke er støttet av møte-modellen kaster 
-\texttt{NotSupportedException}:
+\texttt{NHNVideoProviderTests.UnsupportedOperations\_ThrowNotSupportedException}
+verifiserer at start, stopp og romtoken for NHN kaster
+\texttt{NotSupportedException}. \texttt{VideoProviderFactoryTests} bekrefter
+case-insensitivt provider-oppslag (\emph{f.eks.}\ \texttt{NhN} og \texttt{nhn}).
 
-\begin{lstlisting}[language={[Sharp]C}, caption={NHNVideoProviderTests — ikke-støttede operasjoner}]
+\subsection{Token-håndtering}
+\label{subsec:token-haandtering}
+
+Autentiseringshåndtererne håndterte tre sikkerhetskritiske operasjoner:
+caching av token mellom kall, fornyelse når \texttt{exp} nærmet seg, og
+trådsikker oppførsel ved samtidige kall. Disse var testet eksplisitt
+fordi double-check locking-mønsteret i kodeliste~\ref{lst:double-check}
+hadde en ikke-triviell race condition: uten korrekt synkronisering ville
+parallelle requests kunne generere flere tokens og indusere unødvendige
+kall mot Keycloak eller NHN.
+
+Kjernen i concurrency-testen er ti parallelle \texttt{GetTokenAsync}-kall
+mot tom cache og telling av faktiske POST-kall til NHNs \texttt{/Token}:
+
+\begin{lstlisting}[language={[Sharp]C}, caption={NHNAuthHandlerTests — ett token-kall ved parallelle klienter}]
 [Fact]
-public async Task UnsupportedOperations_ThrowNotSupportedException()
+public async Task ConcurrentRequests_DuringTokenRefresh_FetchTokenOnce()
 {
-    using var client = CreateHttpClient(_ =>
-        Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)));
-    var sut = CreateSut(client);
+    var tokenFetchCount = 0;
+    using var client = new HttpClient(new StubHttpMessageHandler(req =>
+    {
+        if (req.RequestUri!.AbsolutePath.EndsWith("/Token"))
+            Interlocked.Increment(ref tokenFetchCount);
+        var json = "{\"access_token\":\"abc\",\"expires_in\":3600}";
+        return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+            { Content = new StringContent(json) });
+    }));
 
-    await Assert.ThrowsAsync<NotSupportedException>(
-        () => sut.StartStreamAsync("24418"));
-    await Assert.ThrowsAsync<NotSupportedException>(
-        () => sut.StopStreamAsync("24418"));
-    await Assert.ThrowsAsync<NotSupportedException>(
-        () => sut.SetRoomTokenAsync("24418", "token"));
+    var sut = CreateAuthHandler(client, new NHNTokenCache());
+    await Task.WhenAll(Enumerable.Range(0, 10)
+        .Select(_ => sut.GetTokenAsync(CancellationToken.None)));
+
+    Assert.Equal(1, tokenFetchCount);
 }
 \end{lstlisting}
 
-\texttt{VideoProviderFactory} testes med mixed-case 
-nøkler for å verifisere at provider-oppslag er 
-case-insensitivt:
+En tilsvarende test verifiserte at et utløpt token utløste ny henting:
+\texttt{NHNTokenCache.Expiry} ble manuelt satt til en tid i fortiden,
+deretter ble ett nytt kall verifisert å ha hentet token på nytt mens
+to påfølgende kall gjenbrukte det. \texttt{AntMediaAuthHandler} hadde
+analoge tester for det lokalt signerte HMAC-SHA256-tokenet, der
+fem-minutters cachen ble manipulert tilsvarende. Disse testene var en
+av grunnene til at \texttt{NHNAuthHandler} (97{,}8\,\%) og
+\texttt{AntMediaAuthHandler} (98\,\%) hadde høy linjedekning.
 
-\begin{lstlisting}[language={[Sharp]C}, caption={VideoProviderFactoryTests — mixed-case nøkkel}]
-[Fact]
-public void GetProvider_MixedCaseKey_ReturnsRegisteredProvider()
-{
-    var nhnProvider = Mock.Of<IVideoProvider>();
-    var services = new ServiceCollection();
-    services.AddKeyedSingleton<IVideoProvider>("nhn", nhnProvider);
-    using var sp = services.BuildServiceProvider();
-    var sut = new VideoProviderFactory(sp);
-
-    var result = sut.GetProvider("NhN");
-
-    Assert.Same(nhnProvider, result);
-}
-\end{lstlisting}

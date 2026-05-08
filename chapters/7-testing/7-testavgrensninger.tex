@@ -1,0 +1,20 @@
+\section{Testavgrensninger og åpne hull}
+\label{sec:testavgrensninger}
+
+Testene dekker funksjonelle krav, sentrale sikkerhetskrav og validering av
+provider-arkitekturen, men de dokumenterer ikke produksjonsklarhet.
+
+Det ble ikke gjennomført automatisk sikkerhetsskanning i CI, lasttesting med
+dedikerte verktøy, systematisk fuzz-testing, kontraktstesting mot flere versjoner
+av AntMedia/NHN/Pexip eller automatiserte recovery-tester for container-restart
+og nettverksfeil. TLS-konfigurasjon er støttet, men testsuiten verifiserer ikke
+sertifikatkjede, TLS-handshake eller sertifikatrotasjon.
+
+E2E-skriptet gir funksjonell validering over tid, men lagrer ikke p95/p99,
+gjennomstrømming eller maksimalt antall samtidige rom som målbare resultater.
+Derfor kan testene brukes som bevis for at proof-of-concept-løsningen fungerer i
+testmiljøet, men ikke som bevis for produksjonsmessig robusthet.
+
+Avgrensningene svekker ikke proof-of-conceptets verdi, men markerer hva
+som må adresseres før en eventuell produksjonssetting med reelle
+pasientdata og strengere driftskrav.
