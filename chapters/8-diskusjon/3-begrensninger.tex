@@ -1,4 +1,60 @@
 \section{Begrensninger}
 \label{sec:begrensninger}
 
-% Hva vi ikke rakk
+VideoAPI er levert som et proof-of-concept. Det betyr at løsningen
+demonstrerer at arkitekturen fungerer og at de definerte kravene kan
+oppfylles, men den er ikke ferdig herdet for produksjon. Flere av valgene
+underveis har vært bevisste kompromisser tilpasset prosjektets ramme, og
+det er viktig å være tydelig på hva disse innebærer.
+
+Den mest åpenbare begrensningen er tidsrammen. Med 19 uker tilgjengelig,
+hvorav en betydelig andel gikk til å bygge grunnleggende forståelse av
+videomotorene og WebRTC, ble det ikke rom for alt vi i utgangspunktet
+hadde sett for oss. Validering av flere providere underveis kunne vært
+utvidet med ekte tredjepartsmotorer i stedet for en mock-provider, og
+ende-til-ende-testing kunne vært gjort mer systematisk. Vi måtte også
+prioritere bredde framfor dybde på enkelte områder for å rekke å levere et
+helhetlig system.
+
+På sikkerhetssiden gjenstår det konkrete punkter som er beskrevet i 8.1.2.
+Issuer- og audience-validering er deaktivert, \texttt{RequireHttpsMetadata}
+er satt til \texttt{false}, og \texttt{/metrics}-endepunktet er eksponert
+uten autentisering. Dette er bevisste valg knyttet til prosjektets
+midlertidige infrastruktur og HDOs planlagte rekonfigurering, men det er
+ikke valg man kan ta med seg uendret inn i produksjon. Autorisasjonsmodellen
+er bevisst grovkornet, basert på et enkelt \texttt{api\_access}-claim, og må
+utvides med rollestyring tilpasset HDOs egne behov før systemet brukes i
+operativ sammenheng.
+
+Avhengighetene til eksterne aktører setter også klare grenser for hva vi har
+kunnet teste og verifisere. NHN-integrasjonen er bygget mot et QA-miljø, og
+vi har opplevd både utdaterte credentials, lisensproblemer og URL-er i feil
+format gjennom prosjektperioden. URL-rewrite-funksjonen i
+\texttt{NHNVideoProvider} er en midlertidig løsning på et problem som egentlig
+hører hjemme på NHN sin side. Når NHN retter formatet på sin ende vil
+rewrite-koden bli overflødig, men inntil videre er den nødvendig for at
+løsningen skal fungere. AntMedia-integrasjonen er testet mot HDOs
+QA-instans, og avhenger av at konfigurasjonen og STUN/TURN-serverne der
+fortsetter å være tilgjengelige.
+
+Observability-oppsettet inneholder også flere pragmatiske kompromisser. UID
+for Prometheus-datasource er hardkodet i Grafana-dashboardene,
+\texttt{/metrics} unntas fra HTTPS-redirect for å la Prometheus scrape over
+HTTP internt i Docker-nettverket, og portene for Grafana og Prometheus er
+eksponert utad for at HDO skulle kunne teste dem direkte. Ingen av disse
+valgene er gale i en utviklings- eller demonstrasjonskontekst, men de bør
+vurderes på nytt før systemet settes i drift.
+
+Testdekningen ligger på rundt 66 prosent linjedekning. Kjernelogikken og
+provider-laget er godt dekket, men deler av infrastruktur- og
+oppstartskoden er ikke testet direkte, og demo-frontenden er ikke en del av
+testregimet. Vi har heller ikke gjort lasttesting eller målinger av reell
+ytelse under produksjonslignende belastning. Det betyr at vi vet at API-et
+fungerer korrekt for de scenariene vi har testet, men ikke hvor godt det
+skalerer eller hvordan det oppfører seg under press.
+
+Til slutt er det verdt å påpeke at demo-frontenden er nettopp en demo. Den
+ble laget for å kunne vise at videostrømmer faktisk fungerte ende-til-ende,
+ikke for å være et brukbart klientgrensesnitt. Den klienten HDO eventuelt
+kobler på i produksjon vil måtte bygges separat, og en del av antagelsene i
+demo-frontenden vil ikke nødvendigvis holde der.

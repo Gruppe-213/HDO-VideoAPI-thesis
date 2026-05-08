@@ -1,4 +1,20 @@
 \section{Konklusjon}
 \label{sec:konklusjon}
 
-% Oppsummering av bidrag og hovedfunn
+Prosjektet resulterte i et fungerende proof-of-concept for HDO VideoAPI:
+et mellomvare-API som eksponerer felles romoperasjoner mot AntMedia og
+NHN gjennom en provider-basert arkitektur. Løsningen støtter
+tokenbasert autentisering, containerisert kjøring, miljøbasert
+konfigurasjon, logging, helsesjekker og Prometheus/Grafana-metrikker.
+
+Forskningsspørsmålet kan besvares positivt, men med forbehold. En
+plugin-basert mellomvarearkitektur kan i stor grad standardisere tilgang
+til flere videomotorer og isolere backend-spesifikk logikk fra
+kjernelogikken. Samtidig viser prosjektet at et felles API ikke fjerner
+forskjeller mellom videomotorenes domenemodeller. AntMedia og NHN krever
+fortsatt ulik håndtering i provider-laget.
+
+Løsningen er derfor et godt grunnlag for videre arbeid, men ikke et
+produksjonsklart system. Før reell drift må sikkerheten herdes, testing og
+monitorering utvides, og nye providere vurderes gjennom egne
+integrasjons- og kontraktstester.
