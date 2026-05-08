@@ -1,19 +1,28 @@
 \section{Metode og evalueringsgrunnlag}
-\label{sec:metode-evaluering}
-
 Prosjektet er gjennomført som et design- og implementasjonsprosjekt med
-empirisk evaluering. Først ble HDOs kravspesifikasjon analysert for å
-identifisere funksjonelle og ikke-funksjonelle krav.
+empirisk evaluering. Først ble \gls{hdo}s kravspesifikasjon analysert for å
+identifisere funksjonelle og ikke-funksjonelle krav. Deretter ble løsningen
+designet, implementert og evaluert i flere iterasjoner mot \gls{hdo}s testmiljø.
 
-Evalueringen bygger på fire typer grunnlag. For det første ble
-kravoppfyllelse vurdert mot HDOs kravspesifikasjon. For det andre ble
-arkitekturen vurdert ut fra hvor backend-spesifikk logikk er plassert, og
-hvilke endringer som kreves for å støtte en ny videomotor. For det tredje
-ble løsningen testet gjennom automatiserte enhetstester, integrasjonstester
-og manuell ende-til-ende-testing mot testmiljøer. For det fjerde ble
-driftsaspekter vurdert gjennom containerisert kjøring, helsesjekker,
-Prometheus-metrikker og Grafana-dashboard.
+Evalueringen som besvarer forskningsspørsmålet bygger på fire typer grunnlag.
+\emph{Krav-evaluering} sammenstiller hvert krav i kravspesifikasjonen mot
+hvor det er implementert og hvordan det er testet, og besvarer i hovedsak
+dimensjon~1 og dimensjon~3. \emph{Arkitektur-evaluering} vurderer hvor
+backend-spesifikk logikk er plassert og hvilke endringer som faktisk kreves
+for å støtte en ny videomotor; dette ble undersøkt empirisk ved å legge til
+to ekstra providere etter at hovedimplementasjonen var ferdig (se
+seksjon~\ref{sec:provider-validering}), og besvarer i hovedsak
+dimensjon~2. \emph{Funksjonell verifisering} ble gjort gjennom 133
+automatiserte enhets- og integrasjonstester, samt et ende-til-ende-skript
+som kjører mot \gls{hdo}s faktiske AntMedia- og \gls{nhn}-testmiljøer.
+\emph{Drifts-evaluering} dekker containerisert kjøring, helsesjekker,
+Prometheus-metrikker og Grafana-dashboard, og bidrar primært til
+dimensjon~3.
 
-Denne tilnærmingen gjør det mulig å vurdere både om VideoAPI oppfyller
-kravene fra HDO, og i hvilken grad provider-arkitekturen faktisk reduserer
-integrasjonskompleksitet.
+I tillegg ble det innhentet en strukturert sluttevaluering fra \gls{hdo} etter
+overlevering, der to representanter fra oppdragsgiver vurderte leveransen
+mot kravområdene på en skala fra 1 til 5. Sluttevalueringen er gjengitt
+i sin helhet i vedlegg~\ref{app:hdo-evaluering} og brukes som ekstern
+validering på tvers av alle tre dimensjoner. Datagrunnlaget er for
+begrenset til statistiske slutninger, men gir et kvalitativt bilde av
+hvor godt leveransen møter behovet hos oppdragsgiver.

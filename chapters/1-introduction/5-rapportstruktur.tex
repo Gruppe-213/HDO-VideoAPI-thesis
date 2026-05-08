@@ -1,16 +1,42 @@
 \section{Rapportstruktur}
-\label{sec:rapportstruktur}
 
-Kapittel~1 introduserer prosjektets bakgrunn, problemstilling, mål og
-evalueringsgrunnlag. Kapittel~2 gir faglig og teknisk bakgrunn for
-prosjektet, inkludert HDOs virksomhetsområde, eksisterende videoløsninger
-og de to videomotorene. Kapittel~3 presenterer kravspesifikasjonen fra HDO
-med funksjonelle og ikke-funksjonelle krav. Kapittel~4 beskriver designet av
-VideoAPI, inkludert provider-mønsteret, API-design, datamodeller og
-sikkerhetsarkitektur. Kapittel~5 dokumenterer implementasjonen med vekt på
-provider-adaptere, JWT-håndtering, containerisering og observability.
-Kapittel~6 beskriver testing og resultater. Kapittel~7 evaluerer løsningen
-mot problemstillingen og kravspesifikasjonen, og diskuterer begrensninger,
-videre arbeid, bærekraft og bruk av KI. Kapittel~8 oppsummerer
-hovedfunnene. Vedlegg inneholder blant annet kravspesifikasjon,
-API-dokumentasjon, møtereferater, deployment-veiledning og prosjektplan.
+Rapporten er strukturert slik:
+
+\begin{description}
+    \item[\textbf{Kapittel~\ref{ch:bakgrunn} -- Bakgrunn}]
+    gir faglig og teknisk bakgrunn for prosjektet, inkludert \gls{hdo}s
+    virksomhetsområde, eksisterende videoløsninger og videomotorene
+    AntMedia Server og \gls{nhn} Video.
+
+    \item[\textbf{Kapittel~\ref{ch:krav} -- Kravspesifikasjon}]
+    presenterer kravspesifikasjonen fra \gls{hdo} med funksjonelle og
+    ikke-funksjonelle krav.
+
+    \item[\textbf{Kapittel~\ref{ch:utvikling} -- Utviklingsprosess}]
+    beskriver utviklingsmetodikken, kodehåndtering, samarbeidet med \gls{hdo}
+    og fremdrift gjennom prosjektperioden.
+
+    \item[\textbf{Kapittel~\ref{ch:design} -- Design}]
+    dokumenterer designet av VideoAPI, inkludert provider-arkitekturen,
+    \gls{api}-design, datamodeller og sikkerhetsarkitektur.
+
+    \item[\textbf{Kapittel~\ref{ch:implementasjon} -- Implementasjon}]
+    beskriver implementasjonen med vekt på provider-adaptere,
+    \gls{jwt}-håndtering, containerisering, observability og feilhåndtering.
+
+    \item[\textbf{Kapittel~\ref{ch:testing} -- Testing og validering}]
+    beskriver teststrategien, testresultatene og en empirisk validering
+    av at provider-arkitekturen tillater nye videomotorer å legges til
+    uten endringer i kjernelogikken.
+
+    \item[\textbf{Kapittel~\ref{ch:diskusjon} -- Diskusjon og konklusjon}]
+    evaluerer løsningen mot kravspesifikasjonen og forskningsspørsmålet,
+    drøfter begrensninger, læringsutbytte, bærekraft og bruk av kunstig
+    intelligens, og presenterer videre arbeid og konklusjon.
+
+    \item[\textbf{Vedlegg}]
+    inneholder blant annet \gls{api}-dokumentasjon, kildekode-referanser,
+    møtereferater, deployment-veiledning, prosjektplan,
+    samarbeidsavtale, kravspesifikasjon, KI-deklarasjon og \gls{hdo}s
+    sluttevaluering.
+\end{description}

@@ -1,7 +1,22 @@
 \subsection{Bærekraft}
 \label{sec:bærekraft}
 
-Prosjektet hadde ikke bærekraft som et eksplisitt krav fra oppdragsgiver,
-og løsningens karakter som proof-of-concept-mellomvare gjør det vanskelig
-å trekke meningsfulle slutninger om miljømessig eller sosial påvirkning.
-Bærekraftsvurdering er derfor ikke inkludert i denne rapporten.
+NTNUs emnebeskrivelse krever at bacheloroppgaven reflekterer over oppgavens
+bærekraftsrelevans med utgangspunkt i FNs bærekraftsmål.
+
+VideoAPI inngår i akuttmedisinsk infrastruktur der videostrøm brukes som
+beslutningsstøtte for AMK- og legevaktoperatører. Dette knytter prosjektet
+til SDG~3 (God helse og livskvalitet) ved at standardisert og vedlikeholdbar
+tilgang til videoløsningene støtter rask og presis respons i akutte
+situasjoner. Plugin-arkitekturen reduserer teknologisk innlåsing og gir HDO
+større fleksibilitet overfor leverandører, noe som er relevant for SDG~9
+(Industri, innovasjon og infrastruktur). Personvernhensyn — ingen lyd, bilde
+eller pasientopplysninger lagres, og alle endepunkter er autentisert — er i
+tråd med kravene til kritisk helseinfrastruktur under SDG~16 (Velfungerende
+institusjoner).
+
+Stateless arkitektur og containerisering muliggjør effektiv ressursbruk ved
+variabel last. Videostrømming har generelt høy energi- og båndbreddekostnad,
+men dette ligger utenfor mellomvarens kontrollsfære. VideoAPI introduserer
+et ekstra nettverkshopp, men overhead fra API-kallet er neglisjerbart
+sammenlignet med selve videostrømmingen.

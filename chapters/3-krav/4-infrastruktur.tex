@@ -1,21 +1,36 @@
 \section{Infrastrukturkrav}
 \label{sec:krav-infrastruktur}
 
+Infrastrukturkravene beskriver hvordan mellomvaren skal pakkes, 
+konfigureres og kjøres i et test- eller driftsmiljø.
+
 \subsection{Containerisering (I1.1)}
 \label{subsec:krav-i11}
 
-Mellomvaren skal kunne kjøres som Docker-image. VideoAPI leveres 
-som Docker-image med tilhørende Docker Compose-oppsett for lokal 
-kjøring og testing.
+Krav I1.1 innebærer at mellomvaren skal kunne kjøres som et 
+Docker-image. Formålet er å gjøre løsningen enklere å distribuere, 
+teste og kjøre uten manuell installasjon av rammeverk og avhengigheter 
+på vertsmaskinen.
+
+Kravet vurderes som oppfylt dersom applikasjonen kan bygges som et 
+Docker-image, startes som container og konfigureres uten at imaget må 
+bygges på nytt. Oppsettet skal også dokumenteres slik at HDO kan kjøre 
+løsningen videre etter prosjektperioden.
 
 \subsection{Stateless design og skalerbarhet (I1.2)}
 \label{subsec:krav-i12}
 
-Mellomvaren skal være stateless — ingen tilstand lagres i minne 
-per instans. Dersom state er nødvendig, lagres dette i en delt 
-komponent som Redis eller en database. All konfigurasjon leses 
-fra miljøvariabler.
+Krav I1.2 innebærer at mellomvaren skal være stateless. I denne 
+oppgaven tolkes dette som at VideoAPI ikke skal lagre rom-, bruker- 
+eller sesjonstilstand lokalt per instans. Dersom slik tilstand er 
+nødvendig, skal den ligge i en delt ekstern komponent eller hos de 
+eksterne videomotorene.
 
-VideoAPI lagrer ingen tilstand internt. API-nøkler, backend-URLer 
-og JWT-issuer konfigureres via miljøvariabler. State, som aktive 
-videorom, ligger hos backend-tjenestene.
+Kravet innebærer også at miljøavhengig konfigurasjon, som backend-URLer, 
+API-nøkler og token-konfigurasjon, skal kunne settes gjennom 
+miljøvariabler.
+
+Kravet evalueres gjennom arkitekturgjennomgang, kontroll av 
+konfigurasjonshåndtering og testing av containerisert kjøring. 
+Begrensninger knyttet til horisontal skalering diskuteres i 
+kapittel~\ref{chap:diskusjon}.

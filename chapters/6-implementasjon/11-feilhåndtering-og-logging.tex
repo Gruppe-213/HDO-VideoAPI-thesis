@@ -6,7 +6,7 @@ I et mellomvare-API som videresender kall til to eller flere ulike eksterne vide
 \subsection{Strategi: én sentral handler}
 \label{subsec:errors-strategi}
 
-Tilnærmingen bygger på tre prinsipper. For det første skal controllerne ikke fange exceptions; feil får i stedet propagere til middleware-laget. Dette holder controller-koden lesbar og hindrer at hvert endepunkt må implementere samme \texttt{try/catch}-logikk på nytt. For det andre skal all feilrespons ta utganspunkt i RFC~7807, \emph{Problem Details for HTTP APIs} \cite{rfc7807}, slik at klienter får presis og forståelig informasjon om hva som gikk galt. For det tredje skal interne detaljer ikke eksponeres. Feilmeldinger med statuskode \texttt{5xx} erstattes med generisk tekst, mens detaljert informasjon logges internt (jf. kravspesifikasjonen \cite{hdo_kravspec}).
+Tilnærmingen bygger på tre prinsipper. For det første skal controllerne ikke fange exceptions; feil får i stedet propagere til middleware-laget. Dette holder controller-koden lesbar og hindrer at hvert endepunkt må implementere samme \texttt{try/catch}-logikk på nytt. For det andre skal all feilrespons ta utgangspunkt i RFC~7807, \emph{Problem Details for HTTP APIs} \cite{rfc7807}, slik at klienter får presis og forståelig informasjon om hva som gikk galt. For det tredje skal interne detaljer ikke eksponeres. Feilmeldinger med statuskode \texttt{5xx} erstattes med generisk tekst, mens detaljert informasjon logges internt (jf. kravspesifikasjonen \cite{hdo_kravspec}).
 
 ASP.NET Core 10 har innebygd støtte for dette mønsteret via \texttt{IExceptionHandler}. I oppstartsekvensen registreres handleren som en tjeneste, og middleware-kjeden aktiverer den rett etter routing:
 

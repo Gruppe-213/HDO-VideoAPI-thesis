@@ -12,20 +12,72 @@
 
 % Tekniske
 \newacronym{jwt}{JWT}{JSON Web Token}
+\newacronym{oauth2}{OAuth2}{Open Authorization 2.0}
 \newacronym{webrtc}{WebRTC}{Web Real-Time Communication}
+\newacronym{api}{API}{Application Programming Interface}
+\newacronym{rest}{REST}{Representational State Transfer}
+\newacronym{cicd}{CI/CD}{Continuous Integration / Continuous Delivery}
+\newacronym{vod}{VoD}{Video on Demand}
 
 % ============================================================================
 % FAGTERMER - kun prosjektspesifikke
 % ============================================================================
 
+\newglossaryentry{rest-api}{
+    name={REST-API},
+    description={API basert på Representational State Transfer (REST), der ressurser aksesseres via standard HTTP-metoder og unike URL-er}
+}
+
+\newglossaryentry{prosess-intern-state}{
+    name={prosess-intern state},
+    description={Data som kun lever i applikasjonsprosessens arbeidsminne og ikke persisteres til ekstern lagring, og derfor går tapt ved omstart av tjenesten}
+}
+
+\newglossaryentry{teknologisk-innlåsing}{
+    name={teknologisk innlåsing},
+    description={Situasjon der et system er så tett koblet til én leverandørs 
+    teknologi, protokoler eller API-er at bytte av leverandør medfører 
+    betydelige tekniske eller økonomiske kostnader}
+}
+
+\newglossaryentry{proof-of-concept}{
+    name={proof-of-concept},
+    description={En tidlig, forenklet implementasjon som har som mål å demonstrere at en teknisk løsning er gjennomførbar eller hensiktsmessig, uten å være produksjonsklar}
+}
+
+\newglossaryentry{plugin-basert}{
+    name={plugin-basert},
+    description={En arkitektur der funksjonalitet legges til som selvstendige, utskiftbare moduler (plugins) uten å endre kjernesystemet}
+}
+
 \newglossaryentry{videomotor}{
     name={videomotor},
-    description={Backend-system som håndterer videostrømming. I dette prosjektet: AntMedia Server og NHN Video (Pexip)}
+    description={Backend-system som håndterer videostrømming. I dette prosjektet: AntMedia Server og NHN Video}
+}
+
+\newglossaryentry{mellomvare}{
+    name={mellomvare},
+    description={Programvarelag som befinner seg mellom to systemer og håndterer kommunikasjon, oversettelse eller felles funksjonalitet}
+}
+
+\newglossaryentry{provider-laget}{
+    name={provider-laget},
+    description={Arkitekturlag som håndterer integrasjon mot eksterne videomotorer. Hvert provider-lag implementerer et felles grensesnitt, slik at kjernesystemet er uavhengig av underliggende videoteknologi}
+}
+
+\newglossaryentry{controller-laget}{
+    name={controller-laget},
+    description={Arkitekturlag som eksponerer API-endepunkter og håndterer innkommende HTTP-forespørsler. Delegerer forretningslogikk videre til underliggende lag}
 }
 
 \newglossaryentry{provider}{
     name={provider},
     description={Komponent som implementerer integrasjon mot en spesifikk videomotor via \texttt{IVideoProvider}-grensesnittet}
+}
+
+\newglossaryentry{provider-adapter}{
+    name={provider-adapter},
+    description={Konkret implementasjon av en provider som oversetter mellom VideoAPI sitt interne grensesnitt og en spesifikk videomotors protokoll}
 }
 
 \newglossaryentry{broadcast}{

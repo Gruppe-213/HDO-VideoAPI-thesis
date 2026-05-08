@@ -1,6 +1,5 @@
 \section{Teststrategi}
 \label{sec:teststrategi}
-
 Testarbeidet er organisert i tre nivåer: enhetstester for 
 isolerte komponenter, integrasjonstester for HTTP-laget, 
 og manuell testing mot faktiske testmiljøer. Alle automatiserte 
@@ -12,32 +11,130 @@ tjenester (AntMedia, NHN Video og Keycloak) er fullstendig
 mocket i alle automatiserte tester. Ingen tester krever 
 tilgang til faktiske eksterne miljøer.
 
+Målet med testingen var ikke å bevise produksjonsklarhet, men å verifisere at 
+proof-of-conceptet oppfyller kravspesifikasjonen og at arkitekturen støtter 
+utvidelse med nye videomotorer. Teststrategien hadde derfor fire konkrete mål: 
+å verifisere kjerneoperasjonene i krav F1.1--F1.5, å teste sentrale feil- og 
+sikkerhetsscenarier, å kontrollere integrasjon mot faktiske AntMedia- og NHN-testmiljøer, 
+og å måle hvor mye kjernelogikk som måtte endres ved innføring av nye providere.
+
+Tabell~\ref{tab:rtm} viser sporbarhet mellom krav, implementasjon og tester.
+
+% \begin{table}[h]
+% \centering
+% \small
+% \begin{tabular}{l p{4.2cm} p{6cm} r}
+% \toprule
+% \textbf{Krav} & \textbf{Implementasjon} & \textbf{Test(er)} & \textbf{Resultat} \\
+% \midrule
+% F1.1 & RoomsController.CreateRoom, \newline AntMediaProvider.CreateRoomAsync, \newline NHNVideoProvider.CreateRoomAsync & CreateRoom\_Success\_Returns201, \newline CreateRoomAsync\_Success & Pass \\
+% \midrule
+% F1.2 & RoomsController.DeleteRoom, \newline *Provider.DeleteRoomAsync & DeleteRoom\_Success\_Returns204 & Pass \\
+% \midrule
+% F1.3 & RoomsController.GetRoom, \newline *Provider.GetRoomAsync & GetRoom\_Success\_Returns200 & Pass \\
+% \midrule
+% F1.4 & RoomsController.StartStream, \newline AntMediaProvider.StartStreamAsync, \newline NHNVideoProvider (501) & StartStreamAsync\_Success, \newline UnsupportedOperations\_ThrowNotSupportedException & Pass \\
+% \midrule
+% F1.5 & RoomsController.StopStream, \newline AntMediaProvider.StopStreamAsync, \newline NHNVideoProvider (501) & StopStream\_Upstream500\_ThrowsExternalServiceException, \newline UnsupportedOperations\_ThrowNotSupportedException & Pass \\
+% \midrule
+% S1.1 & KeycloakExtensions, \newline [Authorize] på RoomsController & ProtectedEndpoint\_WithoutApiAccessClaim\_Returns403, \newline SecurityBehaviorTests & Pass \\
+% \midrule
+% S1.2 & *Provider.SetRoomTokenAsync, \newline GenerateWebRtcTokenAsync & SetRoomToken\_*, \newline GenerateWebRtcToken\_* & Pass \\
+% \midrule
+% I1.1 & Dockerfile, compose.yaml & Manuell deploy-test & Pass \\
+% \midrule
+% I1.2 & Program.cs, env-vars, \newline NHNTokenCache (per prosess) & Arkitekturgjennomgang & Pass \\
+% \midrule
+% O1.1 & GlobalExceptionHandler, \newline ILogger & GlobalExceptionHandlerTests & Pass \\
+% \midrule
+% O1.2 & HealthCheckExtensions, \newline AntMediaHealthCheck, NHNHealthCheck & HealthCheck-tester, E2E fase~1 & Pass \\
+% \midrule
+% O1.3 & VideoMetrics, prometheus-net & E2E fase~9, Grafana-verifisering & Pass \\
+% \midrule
+% D1.1 & Swashbuckle, README, docs/ & Dokumentasjonsgjennomgang & Pass \\
+% \bottomrule
+% \end{tabular}
+% \caption{Krav-sporbarhetstabell (Requirements Traceability Matrix). * indikerer at begge providers er involvert.}
+% \label{tab:rtm}
+% \end{table}
+
+\begin{table}[h]
+\centering
+\small
+\begin{threeparttable}
+\begin{tabular}{l p{5.5cm} p{6cm} r}
+\toprule
+\textbf{Krav} & \textbf{Implementasjon} & \textbf{Test(er)} & \textbf{Resultat} \\
+\midrule
+F1.1 & \url{RoomsController.CreateRoom}, \newline \url{*.CreateRoomAsync}
+     & \url{CreateRoom_Success_Returns201}, \newline \url{CreateRoomAsync_Success} & \texttt{Pass} \\
+\addlinespace
+F1.2 & \url{RoomsController.DeleteRoom}, \newline \url{*.DeleteRoomAsync}
+     & \url{DeleteRoom_Success_Returns204} & \texttt{Pass} \\
+\addlinespace
+F1.3 & \url{RoomsController.GetRoom}, \newline \url{*.GetRoomAsync}
+     & \url{GetRoom_Success_Returns200} & \texttt{Pass} \\
+\addlinespace
+F1.4 & \url{RoomsController.StartStream}, \newline \url{AntMediaProvider.StartStreamAsync}, \newline \url{NHNVideoProvider} (501)
+     & \url{StartStreamAsync_Success}, \newline \url{UnsupportedOperations_ThrowNotSupportedException} & \texttt{Pass} \\
+\addlinespace
+F1.5 & \url{RoomsController.StopStream}, \newline \url{AntMediaProvider.StopStreamAsync}, \newline \url{NHNVideoProvider} (501)
+     & \url{StopStream_Upstream500_ThrowsExternalServiceException}, \newline \url{UnsupportedOperations_ThrowNotSupportedException} & \texttt{Pass} \\
+\midrule
+S1.1 & \url{KeycloakExtensions}, \newline \url{[Authorize]} på \url{RoomsController}
+     & \url{ProtectedEndpoint_WithoutApiAccessClaim_Returns403}, \newline \url{SecurityBehaviorTests} & \texttt{Pass} \\
+\addlinespace
+S1.2 & \url{*.SetRoomTokenAsync}, \newline \url{GenerateWebRtcTokenAsync}
+     & \url{SetRoomToken_*}, \newline \url{GenerateWebRtcToken_*} & \texttt{Pass} \\
+\midrule
+I1.1 & \url{Dockerfile}, \url{compose.yaml}
+     & Manuell deploy-test & \texttt{Pass} \\
+\addlinespace
+I1.2 & \url{Program.cs}, env-vars, \newline \url{NHNTokenCache} (per prosess)
+     & Arkitekturgjennomgang & \texttt{Pass} \\
+\midrule
+O1.1 & \url{GlobalExceptionHandler}, \url{ILogger}
+     & \url{GlobalExceptionHandlerTests} & \texttt{Pass} \\
+\addlinespace
+O1.2 & \url{HealthCheckExtensions}, \newline \url{*.HealthCheck}
+     & \url{HealthCheck}-tester, E2E fase~1 & \texttt{Pass} \\
+\addlinespace
+O1.3 & \url{VideoMetrics}, \url{prometheus-net}
+     & E2E fase~9, Grafana-verifisering & \texttt{Pass} \\
+\midrule
+D1.1 & \url{Swashbuckle}, \url{README}, \url{docs/}
+     & Dokumentasjonsgjennomgang & \texttt{Pass} \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\centering
+\small
+\item[*] Alle providers: \texttt{AntMediaProvider} og \texttt{NHNVideoProvider}
+\end{tablenotes}
+\end{threeparttable}
+\caption{Krav-sporbarhetstabell (Requirements Traceability Matrix).}
+\label{tab:rtm}
+\end{table}
+
 \subsection{Reprodusere testresultatene}
 \label{subsec:reprodusere-tester}
-
 Testene kan kjøres lokalt med følgende kommandoer:
-
 \begin{lstlisting}[language=bash, caption={Kjøre testsuiten med coverage}]
 # Klon repoet
 git clone https://github.com/Gruppe-213/HDO-VideoAPI.git
 cd HDO-VideoAPI
-
 # Kjør alle tester
 dotnet test
-
 # Kjør med coverage-innsamling
 dotnet test --collect:"XPlat Code Coverage" \
   --results-directory ./coverage
-
 # Generer lesbar rapport
 reportgenerator \
   "-reports:./coverage/**/coverage.cobertura.xml" \
   "-targetdir:./coverage/report" \
   "-reporttypes:TextSummary"
-
 cat ./coverage/report/Summary.txt
 \end{lstlisting}
-
 Testene krever .NET~10 SDK. Ingen eksterne tjenester 
 er nødvendig — alle avhengigheter er mocket i 
 testmiljøet.

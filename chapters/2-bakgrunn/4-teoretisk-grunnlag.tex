@@ -1,0 +1,62 @@
+\subsection{Mellomvare, REST og adapter-mønsteret}
+\label{subsec:mellomvare-rest-adapter}
+
+Mellomvare er programvare som fungerer som et kommunikasjonslag mellom applikasjoner,
+databaser og operativsystemer. I stedet for at hver applikasjon må koble seg direkte til
+alle andre, kobler de seg til mellomvaren, som håndterer ruting, transformasjon og
+sikkerhet på tvers av systemene \cite{azure_middleware}.
+
+\gls{rest} er en arkitekturstil for distribuerte systemer,
+definert av Roy Fielding i hans doktoravhandling fra 2000. REST bygger på et sett
+constraints: klient-tjener-separasjon, tilstandsløshet, og et uniformt grensesnitt
+basert på ressursidentifikasjon via URI-er \cite{wiki_rest}. VideoAPI følger disse
+prinsippene ved å eksponere videorom som ressurser over HTTP.
+
+Adapter-mønsteret er ett av de klassiske strukturelle designmønstrene beskrevet av
+Gamma et al. Det løser problemet der to grensesnitt er inkompatible ved å innføre
+et mellomliggende adapter-lag som oversetter kall fra klienten til det formatet
+mottakeren forventer \cite{wiki_adapter}. I VideoAPI realiseres dette gjennom
+\texttt{IVideoProvider}-grensesnittet, der hver provider-implementasjon fungerer som
+en adapter mot sin respektive videomotor.
+
+\subsection{Containerisering og statelessness}
+\label{subsec:containerisering-statelessness}
+
+Containerisering innebærer at en applikasjon pakkes sammen med alle sine avhengigheter
+i et isolert miljø som kan kjøres konsistent på tvers av ulike plattformer \cite{docker_docs}.
+Docker er den mest utbredte teknologien for dette, og muliggjør reproduserbare bygge-
+og kjøremiljøer uten avhengighet av vertssystemets konfigurasjon.
+
+Twelve-Factor App-metodologien definerer et sett prinsipper for å bygge skalerbare
+og vedlikeholdbare tjenester. To av prinsippene er særlig relevante for VideoAPI:
+konfigurasjon skal lagres i miljøvariabler fremfor i kode, og tjenesten skal være
+tilstandsløs slik at flere instanser kan kjøre parallelt uten å dele \gls{prosess-intern-state} \cite{twelve_factor}. VideoAPI følger begge disse prinsippene — all konfigurasjon
+styres via miljøvariabler, og API-et behandler hver forespørsel uavhengig av tidligere
+forespørsler.
+
+\subsection{Observability med Prometheus og Grafana}
+\label{subsec:observability}
+
+Observability handler om evnen til å forstå tilstanden til et system basert på
+data det eksponerer. Prometheus er et åpen kildekode-verktøy for systemovervåkning
+som samler inn og lagrer metrikker som tidsseriedata, identifisert med metrikknavn
+og nøkkel-verdi-par kalt labels \cite{prometheus_docs}. Innsamling skjer via en
+pull-modell der Prometheus periodisk henter metrikker fra instrumenterte tjenester.
+
+Grafana brukes til å visualisere disse metrikkene gjennom dashboards sammensatt av
+paneler som spør mot én eller flere datakilder \cite{grafana_docs}. I VideoAPI
+eksponerer applikasjonen metrikker via \texttt{prometheus-net}, som Prometheus
+skraper og Grafana visualiserer i egne dashboards for drifts- og sikkerhetsovervåkning.
+
+\subsection{Tokenbasert autentisering}
+\label{subsec:tokenbasert-autentisering}
+
+OAuth 2.0 er et autorisasjonsrammeverk som lar en klient få begrenset tilgang til
+en tjeneste på vegne av en ressurseier \cite{rfc6749}. I maskin-til-maskin-sammenheng
+benyttes \texttt{client\_credentials}-flyten, der klienten autentiserer seg direkte
+mot en autorisasjonsserver og mottar et tilgangstoken uten brukerinteraksjon.
+
+JSON Web Token (JWT) er et kompakt, URL-trygt format for å overføre påstander mellom
+parter som et signert objekt \cite{rfc7519}. Tokenet består av tre deler: header,
+payload og signatur. I VideoAPI valideres JWT-tokens utstedt av Keycloak på hvert
+beskyttet endepunkt, og tilgang krever at tokenet inneholder \texttt{api\_access}-påstanden.

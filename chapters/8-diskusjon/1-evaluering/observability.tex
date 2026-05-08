@@ -1,4 +1,49 @@
 \subsection{Observability-krav (O1.1--O1.3)}
 \label{sec:eval-observability}
 
-% Oppfyllelse av observability-krav
+Krav~O1.1--O1.3 ble i hovedsak oppfylt, men arbeidet med observability
+ble mer krevende enn først antatt. Den største lærdommen var at
+utfordringen ikke først og fremst lå i å lage logger, helsesjekker eller
+metrikker, men i å få Prometheus, Grafana og API-et til å fungere stabilt
+sammen i et containerisert miljø.
+
+Det mest tidkrevende problemet var å få Prometheus til å scrape
+\texttt{/metrics}-endepunktet fra API-containeren. I teorien er dette bare
+en HTTP-forespørsel, men i praksis støtte den på flere lag i
+applikasjonen og infrastrukturen. Intern Docker-DNS, \texttt{AllowedHosts},
+\texttt{RequireHost} og HTTPS-redirect påvirket alle om Prometheus faktisk
+fikk svar fra API-et. Vi prøvde flere varianter før vi landet på en løsning
+der Prometheus scraper over HTTP internt i Docker-nettverket, samtidig som
+\texttt{/metrics} eksplisitt unntas fra HTTPS-redirect. Dette var et
+praktisk kompromiss: TLS gir liten verdi internt mellom containere på samme
+host, men HTTPS bør fortsatt brukes for ekstern trafikk.
+
+Grafana ga også noen uventede problemer. Datasource-oppsettet fungerte
+ikke stabilt før UID-en til Prometheus-datasourcen ble hardkodet i
+dashboard-filene. Dette er ikke den mest fleksible løsningen, men den gjorde
+provisioning mer forutsigbar. I tillegg måtte vi håndtere problemer med
+plugin-oppdateringer og minnebruk i Grafana-containeren. Dette viste at
+observability-verktøyene selv også må driftes og konfigureres riktig, ikke
+bare legges til som en ekstra tjeneste i Docker Compose.
+
+Et annet konkret eksempel var Docker-healthchecken. Den brukte
+\texttt{curl}, men base-imaget inneholdt ikke \texttt{curl}. Resultatet var
+at containeren ble markert som \texttt{unhealthy}, selv om API-et i seg selv
+kunne kjøre. Feilen var enkel å rette, men vanskeligere å finne fordi
+symptomet oppstod i samspillet mellom Docker, API-containeren og
+Prometheus. Dette gjorde det tydelig at flere av problemene var
+diagnostiseringsproblemer mer enn rene kodeproblemer.
+
+En viktig erfaring er derfor at observability ikke bare handler om å
+eksponere riktige data, men også om å kunne stole på infrastrukturen som
+samler dem inn. Flere av løsningene ble pragmatiske kompromisser, som HTTP
+internt i Docker-nettet, hardkodet datasource-UID og eksponering av Grafana
+og Prometheus-porter for at HDO lettere kunne teste. Disse valgene var
+nyttige i prosjektfasen, men bør vurderes strengere før produksjonsbruk.
+
+Den viktigste svakheten i dagens løsning er at \texttt{/metrics}-endepunktet
+er eksponert uten autentisering. Før produksjon bør dette sikres med
+nettverksbegrensning, reverse proxy-regler eller Bearer-autentisering. I
+tillegg burde vi hatt bedre testdekning og mer systematisk feilsøkingslogg
+for observability-oppsettet, slik at slike problemer kunne vært oppdaget
+tidligere.

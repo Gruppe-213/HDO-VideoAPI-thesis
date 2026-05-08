@@ -1,17 +1,14 @@
 \section{Bakgrunn}
 \label{sec:bakgrunn}
 
-Helsetjenestens driftsorganisasjon for nødnett HF (HDO) leverer
-kommunikasjonsløsninger til norsk akuttmedisin og drifter videoløsninger
-for 109 akuttmedisinske kommunikasjonssentraler (AMK) og legevaktsentraler
-(LVS) over hele Norge \cite{hdo_kravspec}. Videoløsningene brukes i akutte
-situasjoner der operatører kan sende en SMS-lenke til innringeren, som
-deretter kan sende videostrøm tilbake til sentralen. Dette brukes som beslutningsstøtte ved akuttmedisinske hendelser.
+\gls{hdo} leverer kommunikasjonsløsninger til norsk akuttmedisin og drifter videoløsninger for 109 \gls{amk} og \gls{lvs} over hele Norge \cite{hdo_kravspec}. Videoløsningene brukes i akutte situasjoner der operatøren sender en SMS-lenke til innringeren, som deretter starter en videostrøm tilbake til sentralen. Lyd går via den ordinære telefonsamtalen, mens video brukes som beslutningsstøtte ved akuttmedisinske hendelser.
 
-HDO benytter i dag to separate videomotorer: AntMedia Server og NHN Video. Disse har ulike API-er og integrasjonsmetoder, noe som
-gjør at ny funksjonalitet må implementeres separat for hver motor. Samtidig
-må opplæring, vedlikehold og drift forholde seg til to ulike systemer.
+Hdo benytter i dag to separate \gls{videomotor}er: AntMedia Server og \gls{nhn} Video.
+Disse har ulike \gls{api}-er og integrasjonsmetoder, noe som gjør at ny
+funksjonalitet må implementeres separat for hver motor. Samtidig må
+opplæring, vedlikehold og drift forholde seg til to ulike systemer.
 
-For å håndtere dette ønsket HDO en mellomvare som skjuler forskjellene
-mellom videomotorene bak ett felles API. I dette prosjektet ble en slik
-mellomvare utviklet som proof-of-concept, med støtte for de videomotorene som er i bruk i dag.
+For å håndtere dette ønsket HDO en \gls{mellomvare} som skjuler forskjellene
+mellom videomotorene bak ett felles API. I dette prosjektet utviklet vi
+en slik mellomvare som \gls{proof-of-concept}, med støtte for de videomotorene
+som er i bruk i dag.

@@ -1,23 +1,35 @@
 \section{Sikkerhetskrav}
 \label{sec:krav-sikkerhet}
 
-VideoAPI opererer i akuttmedisinsk sammenheng hvor uautorisert 
-tilgang til videostrømmer kan utgjøre alvorlige personvernbrudd. 
-Sikkerhetskravene definerer hvem som kan bruke API-et og hvordan 
-tilgang til individuelle videorom kontrolleres.
+VideoAPI skal brukes i en akuttmedisinsk kontekst, der uautorisert 
+tilgang til videostrømmer kan føre til alvorlige personvernbrudd. 
+Sikkerhetskravene beskriver derfor både tilgang til selve API-et og 
+tilgang til individuelle videorom eller strømmer.
 
 \subsection{API-autentisering (S1.1)}
 \label{subsec:krav-s11}
 
-Alle endepunkter unntatt helsesjekk krever et gyldig Bearer-token 
-utstedt via OAuth~2.0. Dette begrenser tilgangen til VideoAPI til 
-HDOs egne systemer og forhindrer uautorisert opprettelse av videorom.
+Krav S1.1 innebærer at alle API-endepunkter, med unntak av 
+helsesjekk-endepunkter, skal kreve gyldig Bearer-token utstedt 
+gjennom OAuth~2.0. Formålet er å begrense bruken av VideoAPI til 
+autoriserte klientsystemer og hindre uautorisert opprettelse, henting 
+eller sletting av videorom.
+
+Kravet evalueres ved å teste at beskyttede endepunkter avviser 
+forespørsler uten gyldig token, og at helsesjekk-endepunktene fortsatt 
+kan nås uten autentisering.
 
 \subsection{Romtoken for videostrømmer (S1.2)}
 \label{subsec:krav-s12}
 
-Hvert videorom tildeles en sikkerhetstoken slik at kun mottakeren 
-av SMS-lenken kan delta i strømmen. AntMedia bruker JWT-baserte 
-viewer tokens; NHN Video bruker Pexip Guest PINs. VideoAPI 
-abstraherer disse forskjellene og returnerer en uniform 
-tilkoblingslenke uavhengig av backend.
+Krav S1.2 innebærer at tilgang til et opprettet videorom eller en 
+videostrøm skal begrenses med en romspesifikk tilgangsmekanisme. 
+I denne oppgaven tolkes kravet som at VideoAPI skal bruke den 
+underliggende videomotorens egen mekanisme for romtilgang, for 
+eksempel viewer-token, PIN-kode eller tilsvarende.
+
+Formålet er at kun den tiltenkte mottakeren av videolenken skal kunne 
+delta i eller se strømmen. Kravet evalueres ved å kontrollere at 
+VideoAPI kan opprette eller returnere nødvendig tilgangsinformasjon 
+for de støttede videomotorene, og at denne oppførselen er dokumentert 
+i API-dokumentasjonen.

@@ -3,7 +3,7 @@
 
 Kildekoden ble håndtert i Git med en grenbasert arbeidsflyt inspirert av Gitflow \cite{gitflow}. Utviklingen foregikk i egne \texttt{feature/*}-grener navngitt etter funksjonsområde. En ferdig \texttt{feature}-gren ble gjennomgått av et annet teammedlem via en pull request og deretter flettet inn i \texttt{develop}. Samlede leveranser fra \texttt{develop} ble flettet til \texttt{main} når nye og betydelige funksjoner var ferdigstilt og tilstrekkelig testet.
 
-Alle commit-meldinger tok utganspunkt i konvensjonen fra Conventional Commits \cite{conventionalcommits}, med prefikser som \texttt{feat:} for ny funksjonalitet og \texttt{fix:} for feilrettinger. Dette holdt historikken lesbar og gjorde det enklere å identifisere hvilke endringer som introduserte ny atferd.
+Alle commit-meldinger tok utgangspunkt i konvensjonen fra Conventional Commits \cite{conventionalcommits}, med prefikser som \texttt{feat:} for ny funksjonalitet og \texttt{fix:} for feilrettinger. Dette holdt historikken lesbar og gjorde det enklere å identifisere hvilke endringer som introduserte ny atferd.
 
 CI-pipelinen var definert i GitHub Actions og trigget ved hvert push og pull request mot \texttt{main}, \texttt{develop} og \texttt{feature/*}-grener. Pipelinen besto av fire trinn som kjørte i sekvens: formatkontroll med \texttt{dotnet format --verify-no-changes}, pakkelasting med \texttt{dotnet restore}, kompilering i Release-konfigurasjon og kjøring av hele testsuiten med \texttt{dotnet test}. Et femte trinn, menneskelig godkjenning, var påkrevd før en push til \texttt{main} ble regnet som fullført. Dette hindret at kode fant veien til stabil gren uten eksplisitt vurdering selv om alle automatiserte sjekker passerte.
 

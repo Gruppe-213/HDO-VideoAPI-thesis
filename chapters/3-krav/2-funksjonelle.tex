@@ -1,43 +1,62 @@
 \section{Funksjonelle krav}
 \label{sec:krav-funksjonelle}
 
-VideoAPI tilbyr et standardisert REST API som abstraherer 
-forskjellene mellom AntMedia Server og NHN Video. Kravene 
-definerer kjerneoperasjonene som måtte støttes for å dekke 
-HDOs bruksbehov i akuttmedisinske kontrollrom.
+De funksjonelle kravene beskriver kjerneoperasjonene VideoAPI må 
+støtte for å dekke HDOs behov for håndtering av videorom. Kravene 
+tar utgangspunkt i arbeidsflyten der en operatør sender en SMS-lenke 
+til en innringer, og innringeren kan starte videostrømming tilbake til 
+kontrollrommet.
 
 \subsection{Oppretting av videorom (F1.1)}
 \label{subsec:krav-f11}
 
-AMK-operatører initierer videostrømming ved å sende en 
-SMS-lenke til innringeren. Videorommet opprettes dynamisk 
-uten manuell prekonfigurasjon. VideoAPI støtter oppretting 
-av nye rom og returnerer informasjon som tillater tilkobling. 
-Dersom klienten ikke sender med et rom-navn, genererer 
-mellomvaren et unikt navn og returnerer dette.
+Krav F1.1 innebærer at mellomvaren skal kunne opprette et nytt 
+videorom hos valgt videomotor og returnere informasjon som gjør det 
+mulig å koble til rommet. Dersom klienten ikke sender med navn eller 
+ID for rommet, skal mellomvaren sette dette selv og returnere verdien 
+til klienten.
+
+Kravet evalueres ved å kontrollere at rom kan opprettes for de 
+støttede videomotorene, og at responsen inneholder nødvendig 
+rominformasjon.
 
 \subsection{Sletting av videorom (F1.2)}
 \label{subsec:krav-f12}
 
-Etter endt samtale slettes videorommet for å frigjøre 
-ressurser på backend-tjenestene. API-et aksepterer rom-ID 
-som parameter og videresender slettingen til riktig backend.
+Krav F1.2 innebærer at mellomvaren skal kunne slette et spesifikt 
+videorom etter endt bruk. Formålet er å rydde opp i rom som ikke 
+lenger er nødvendige og frigjøre eventuelle ressurser hos den 
+underliggende videomotoren.
 
-\subsection{Henting av roominformasjon (F1.3)}
+Kravet evalueres ved å kontrollere at et opprettet rom kan slettes, 
+og at senere forespørsler mot samme rom håndteres som forventet.
+
+\subsection{Henting av rominformasjon (F1.3)}
 \label{subsec:krav-f13}
 
-Operatører trenger oversikt over aktive videorom under 
-pågående hendelser. VideoAPI returnerer strukturert 
-roominformasjon, herunder antall deltakere, 
-strømmingskvalitet og tilkoblingsstatus, normalisert 
-på tvers av de to backendene.
+Krav F1.3 innebærer at mellomvaren skal kunne hente informasjon om 
+et spesifikt videorom. Relevant informasjon kan være rom-ID, valgt videomotor, status, deltakere, tilkoblingsinformasjon eller andre verdier som den underliggende videomotoren tilbyr.
+
+Siden AntMedia Server og NHN Video har ulike datamodeller, tolkes 
+kravet som at VideoAPI skal returnere en felles responsmodell så langt 
+det er praktisk mulig, uten å skjule backend-spesifikke begrensninger.
+
+Kravet evalueres ved å kontrollere at rominformasjon kan hentes for 
+de støttede videomotorene, og at forskjeller mellom backendene er 
+dokumentert.
 
 \subsection{Start og stopp av videostrøm (F1.4, F1.5)}
 \label{subsec:krav-f14-f15}
 
-Operatører må kunne starte og stoppe videostrømming 
-eksplisitt. AntMedia er strøm-orientert og har egne 
-start/stopp-operasjoner; NHN Video er møte-orientert 
-og rommet er klart når det opprettes. Start og stopp 
-er derfor implementert ulikt per provider, noe som 
-var en av driverne for plugin-arkitekturen.
+Krav F1.4 og F1.5 innebærer at mellomvaren skal tilby operasjoner for 
+å starte og stoppe videostrømming for et eksisterende videorom.
+
+Kravene tolkes som backend-avhengige fordi videomotorene har ulike 
+domenemodeller. Dersom en videomotor støtter eksplisitt start og 
+stopp av strøm, skal mellomvaren videresende operasjonen. Dersom en 
+videomotor ikke har tilsvarende operasjon, skal API-et returnere en 
+tydelig og dokumentert feilrespons.
+
+Kravene evalueres ved å teste start- og stoppoperasjoner for de 
+videomotorene som støtter dette, og ved å kontrollere at ikke-støttede 
+operasjoner håndteres på en forutsigbar måte.

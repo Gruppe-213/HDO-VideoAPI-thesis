@@ -6,17 +6,27 @@ passerer i CI-pipeline. Testene kjører på 5,9 sekunder
 og aktiveres ved push til \texttt{main}, \texttt{develop} 
 og feature-brancher via GitHub Actions.
 
-Samlet linjedekning er 56\%, grensesnittdekning 36,7\% 
-og metodedekning 78,7\%. Den lave grensesnittdekningen 
-skyldes primært at mange kodestier kun aktiveres ved 
-spesifikke nettverkstilstander som ikke simuleres i 
-testmiljøet.
+En samlet linjedekning på 56\% vurderes som moderat. Dekningen var tilstrekkelig 
+for å gi trygghet rundt de mest sentrale kodebanene i proof-of-conceptet, men er 
+ikke høy nok til å dokumentere produksjonsmodenhet alene. Gruppen satte ikke et 
+formelt dekningsmål ved prosjektstart, noe som i ettertid vurderes som en svakhet 
+i teststrategien. For en produksjonsnær løsning i akuttmedisinsk kontekst burde 
+det vært definert eksplisitte mål for dekning av kritiske komponenter, særlig 
+controller-laget, provider-laget, autentisering og feilhåndtering.
+
+De viktigste udekkede kodebanene gjelder sjeldne feiltilstander i kommunikasjon 
+med eksterne tjenester, for eksempel timeout, avbrutte forespørsler, uventede 
+responsformater, DNS-/nettverksfeil og enkelte kombinasjoner av HTTP-statuskode 
+og responsbody fra AntMedia eller NHN. Slike tilfeller kan simuleres med mer 
+avanserte stubber eller kontraktstester, men ble ikke fullstendig dekket innenfor 
+prosjektperioden. Dette betyr at testene dokumenterer hovedflyt og flere sentrale 
+feilscenarier, men ikke alle mulige produksjonsfeil.
 
 \begin{table}[h]
 \centering
 \begin{tabular}{llr}
 \toprule
-\textbf{Komponent} & \textbf{Testtype} & \textbf{Dekning} \\
+\textbf{Komponent} & \textbf{Testtype} & \textbf{Linjedekning} \\
 \midrule
 AuthController & Integrasjonstest & 100\% \\
 KeycloakService & Enhetstest & 100\% \\
@@ -29,10 +39,16 @@ ApplicationExtensions & Integrasjonstest & 93,7\% \\
 GlobalExceptionHandler & Enhetstest & 89,2\% \\
 RoomsController & Integrasjonstest & 79\% \\
 AntMediaProvider & Enhetstest & 78,8\% \\
-VideoMetrics & Ingen & 0\% \\
+\midrule
+VideoMetrics & Ingen & 0\%$^*$ \\
+NHNConference & Ingen & 0\%$^*$ \\
+Microsoft.AspNetCore.OpenApi.Generated & Ingen & 0\%$^\dagger$ \\
+System.Runtime.CompilerServices & Ingen & 0\%$^\dagger$ \\
 \bottomrule
 \end{tabular}
-\caption{Linjedekning per komponent}
+\caption{Linjedekning per komponent. $^*$~Ikke testet direkte: avhenger av
+Prometheus-instans eller er ren datamodell uten testbar logikk.
+$^\dagger$~Autogenerert kode utenfor prosjektets kontroll.}
 \label{tab:testresultater}
 \end{table}
 

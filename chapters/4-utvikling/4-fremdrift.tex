@@ -1,11 +1,133 @@
+% \section{Fremdrift: plan versus gjennomføring}
+
+% \subsection{Planlagt fremdrift}
+
+% Prosjektet ble planlagt over 19 uker, fra 12. januar til 20. mai 2026. Fremdriftsplanen er visualisert i Gantt-diagrammet i Figur~\ref{fig:gantt} og organisert rundt fire parallelle arbeidsstrømmer: analyse og design, implementasjon, testing og dokumentasjon. Testing og rapportskriving foregikk løpende gjennom hele perioden fremfor å samles i en avsluttende fase.
+
+% Planen definerte syv milepæler. \textbf{M1} (Plan godkjent) markerte overgangen fra oppstart og kravanalyse til aktiv utvikling. \textbf{M2} (Første fungerende API) var satt til å avslutte arbeidet med kjerne-API, infrastruktur og sikkerhet — det vil si den grunnleggende strukturen av provider-grensesnitt, konfigurasjonssystem, autentisering og CI-oppsett. \textbf{M3} (Begge videomotorer) markerte at adaptere for AntMedia Server og NHN Video begge var integrert og i fungerende stand. \textbf{M4} (Demo ferdig) avsluttet arbeidet med demo-frontend og observability-støtte. \textbf{M5} (Produktleveranse) representerte det tidspunktet løsningen ble betraktet som komplett og overlevert oppdragsgiver. \textbf{M6} og \textbf{M7} markerte henholdsvis myk rapportfrist og endelig innlevering.
+
+% \newpage
+% \begin{figure}[H]
+% \centering
+% \input{figures/plan-gant}
+% \caption{Gantt-diagram for HDO VideoAPI (uke 1--19).}
+% \label{fig:gantt}
+% \end{figure}
+
+% \noindent\textbf{Fargeforklaring:}
+% \begin{itemize}
+%   \item \textcolor{red!40}{\rule{1cm}{0.25cm}} Kritisk sti
+%   \item \textcolor{blue!30}{\rule{1cm}{0.25cm}} Analyse og design
+%   \item \textcolor{green!30}{\rule{1cm}{0.25cm}} Implementasjon
+%   \item \textcolor{orange!30}{\rule{1cm}{0.25cm}} Testing
+%   \item \textcolor{purple!30}{\rule{1cm}{0.25cm}} Dokumentasjon
+% \end{itemize}
+
+% \subsection{Gjennomføring}
+
+% Det største avviket fra planen oppstod i perioden mellom M1 og M2. Opplæringen i C\# og .NET~10 tok lengre tid enn estimert. Dette forskyvet starten på provider-implementasjonene og bidro til at M3 ble noe forsinket.
+
+% Under integrasjonen av AntMedia-adapteren oppsto det utfordringer knyttet til WebRTC-adapteren og konfigurasjon av STUN- og TURN-servere i HDOs miljø. Dette gjorde det vanskelig å etablere stabile ende-til-ende-forbindelser i testmiljøet og krevde ekstra tid til feilsøking og tilpasning av klientkonfigurasjonen.
+
+% Arbeidet med NHN Video-adapteren ble påvirket av forhold utenfor prosjektgruppen i to distinkte faser. Tidlig i prosjektet fikk gruppen utleverte credentials som viste seg å være utløpt, noe som blokkerte autentisering mot NHN-miljøet. Det tok betydelig tid før nye og fungerende credentials ble utstedt, noe som forsinket oppstarten av integrasjonsarbeidet merkbart. Mot slutten av prosjektperioden, under ende-til-ende-testing, returnerte NHN-plattformen feilmeldinger om utilstrekkelig lisens ved opprettelse av videokommunikasjon. Begge forhold ble tatt opp i dialog med HDO, og det ble bekreftet at problemene lå på NHN-siden.
+
+% Det er viktig å presisere at VideoAPI-koden fungerte som forventet gjennom hele testperioden: autentisering, romoppretting og token-generering mot NHN-endepunktene gikk igjennom uten feil. Problemene oppsto først i det øyeblikket en sluttbruker skulle overføres fra VideoAPI til NHN Videos egen plattform for å etablere selve videoforbindelsen — et lag utenfor prosjektets kontrollsfære.
+
+% Aktivitetene knyttet til demo-frontend og observability, som planen plasserte mellom M3 og M4, gikk derimot raskere enn forventet. ASP.NET Cores innebygde støtte for helsesjekker og Prometheus-metrikker reduserte mengden egenskrevet infrastrukturkode vesentlig, og containeriseringen med Docker Compose falt raskt på plass etter at grunnstrukturen var etablert.
+
+% \subsection{Resultat}
+
+% Milepælene M1 gjennom M5 ble nådd innenfor prosjektperioden. Alle funksjonelle kjernekrav fra HDO ble implementert: oppretting, henting og sletting av videorom (F1.1–F1.3), start og stopp av videostrøm (F1.4–F1.5), OAuth~2.0-autentisering (S1.1) og romtokens per provider (S1.2). Infrastrukturkravene om containerisering og stateless design (I1.1–I1.2) ble oppfylt, og observability-kravene om strukturert logging, helseendepunkter og Prometheus-metrikker (O1.1–O1.3) er på plass. Testsuiten teller 133 automatiserte tester fordelt på enhets- og integrasjonstester.
+
+% Ett område ble nedprioritert som følge av tidspresset var at løsningen kun støtter Keycloak som identitetsleverandør. Generell OAuth~2.0-støtte mot vilkårlige utstedere ble vurdert som nyttig, men falt utenfor omfanget. Dette er dokumentert som kandidat for videre arbeid i delkapittel. ~\ref{sec:videre-arbeid}.
+
 \section{Fremdrift: plan versus gjennomføring}
 
-Prosjektperioden ble planlagt i tre faser. Den første fasen fokuserte på arkitektur og etablering av prosjektets grunnstruktur. Dette inkluderte provider-grensesnitt, konfigurasjonssystem, autentisering og CI-oppsett, parallelt med opplæring i C\# og .NET 10. Den andre fasen omfattet implementasjon av provider-adapterne, observability-støtte og containerisering. Den tredje fasen var reservert til testing, rapportskriving og finjustering av løsningen.
+\subsection{Planlagt fremdrift}
 
-Flere eksterne forhold påvirket fremdriften underveis i prosjektet. For AntMedia oppsto det utfordringer knyttet til WebRTC-adapteren og konfigurasjon av STUN- og TURN-servere i HDOs miljø. Dette gjorde det vanskelig å etablere stabile ende-til-ende-forbindelser i testmiljøet og førte til ekstra arbeid med feilsøking og tilpasning av klientkonfigurasjon.
+Prosjektet ble planlagt over 19 uker, fra 12. januar til 20. mai 2026. Fremdriftsplanen
+er visualisert i Gantt-diagrammet i Figur~\ref{fig:gantt} og organisert rundt fire
+parallelle arbeidsstrømmer: analyse og design, implementasjon, testing og dokumentasjon.
+Testing og rapportskriving foregikk løpende gjennom hele perioden fremfor å samles i
+en avsluttende fase. Siden ingen på teamet hadde erfaring med C\# eller .NET fra før,
+ble den første delen av prosjektet planlagt med rom for opplæring parallelt med
+etablering av prosjektstruktur.
 
-Arbeidet med NHN Video ble også påvirket av forhold utenfor prosjektgruppen. NHN-miljøet var periodevis ustabilt, og enkelte deler av API-et oppførte seg annerledes enn dokumentasjonen beskrev. Samtidig var responstiden på tekniske henvendelser via HDO begrenset, noe som gjorde avklaringer og feilretting tidkrevende. Dette påvirket særlig integrasjonstestingen av NHN-provideren mot slutten av prosjektperioden.
+Planen definerte syv milepæler. \textbf{M1} (Plan godkjent) markerte overgangen fra
+oppstart og kravanalyse til aktiv utvikling. \textbf{M2} (Første fungerende API)
+avsluttet arbeidet med kjerne-API, infrastruktur og sikkerhet — provider-grensesnitt,
+konfigurasjonssystem, autentisering og CI-oppsett. \textbf{M3} (Begge videomotorer)
+markerte at adaptere for AntMedia Server og NHN Video begge var integrert og i
+fungerende stand. \textbf{M4} (Demo ferdig) avsluttet arbeidet med demo-frontend og
+observability-støtte. \textbf{M5} (Produktleveranse) representerte det tidspunktet
+løsningen ble betraktet som komplett og overlevert oppdragsgiver. \textbf{M6} og
+\textbf{M7} markerte henholdsvis myk rapportfrist og endelig innlevering.
 
-Containerisering, CI/CD og observability-støtte ble derimot implementert raskere enn planlagt. ASP.NET Cores innebygde støtte for helsesjekker og Prometheus-metrikker reduserte behovet for egendefinert infrastrukturkode og gjorde det enklere å etablere et fungerende driftsmiljø tidlig i prosjektet.
+\newpage
+\begin{figure}[H]
+\centering
+\input{figures/plan-gant}
+\caption{Gantt-diagram for HDO VideoAPI (uke 1--19).}
+\label{fig:gantt}
+\end{figure}
 
-Til tross for utfordringene ble de funksjonelle kjernekravene fra HDO levert innenfor prosjektperioden. Økt testdekning av provider-laget og støtte for ytterligere identitetsleverandører ble identifisert som naturlige kandidater for videre arbeid.
+\noindent\textbf{Fargeforklaring:}
+\begin{itemize}
+  \item \textcolor{red!40}{\rule{1cm}{0.25cm}} Kritisk sti
+  \item \textcolor{blue!30}{\rule{1cm}{0.25cm}} Analyse og design
+  \item \textcolor{green!30}{\rule{1cm}{0.25cm}} Implementasjon
+  \item \textcolor{orange!30}{\rule{1cm}{0.25cm}} Testing
+  \item \textcolor{purple!30}{\rule{1cm}{0.25cm}} Dokumentasjon
+\end{itemize}
+
+\subsection{Gjennomføring}
+
+Avviket mellom plan og gjennomføring skyldes i hovedsak to typer utfordringer:
+forsinkelser i tidlig fase som presset provider-implementasjonene, og eksterne
+forhold knyttet til NHN-miljøet som påvirket ende-til-ende-testing mot slutten
+av perioden.
+
+Tidlig i prosjektet fikk gruppen utleverte credentials til NHN-miljøet som viste
+seg å være utløpt. Det tok betydelig tid før nye og fungerende credentials ble
+utstedt, noe som forsinket oppstarten av NHN-integrasjonen og bidro til at M3
+ble noe forsinket.
+
+Under integrasjonen av AntMedia-adapteren oppsto det utfordringer knyttet til
+WebRTC-adapteren og konfigurasjon av STUN- og TURN-servere i HDOs miljø. Dette
+gjorde det vanskelig å etablere stabile ende-til-ende-forbindelser i testmiljøet
+og krevde ekstra tid til feilsøking og tilpasning av klientkonfigurasjonen.
+
+Mot slutten av prosjektperioden, under ende-til-ende-testing av NHN Video,
+returnerte plattformen feilmeldinger om utilstrekkelig lisens ved opprettelse av
+videokommunikasjon. Forholdet ble tatt opp i dialog med HDO, og det ble bekreftet
+at feilen lå hos NHN. VideoAPI-koden opererte korrekt gjennom hele testperioden;
+autentisering, romoppretting og token-generering mot NHN-endepunktene gikk
+igjennom uten feil. Feilen manifesterte seg først når sluttbrukeren ble overført
+til NHN Videos egen plattform for å etablere videoforbindelsen — et lag utenfor
+prosjektets kontrollsfære.
+
+Aktivitetene mellom M3 og M4 gikk derimot raskere enn planlagt. ASP.NET Cores
+innebygde støtte for helsesjekker og Prometheus-metrikker reduserte mengden
+egenskrevet infrastrukturkode vesentlig, containeriseringen med Docker Compose
+falt raskt på plass etter at grunnstrukturen var etablert, og utviklingen av
+demo-frontenden forløp uten større hindringer.
+
+\subsection{Resultat}
+
+Milepælene M1 gjennom M5 ble nådd innenfor prosjektperioden. Alle funksjonelle
+kjernekrav fra HDO ble implementert: oppretting, henting og sletting av videorom
+(F1.1–F1.3), start og stopp av videostrøm (F1.4–F1.5), OAuth~2.0-autentisering
+(S1.1) og romtokens per provider (S1.2)~\cite{hdo_kravspec}.
+Infrastrukturkravene om containerisering og stateless design (I1.1–I1.2) ble oppfylt,
+og observability-kravene om strukturert logging, helseendepunkter og
+Prometheus-metrikker (O1.1–O1.3) er på plass~\cite{hdo_kravspec}.
+Testsuiten teller 133 automatiserte tester fordelt på enhets- og integrasjonstester.
+
+Det eneste området som ble nedprioritert som følge av tidspresset er at løsningen
+kun støtter Keycloak som identitetsleverandør. Generell OAuth~2.0-støtte mot vilkårlige
+utstedere ble vurdert som nyttig, men HDO ga uttrykk for at autentiseringsløsningen
+uansett ville bli erstattet ved en eventuell produksjonssetting, da de ville integrere
+sin egen autentiseringsinfrastruktur. Keycloak-støtten ble derfor behandlet som en
+midlertidig løsning, og generalisering av identitetsleverandør ble nedprioritert til
+fordel for kjerneomfanget. Dette er dokumentert som kandidat for videre arbeid i
+delkapittel~\ref{sec:videre-arbeid}.

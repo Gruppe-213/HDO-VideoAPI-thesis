@@ -8,6 +8,13 @@ AntMedia- og NHN-testmiljøer. Skriptet ble generert med
 AI-assistanse basert på teamets spesifikasjon av 
 testscenarier og forventet systemoppførsel, og ligger 
 i prosjektets repositorium under \texttt{e2e-test.sh}.
+Genereringen foregikk i flere iterasjoner der teamet 
+reviderte og validerte hver fase manuelt mot reelle 
+responsformater fra HDOs testmiljøer før koden ble 
+committet. Assertion-logikken ble spesifikt kontrollert 
+mot dokumenterte HTTP-statuskoder fra AntMedia og NHN, 
+og faser som ikke samsvarte med observert API-oppførsel 
+ble forkastet og regenerert.
 
 Skriptet er organisert i ti faser som dekker 
 infrastruktur, autentisering, full livssyklus for begge 
@@ -73,22 +80,20 @@ som integrasjonstester.
 \subsection{Prometheus og Grafana}
 \label{subsec:grafana}
 
-Prometheus-metrikker og Grafana-dashboardet ble 
-verifisert løpende under utvikling og under kjøring 
-av e2e-skriptet. Følgende ble bekreftet visuelt:
+Prometheus- og Grafana-integrasjonen ble verifisert ved å kjøre et kontrollert 
+trafikkmønster gjennom E2E-scriptet og deretter sammenligne forventede hendelser 
+med verdiene i Prometheus og Grafana-dashboardene. Verifiseringen ble gjort manuelt, 
+men etter en fast sjekkliste:
 
 \begin{itemize}
-    \item \texttt{hdo\_active\_rooms\_total} øker ved 
-          romopprettelse og nullstilles etter sletting
-    \item \texttt{http\_requests\_total} reflekterer 
-          faktisk trafikkmønster per endepunkt og 
-          statuskode
-    \item \texttt{http\_request\_duration\_seconds} 
-          viser forventet latens for begge backends
-    \item Rate limiting-metrikker trigges korrekt ved 
-          overskridelse av terskelverdi
-    \item Health check-status for AntMedia og NHN 
-          oppdateres korrekt ved tilgjengelighetsendringer
+    \item \texttt{hdo\_active\_rooms\_total} økte ved romopprettelse og gikk tilbake 
+          til null etter sletting
+    \item \texttt{http\_requests\_total} økte for de endepunktene E2E-scriptet traff
+    \item \texttt{http\_request\_duration\_seconds} viste registrerte responstider 
+          for begge backends
+    \item rate limiting-metrikker økte når scriptet overskred definert terskelverdi
+    \item health check-status for AntMedia og NHN samsvarte med tilgjengeligheten 
+          observert fra \texttt{/health/ready}
 \end{itemize}
 
 \subsection{Frontend-demo}
