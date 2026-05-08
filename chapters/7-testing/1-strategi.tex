@@ -29,63 +29,137 @@ inneholder flere tester per kategori enn det som er listet eksplisitt.
 Statuskolonnen angir hvordan kravet primært ble verifisert (jf.\
 forklaring under tabellen).
 
+% \begin{table}[h]
+% \centering
+% \small
+% \begin{threeparttable}
+% \begin{tabular}{l p{5cm} p{5.4cm} r}
+% \toprule
+% \textbf{Krav} & \textbf{Implementasjon} & \textbf{Test(er)} & \textbf{Status} \\
+% \midrule
+% F1.1 & \url{RoomsController.CreateRoom}, \newline \url{*.CreateRoomAsync}
+%      & Vellykket oppretting returnerer 201 med Location-header; \newline 
+%        provider-adapterne oppretter rom korrekt; E2E & Pass \\
+% \addlinespace
+% F1.2 & \url{RoomsController.DeleteRoom}, \newline \url{*.DeleteRoomAsync}
+%      & Controller håndterer feilstier korrekt; \newline 
+%        E2E og manuell verifisering av sletting & Pass (E2E) \\
+% \addlinespace
+% F1.3 & \url{RoomsController.GetRoom}, \newline \url{*.GetRoomAsync}
+%      & Validerings- og feilsti-tester; \newline E2E og manuell \texttt{200} & Pass (E2E) \\
+% \addlinespace
+% F1.4 & \texttt{RoomsController.StartStream}, \newline \texttt{AntMediaProvider.StartStreamAsync}, \newline \texttt{NHNVideoProvider} (\texttt{501})
+%      & Automatiserte feilstier og provider-tester; \newline E2E og manuell AntMedia-start & Delvis \\
+% \addlinespace
+% F1.5 & \texttt{RoomsController.StopStream}, \newline \texttt{AntMediaProvider.StopStreamAsync}, \newline \texttt{NHNVideoProvider} (\texttt{501})
+%      & Automatiserte feilstier og NHN-\texttt{501}; \newline E2E og manuell AntMedia-stopp & Delvis \\
+% \midrule
+% S1.1 & \texttt{KeycloakExtensions}, \newline \texttt{[Authorize]} på \texttt{RoomsController}
+%      & \texttt{ProtectedEndpoint\_WithoutApiAccessClaim\_Returns403}, \newline \texttt{SecurityBehaviorTests} & Pass \\
+% \addlinespace
+% S1.2 & \texttt{\{AntMedia,NHNVideo\}Provider.SetRoomTokenAsync}, \newline \texttt{GenerateWebRtcTokenAsync}
+%      & \texttt{SetRoomToken\_*}, \newline \texttt{GenerateWebRtcToken\_*} & Pass \\
+% \midrule
+% I1.1 & \texttt{Dockerfile}, \texttt{compose.yaml}
+%      & Manuell deploy-test på OpenStack-VM & Pass (manuell) \\
+% \addlinespace
+% I1.2 & \texttt{Program.cs}, env-vars, \newline \texttt{NHNTokenCache} (per prosess)
+%      & Dokumentert i kap.~\ref{sec:arkitektur} og~\ref{ch:implementasjon} & Verifisert ved gjennomgang \\
+% \midrule
+% O1.1 & \texttt{GlobalExceptionHandler}, \texttt{ILogger}
+%      & \texttt{GlobalExceptionHandlerTests} & Pass \\
+% \addlinespace
+% O1.2 & \texttt{HealthCheckExtensions}, \newline \texttt{\{AntMedia,NHNVideo\}Provider.HealthCheck}
+%      & \texttt{HealthCheck}-tester, E2E fase~1 & Pass (E2E) \\
+% \addlinespace
+% O1.3 & \texttt{VideoMetrics}, \texttt{prometheus-net}
+%      & E2E fase~9, manuell Grafana-verifisering & Pass (E2E + manuell) \\
+% \midrule
+% D1.1 & \texttt{Swashbuckle}, \texttt{README}, \texttt{docs/}
+%      & Dokumentasjonsgjennomgang & Verifisert ved gjennomgang \\
+% \bottomrule
+% \end{tabular}
+% \begin{tablenotes}
+% \small
+% \item Begge videomotor-providerne: \texttt{AntMediaProvider} og \texttt{NHNVideoProvider}.
+% \item \textbf{Pass} — i hovedsak automatiserte tester.
+% \item \textbf{Pass (E2E)} — suksessflyt eller full scenario verifisert med E2E og/eller manuelt, med supplement fra automatiserte feilstier der det er aktuelt.
+% \item \textbf{Pass (E2E + manuell)} — E2E kombinert med manuell Grafana-/metrikksjekk.
+% \item \textbf{Pass (manuell)} — deploy/manuell kjøring på VM, ikke isolert CI-test.
+% \item \textbf{Delvis} — kravet er oppfylt for AntMedia, mens NHN ikke har tilsvarende start-/stoppoperasjon og returnerer forventet \texttt{501}.
+% \item \textbf{Verifisert ved gjennomgang} — design og kodegjennomgang fremfor én automatisert testcase (I1.2, D1.1). Cache/statelessness diskuteres også i kap.~\ref{ch:diskusjon}.
+% \end{tablenotes}
+% \end{threeparttable}
+% \caption{Krav-sporbarhetstabell (Requirements Traceability Matrix).}
+% \label{tab:rtm}
+% \end{table}
+
 \begin{table}[h]
 \centering
 \small
 \begin{threeparttable}
-\begin{tabular}{l p{5cm} p{5.4cm} p{3.15cm}}
+\begin{tabular}{l p{5cm} p{5.4cm} r}
 \toprule
 \textbf{Krav} & \textbf{Implementasjon} & \textbf{Test(er)} & \textbf{Status} \\
 \midrule
-F1.1 & \texttt{RoomsController.CreateRoom}, \newline \texttt{\{AntMedia,NHNVideo\}Provider.CreateRoomAsync}
-     & \texttt{CreateRoom\_Success\_Returns201WithLocation}, \newline provider-\texttt{CreateRoomAsync}-tester, E2E & Pass \\
+F1.1 & \texttt{RoomsController.CreateRoom}, \newline \texttt{*.CreateRoomAsync}
+     & Vellykket oppretting returnerer 201 med Location-header; provider-adapterne oppretter rom korrekt; E2E & Pass \\
 \addlinespace
-F1.2 & \texttt{RoomsController.DeleteRoom}, \newline \texttt{\{AntMedia,NHNVideo\}Provider.DeleteRoomAsync}
-     & Controller-feilstier; \newline E2E og manuell sletting & Pass (E2E) \\
+F1.2 & \texttt{RoomsController.DeleteRoom}, \newline \texttt{*.DeleteRoomAsync}
+     & Controller håndterer feilstier korrekt; \newline
+       sletting verifisert via E2E og manuell test & Pass \\
 \addlinespace
-F1.3 & \texttt{RoomsController.GetRoom}, \newline \texttt{\{AntMedia,NHNVideo\}Provider.GetRoomAsync}
-     & Validerings- og feilsti-tester; \newline E2E og manuell \texttt{200} & Pass (E2E) \\
+F1.3 & \texttt{RoomsController.GetRoom}, \newline \texttt{*.GetRoomAsync}
+     & Romsøk returnerer korrekt ressurs; \newline
+       validering og feilstier dekket; E2E & Pass \\
 \addlinespace
-F1.4 & \texttt{RoomsController.StartStream}, \newline \texttt{AntMediaProvider.StartStreamAsync}, \newline \texttt{NHNVideoProvider} (\texttt{501})
-     & Automatiserte feilstier og provider-tester; \newline E2E og manuell AntMedia-start & Delvis \\
+F1.4 & \texttt{RoomsController.StartStream}, \newline \texttt{*.StartStreamAsync}
+     & Strømstart delegeres korrekt til provider; \newline
+       NHN returnerer forventet \texttt{501}; E2E og manuell AntMedia-start & Delvis \\
 \addlinespace
-F1.5 & \texttt{RoomsController.StopStream}, \newline \texttt{AntMediaProvider.StopStreamAsync}, \newline \texttt{NHNVideoProvider} (\texttt{501})
-     & Automatiserte feilstier og NHN-\texttt{501}; \newline E2E og manuell AntMedia-stopp & Delvis \\
+F1.5 & \texttt{RoomsController.StopStream}, \newline \texttt{*.StopStreamAsync}
+     & Strømstopp delegeres korrekt til provider; \newline
+       NHN returnerer forventet \texttt{501}; E2E og manuell AntMedia-stopp & Delvis \\
 \midrule
 S1.1 & \texttt{KeycloakExtensions}, \newline \texttt{[Authorize]} på \texttt{RoomsController}
-     & \texttt{ProtectedEndpoint\_WithoutApiAccessClaim\_Returns403}, \newline \texttt{SecurityBehaviorTests} & Pass \\
+     & Endepunkter krever gyldig tilgangsrettighet; \newline
+       forespørsler uten korrekt claim avvises med \texttt{403} & Pass \\
 \addlinespace
-S1.2 & \texttt{\{AntMedia,NHNVideo\}Provider.SetRoomTokenAsync}, \newline \texttt{GenerateWebRtcTokenAsync}
-     & \texttt{SetRoomToken\_*}, \newline \texttt{GenerateWebRtcToken\_*} & Pass \\
+S1.2 & \texttt{RoomsController.SetRoomToken}, \newline \texttt{*.GenerateWebRtcTokenAsync}
+     & Token genereres og valideres korrekt \newline
+       for begge videomotorer & Pass \\
 \midrule
 I1.1 & \texttt{Dockerfile}, \texttt{compose.yaml}
-     & Manuell deploy-test på OpenStack-VM & Pass (manuell) \\
+     & Tjenesten starter og svarer korrekt \newline
+       etter deploy på OpenStack-VM (manuell) & Pass \\
 \addlinespace
 I1.2 & \texttt{Program.cs}, env-vars, \newline \texttt{NHNTokenCache} (per prosess)
-     & Dokumentert i kap.~\ref{sec:arkitektur} og~\ref{ch:implementasjon} & Verifisert ved gjennomgang \\
+     & Konfigurasjon via miljøvariabler og \newline
+       prosess-intern cache verifisert ved kodegjennomgang & Verifisert \\
 \midrule
-O1.1 & \texttt{GlobalExceptionHandler}, \texttt{ILogger}
-     & \texttt{GlobalExceptionHandlerTests} & Pass \\
+O1.1 & \texttt{GlobalExceptionHandler}, \newline \texttt{ILogger}
+     & Uventede feil fanges og returnerer \newline
+       strukturert feilrespons & Pass \\
 \addlinespace
-O1.2 & \texttt{HealthCheckExtensions}, \newline \texttt{\{AntMedia,NHNVideo\}Provider.HealthCheck}
-     & \texttt{HealthCheck}-tester, E2E fase~1 & Pass (E2E) \\
+O1.2 & \texttt{HealthCheckExtensions}, \newline \texttt{*.HealthCheck}
+     & Helsesjekk mot begge providere \newline
+       returnerer korrekt status; E2E & Pass \\
 \addlinespace
 O1.3 & \texttt{VideoMetrics}, \texttt{prometheus-net}
-     & E2E fase~9, manuell Grafana-verifisering & Pass (E2E + manuell) \\
+     & Metrikker eksponeres på \texttt{/metrics} \newline
+       og verifisert i Grafana; E2E & Pass \\
 \midrule
 D1.1 & \texttt{Swashbuckle}, \texttt{README}, \texttt{docs/}
-     & Dokumentasjonsgjennomgang & Verifisert ved gjennomgang \\
+     & API-dokumentasjon og oppsettsveiledning \newline
+       verifisert ved gjennomgang & Verifisert \\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
-\small
-\item Begge videomotor-providerne: \texttt{AntMediaProvider} og \texttt{NHNVideoProvider}.
-\item \textbf{Pass} — i hovedsak automatiserte tester.
-\item \textbf{Pass (E2E)} — suksessflyt eller full scenario verifisert med E2E og/eller manuelt, med supplement fra automatiserte feilstier der det er aktuelt.
-\item \textbf{Pass (E2E + manuell)} — E2E kombinert med manuell Grafana-/metrikksjekk.
-\item \textbf{Pass (manuell)} — deploy/manuell kjøring på VM, ikke isolert CI-test.
-\item \textbf{Delvis} — kravet er oppfylt for AntMedia, mens NHN ikke har tilsvarende start-/stoppoperasjon og returnerer forventet \texttt{501}.
-\item \textbf{Verifisert ved gjennomgang} — design og kodegjennomgang fremfor én automatisert testcase (I1.2, D1.1). Cache/statelessness diskuteres også i kap.~\ref{ch:diskusjon}.
+  \small
+  \item[$*$] Alle providers: \texttt{AntMediaProvider} og \texttt{NHNVideoProvider}
+  \item \textbf{Pass} --- Kravet er oppfylt og verifisert gjennom automatiserte tester, E2E eller manuell test.
+  \item \textbf{Delvis} --- Kravet er oppfylt for AntMedia; NHN mangler tilsvarende operasjon.
+  \item \textbf{Verifisert} --- Kravet er bekreftet gjennom kode- og dokumentasjonsgjennomgang.
 \end{tablenotes}
 \end{threeparttable}
 \caption{Krav-sporbarhetstabell (Requirements Traceability Matrix).}

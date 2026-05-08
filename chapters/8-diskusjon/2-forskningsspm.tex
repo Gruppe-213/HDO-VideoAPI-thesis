@@ -1,22 +1,49 @@
 \section{Besvarelse av forskningsspørsmålet}
 \label{sec:forskningsspm}
 
-\subsection{Dekning av kjerneoperasjoner i ett felles API (dimensjon 1)}
-\label{sec:rq-dimensjon-1}
+Forskningsspørsmålet var:
 
-% Dimensjon 1
+\begin{quote}
+I hvilken grad kan en plugin-basert mellomvarearkitektur standardisere
+tilgang til AntMedia Server og NHN Video gjennom ett felles API, samtidig
+som backend-spesifikk logikk isoleres fra kjernelogikken i VideoAPI?
+\end{quote}
 
-\subsection{Isolering av backend-spesifikk logikk i provider-laget (dimensjon 2)}
-\label{sec:rq-dimensjon-2}
+Resultatet viser at en plugin-basert mellomvarearkitektur i stor grad
+egner seg for dette formålet, men med noen viktige begrensninger.
+VideoAPI klarer å samle de sentrale romoperasjonene bak ett felles API:
+oppretting, henting og sletting av rom kan gjøres gjennom samme
+endepunkter uavhengig av videomotor. For klienten gir dette et mer
+standardisert grensesnitt enn direkte integrasjon mot AntMedia og NHN hver
+for seg.
 
-% Dimensjon 2
+Samtidig viser prosjektet at standardisering ikke betyr at alle
+videomotorer kan behandles helt likt. AntMedia og NHN har ulike
+domenemodeller. AntMedia er strømorientert, mens NHN er møte- og
+bookingorientert. Derfor finnes det operasjoner, særlig start, stopp og
+romtoken, som ikke har identisk betydning i begge systemer. VideoAPI løser
+dette ved å tilby samme API-flate, men la provider-laget håndtere
+forskjellene og returnere tydelige svar når en operasjon ikke støttes.
 
-\subsection{Sikkerhets-, infrastruktur- og observability-krav (dimensjon 3)}
-\label{sec:rq-dimensjon-3}
+Den viktigste styrken i løsningen er isoleringen av backend-spesifikk
+logikk. Controller-laget og de offentlige modellene forblir uavhengige av
+detaljene i AntMedia og NHN. Valideringen med ekstra providere viste også
+at nye videomotorer kunne legges til uten endringer i kjernelogikken.
+Dette støtter hovedideen bak arkitekturen: nye integrasjoner krever
+arbeid, men arbeidet lokaliseres til provider-laget i stedet for å spre
+seg gjennom hele API-et.
 
-% Dimensjon 3
+De ikke-funksjonelle kravene støtter også forskningsspørsmålet. Løsningen
+har autentisering, containerisering, miljøbasert konfigurasjon,
+helsesjekker, logging og Prometheus/Grafana-metrikker. Dette gjør
+arkitekturen mer realistisk som mellomvare i HDOs driftskontekst. Likevel
+må resultatet forstås som et proof-of-concept. Løsningen demonstrerer at
+arkitekturen fungerer, men den dokumenterer ikke full produksjonsmodenhet.
 
-\subsection{Begrensninger ved heterogene domenemodeller (dimensjon 4)}
-\label{sec:rq-dimensjon-4}
-
-% Dimensjon 4
+Samlet er svaret derfor at en plugin-basert mellomvarearkitektur i stor
+grad kan standardisere tilgangen til AntMedia og NHN gjennom ett felles
+API, så lenge standardiseringen forstås som en felles API-kontrakt og ikke
+som full semantisk likhet mellom videomotorene. Backend-spesifikk logikk
+kan isoleres fra kjernelogikken, men de underliggende forskjellene må
+fortsatt håndteres eksplisitt i provider-laget og dokumenteres for
+klientene.

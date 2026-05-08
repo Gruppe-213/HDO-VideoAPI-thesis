@@ -53,15 +53,13 @@ en avsluttende fase. Siden ingen på teamet hadde erfaring med C\# eller .NET fr
 ble den første delen av prosjektet planlagt med rom for opplæring parallelt med
 etablering av prosjektstruktur.
 
-Planen definerte syv milepæler. \textbf{M1} (Plan godkjent) markerte overgangen fra
-oppstart og kravanalyse til aktiv utvikling. \textbf{M2} (Første fungerende API)
-avsluttet arbeidet med kjerne-API, infrastruktur og sikkerhet — provider-grensesnitt,
-konfigurasjonssystem, autentisering og CI-oppsett. \textbf{M3} (Begge videomotorer)
-markerte at adaptere for AntMedia Server og NHN Video begge var integrert og i
-fungerende stand. \textbf{M4} (Demo ferdig) avsluttet arbeidet med demo-frontend og
-observability-støtte. \textbf{M5} (Produktleveranse) representerte det tidspunktet
-løsningen ble betraktet som komplett og overlevert oppdragsgiver. \textbf{M6} og
-\textbf{M7} markerte henholdsvis myk rapportfrist og endelig innlevering.
+Planen definerte syv milepæler:
+\begin{enumerate}
+    \item \textbf{M1} (Plan godkjent) markerte overgangen fra oppstart og kravanalyse til aktiv utvikling.
+    \item \textbf{M2} (Første fungerende API) markerte ferdigstillelsen av kjerne-API-et, med provider-grensesnitt, konfigurasjonssystem, autentisering og CI-oppsett på plass. 
+    \item \textbf{M3} (Begge videomotorer) markerte at adaptere for AntMedia Server og NHN Video begge var integrert og i fungerende stand. \item \textbf{M4} (Demo ferdig) avsluttet arbeidet med demo-frontend og observability-støtte. 
+    \item \textbf{M5} (Produktleveranse) representerte det tidspunktet løsningen ble betraktet som komplett og overlevert oppdragsgiver. \item \textbf{M6} og \textbf{M7} markerte henholdsvis myk rapportfrist og endelig innlevering.
+\end{enumerate}
 
 \newpage
 \begin{figure}[H]
@@ -82,10 +80,7 @@ løsningen ble betraktet som komplett og overlevert oppdragsgiver. \textbf{M6} o
 
 \subsection{Gjennomføring}
 
-Avviket mellom plan og gjennomføring skyldes i hovedsak to typer utfordringer:
-forsinkelser i tidlig fase som presset provider-implementasjonene, og eksterne
-forhold knyttet til NHN-miljøet som påvirket ende-til-ende-testing mot slutten
-av perioden.
+Gjennomføringen avvek fra planen på flere punkter. Hovedtyngden av forsinkelsene var knyttet til eksterne avhengigheter og tredjepartsplattformer utenfor gruppens kontroll, mens enkelte tekniske utfordringer i integrasjonsarbeidet krevde ekstra tid til feilsøking og tilpasning. Mot slutten av perioden ble noe av tapt tid hentet inn gjennom raskere fremdrift mellom M3 og M4 enn opprinnelig planlagt.
 
 Tidlig i prosjektet fikk gruppen utleverte credentials til NHN-miljøet som viste
 seg å være utløpt. Det tok betydelig tid før nye og fungerende credentials ble

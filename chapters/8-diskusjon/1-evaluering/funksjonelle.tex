@@ -1,4 +1,49 @@
 \subsection{Funksjonelle krav (F1.1--F1.5)}
 \label{sec:eval-funksjonelle}
 
-% Oppfyllelse av funksjonelle krav
+Krav F1.1--F1.5 ble oppfylt for begge video-backends, men veien dit var
+lengre enn vi hadde sett for oss. Mye av arbeidet handlet ikke om å skrive
+kode, men om å forstå plattformene vi integrerte mot, jobbe seg gjennom
+konfigurasjonsfeil og uventede begrensninger i video-backendene og vente
+på svar fra dem.
+
+AntMedia var den første og mest krevende integrasjonen. Dokumentasjonen er
+spredt og til dels utdatert, og det var tidskrevende å finne ut hvilken versjon
+av dokumentasjonen som faktisk gjaldt for oppsettet HDO brukte. Vi visste
+heller ikke på forhånd hva WebRTC innebærer i praksis og det tok mye
+prøving og feiling før vi hadde en grunnleggende forståelse av hvordan
+signalering, strømmer og tokens henger sammen. Til slutt måtte vi sette oss
+ned med HDO for å få forklart flyten, noe som burde skjedd tidligere i
+prosjektet.
+
+Start og stopp av videostrøm (F1.4 og F1.5) viste seg å være vanskeligere enn
+antatt. I AntMedia skjer dette ikke via REST-API-et alene, det krever at
+en WebRTC-adapter på klientsiden kobler seg til strømmen. For å i det hele
+tatt vise at dette fungerte, måtte vi lage en enkel frontend. Her støttet vi
+på et nytt problem: vi ble i starten anbefalt å bruke Googles åpne
+STUN-servere, men disse fungerte dårlig i praksis og ga ustabile forbindelser.
+Vi var avhengige av at HDO stilte med egne STUN- og TURN-servere, og mens vi
+ventet på det brukte vi mye tid på feilsøking uten å komme videre. Når
+serverne endelig kom på plass fungerte det, men forsinkelsen kostet tid vi
+kunne brukt på andre ting.
+
+NHN Video hadde en annen type problemer. AntMedia er satt opp og driftet av
+HDO, så når noe ikke stemte der fikk vi raskt hjelp. NHN derimot er en
+ekstern aktør, og responstiden på spørsmål og feilmeldinger var lang gjennom
+hele prosjektet. Det første konkrete problemet var at vi fikk utdaterte credentials som ikke virket og det tok tid å avklare dette og få nye.
+Videre viste det seg at URL-ene NHN returnerer for gjeste- og
+vertspålogging hadde et format som ikke fungerte direkte i nettleseren.
+HDO kjente til problemet, men det ble aldri rettet på NHN sin side i løpet av
+prosjektperioden. Vi endte med å lage en midlertidig URL-rewrite i
+\texttt{NHNVideoProvider} som konverterer URL-ene til riktig format.
+I tillegg opplevde vi lisensproblemer som periodisk hindret tilgang til
+NHNs videostrømmer, noe vi ikke hadde kontroll over og heller ikke fikk
+tilfredsstillende forklaring på.
+
+Den viktigste erfaringen fra arbeidet med de funksjonelle kravene er at
+integrasjonskvaliteten i stor grad avhenger av responsiviteten til den
+eksterne aktøren. Der HDO var tilgjengelig og proaktive gikk integrasjonen
+greit; der NHN var treg ble vi sittende og vente. For fremtidige prosjekter
+med lignende avhengigheter bør man etablere tydelige SLA-er for teknisk
+støtte tidlig, og ikke anta at API-dokumentasjon og credentials man mottar er
+oppdaterte.

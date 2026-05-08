@@ -1,4 +1,31 @@
 \section{Videre arbeid}
 \label{sec:videre-arbeid}
 
-% Fremtidig utvikling
+Videre arbeid bør ta utgangspunkt i både testavgrensningene og
+sluttevalueringen fra HDO. Evalueringen viser at HDO vurderte
+kjernefunksjonaliteten og provider-arkitekturen som godt oppfylt, og at
+kodebasen kan tas videre mot leverandører. Samtidig var den samlede
+vurderingen 4 av 5, og én respondent presiserte at løsningen krever noe
+videreutvikling før videre bruk.
+
+Det viktigste neste steget er produksjonsherding av sikkerheten.
+Issuer- og audience-validering bør aktiveres, \texttt{RequireHttpsMetadata}
+bør være på, og den midlertidige Keycloak-konfigurasjonen bør erstattes
+av HDOs faktiske autentiseringsoppsett. Tilgangsmodellen bør også vurderes
+på nytt dersom flere klienter eller roller skal bruke samme API.
+
+Testoppsettet bør utvides med sikkerhetsskanning i CI, lasttesting med
+målbare resultater og kontraktstesting mot AntMedia, NHN og eventuelle nye
+videomotorer. Dette er nødvendig for å gå fra en fungerende
+proof-of-concept til en løsning som kan vurderes for reell drift.
+
+Observability-oppsettet bør tilpasses HDOs driftsmiljø. \texttt{/metrics},
+Prometheus og Grafana bør sikres med nettverksbegrensning, reverse proxy
+eller annen tilgangskontroll, og dashboard, alerting og loggkorrelasjon
+bør settes opp etter HDOs egne rutiner.
+
+Til slutt bør nye providere behandles som egne integrasjonsprosjekter.
+Valideringen viste at arkitekturen kan utvides uten endringer i
+kjernelogikken, men hver produksjonsklar provider trenger egne tester,
+dokumentasjon, health checks, metrikker og tydelig håndtering av
+operasjoner som ikke støttes.

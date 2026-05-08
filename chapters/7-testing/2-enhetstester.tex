@@ -3,8 +3,8 @@
 
 Enhetstestene var skrevet med xUnit og brukte Moq for mocking av
 avhengigheter. HTTP-laget ble mocket med en hjemmelaget
-\texttt{StubHttpMessageHandler}, som tok en lambda
-\texttt{Func<HttpRequestMessage, Task<HttpResponseMessage>>} og lot
+\texttt{StubHttpMessageHandler}, som tok en lambda funksjon
+\url{Func<HttpRequestMessage, Task<HttpResponseMessage>>} og lot
 testen kontrollere både request-inspeksjon og response-injeksjon uten
 nettverkskall. Dette gjorde det mulig å verifisere både hva provideren
 sendte og hvordan den behandlet svaret.
@@ -21,7 +21,7 @@ DI-registreringer og de egendefinerte exception-typene ble enhetstestet
 av samme grunn. \texttt{VideoMetrics} ble bevisst utelatt fra
 enhetstestene fordi klassen instrumenterer Prometheus via statiske
 metoder uten testbar logikk; den ble i stedet verifisert indirekte
-gjennom E2E-fase 9 og manuell Grafana-sjekk (jf.\ avsnitt~\ref{subsec:grafana}).
+gjennom E2E-fase 9 og manuell Grafana-sjekk (jf.\ avsnitt~\ref{sec:e2e-testing}).
 
 Et eksempel på en happy path-test verifiserte at
 \texttt{CreateRoomAsync} sendte riktig request-body og mappet responsen

@@ -1,4 +1,54 @@
 \section{Læringsutbytte}
 \label{sec:laering}
 
-% Læringsutbytte
+Prosjektet har gitt oss et bredere teknisk fundament enn vi hadde da vi
+startet. Kanskje vel så viktig har vi lært hvordan man jobber gjennom et
+større prosjekt over tid, med eksterne avhengigheter, uklare krav og
+problemer som ikke alltid har en åpenbar løsning.
+
+Den mest håndfaste tekniske læringen er C\# og .NET. Ingen i gruppen hadde
+brukt språket eller rammeverket før prosjektstart, og på 19 uker har vi gått
+fra å lese tutorials til å levere et API i produksjonsklar tilstand med
+testdekning, dokumentasjon og containerisert deployment. Det inkluderer
+å forstå dependency injection, middleware-pipelinen, konfigurasjonshåndtering
+og hvordan man bygger ut et prosjekt på en måte som er vedlikeholdbar over
+tid. Mye av denne læringen kom gjennom refaktoreringer underveis. Ting vi
+skrev tidlig i prosjektet ville vi gjort annerledes i dag, og selve det å se
+kvaliteten på koden vår øke etter hvert har vært nyttig i seg selv.
+
+WebRTC var et nytt felt for oss alle. Vi gikk inn i prosjektet uten å vite
+hva STUN- og TURN-servere er, hva ICE gjør, eller hvorfor en WebRTC-adapter
+er nødvendig på klientsiden. Det tok tid å bygge opp en grunnleggende
+forståelse, og mye av læringen kom fra feilsøking i situasjoner der
+ingenting fungerte og vi ikke umiddelbart visste hvorfor. Det var
+frustrerende mens det sto på, men gir oss nå en konkret forståelse av en
+teknologi som er sentral i moderne sanntidskommunikasjon.
+
+På infrastruktursiden har vi lært praktisk container-orkestrering med Docker
+Compose. Det handler ikke bare om hvordan man skriver en
+\texttt{compose.yaml}, men også om hvordan health checks faktisk oppfører
+seg, hva som skjer når en container markeres unhealthy, og hvordan tjenester
+finner hverandre over interne nettverk. Observability-stacken med Prometheus
+og Grafana ga oss et nytt perspektiv. Det er én ting å skrive kode som
+fungerer, og noe ganske annet å ha innsyn i hvordan koden oppfører seg når
+den faktisk kjører. Å bygge dashboards som viser noe nyttig krever at man
+først har bestemt seg for hva man trenger å vite, og det er en disiplin i
+seg selv.
+
+Vi har også fått praktisk erfaring med autentisering og autorisasjon på et
+mer reelt nivå enn i tidligere skoleprosjekter. Å sette opp en
+Keycloak-instans fra bunnen av, konfigurere realms og klienter, og koble den
+sammen med JWT-validering i API-et var en større læringskurve enn vi
+forventet. Vi forstår nå mye bedre hva som faktisk skjer når en token
+presenteres på et endepunkt. Hva som valideres, hva som ikke valideres, og
+hvilke konfigurasjonsvalg som er sikre nok i ulike situasjoner.
+
+Den minst tekniske men kanskje viktigste læringen handler om arbeidsprosess.
+Vi har lært å jobbe mer profesjonelt ved å bryte arbeid ned i oppgaver,
+bruke pull requests og kodegjennomgang, holde branches ryddige, og skrive
+commit-meldinger som gir mening senere. Vi har jobbet mot en ekstern
+oppdragsgiver med asynkron kommunikasjon, noe som tvang oss til å formulere
+spørsmål skriftlig og presist i stedet for å avklare ting underveis.
+Når vi var avhengige av tredjepartsleverandører som svarte tregt, måtte vi
+også lære oss å parkere problemer og jobbe videre på andre fronter i stedet
+for å bli sittende fast.
