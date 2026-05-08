@@ -5,21 +5,15 @@ identifisere funksjonelle og ikke-funksjonelle krav. Deretter ble løsningen
 designet, implementert og evaluert i flere iterasjoner mot HDOs testmiljø.
 
 Evalueringen som besvarer forskningsspørsmålet bygger på fire typer grunnlag:
-\begin{list}
+\begin{description}
     \item \emph{Krav-evaluering} sammenstiller hvert krav i kravspesifikasjonen mot hvor det er implementert og hvordan det er testet, og besvarer i hovedsak dimensjon~1 og dimensjon~3. 
+    
     \item \emph{Arkitektur-evaluering} vurderer hvor backend-spesifikk logikk er plassert og hvilke endringer som faktisk kreves for å støtte en ny videomotor; dette ble undersøkt empirisk ved å legge til to ekstra providere etter at hovedimplementasjonen var ferdig (se seksjon~\ref{sec:provider-validering}), og besvarer i hovedsak dimensjon~2.
+    
     \item \emph{Funksjonell verifisering} ble gjort gjennom 133 automatiserte enhets- og integrasjonstester, samt et ende-til-ende-skript som kjører mot HDOs faktiske AntMedia- og NHN-testmiljøer.
     
-\end{list}
-
-
-
- 
-
-
-\emph{Drifts-evaluering} dekker containerisert kjøring, helsesjekker,
-Prometheus-metrikker og Grafana-dashboard, og bidrar primært til
-dimensjon~3.
+    \item \emph{Drifts-evaluering} dekker containerisert kjøring, helsesjekker, Prometheus-metrikker og Grafana-dashboard, og bidrar primært til dimensjon~3.
+\end{description}
 
 I tillegg ble det innhentet en strukturert sluttevaluering fra HDO etter
 overlevering, der to representanter fra oppdragsgiver vurderte leveransen
