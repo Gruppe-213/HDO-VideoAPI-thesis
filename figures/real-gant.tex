@@ -18,36 +18,36 @@
 \gantttitle{Faktisk gjennomføring 2026 (12. jan -- 20. mai)}{20} \\
 \gantttitlelist{1,...,20}{1} \\
 
-\ganttgroup{Oppstart, læring og avklaring}{1}{6} \\
-\ganttbar[bar/.append style={fill=blue!30}]{Prosjektplan og oppstart}{1}{4} \\
-\ganttbar[bar/.append style={fill=blue!30}]{C\#/.NET-læring og API-research}{1}{8} \\
-\ganttbar[bar/.append style={fill=blue!30}]{Pilotarbeid og teknisk utforsking}{2}{8} \\
-\ganttmilestone{M1: Prosjektplan levert/godkjent}{4} \\
+\ganttgroup{Oppstart og læring}{1}{6} \\
+\ganttbar[bar/.append style={fill=cyan!40}]{Prosjektplan}{1}{4} \\
+\ganttbar[bar/.append style={fill=cyan!40}]{Læring og research}{1}{8} \\
+\ganttbar[bar/.append style={fill=cyan!40}]{Pilotarbeid}{2}{8} \\
+\ganttmilestone{M1: Plan godkjent}{4} \\
 
-\ganttbar[bar/.append style={fill=red!40, thick}, name=arkitektur]{Arkitektur og provider-design}{6}{9} \\
-\ganttbar[bar/.append style={fill=red!40, thick}, name=kjerne]{Kjerne-API, CI og feilhåndtering}{6}{10} \\
+\ganttbar[bar/.append style={fill=teal!60, thick}, name=arkitektur]{Arkitektur og design}{7}{9} \\
+\ganttbar[bar/.append style={fill=teal!60, thick}, name=kjerne]{Kjerne-API og CI}{4}{9} \\
 \ganttmilestone{M2: Første fungerende API}{9} \\
 
-\ganttbar[bar/.append style={fill=red!40, thick}, name=antmedia]{AntMedia-integrasjon og WebRTC}{8}{12} \\
-\ganttbar[bar/.append style={fill=red!40, thick}, name=nhn]{NHN-integrasjon og URL-/token-fiksing}{10}{17} \\
-\ganttmilestone{M3: Begge videomotorer integrert}{12} \\
+\ganttbar[bar/.append style={fill=teal!60, thick}, name=antmedia]{AntMedia-integrasjon}{6}{11} \\
+\ganttbar[bar/.append style={fill=teal!60, thick}, name=nhn]{NHN-integrasjon}{10}{17} \\
+\ganttmilestone{M3: Begge videomotorer}{12} \\
 
-\ganttbar[bar/.append style={fill=green!30}, name=frontend]{Demo-frontend og brukerflyt}{9}{19} \\
-\ganttbar[bar/.append style={fill=green!30}, name=infra]{OpenStack, Docker og HTTPS}{8}{17} \\
-\ganttbar[bar/.append style={fill=green!30}, name=obs]{Observability: health, Prometheus, Grafana}{12}{18} \\
-\ganttmilestone{M4: Demo/MVP vist til HDO}{15} \\
+\ganttbar[bar/.append style={fill=olive!50}, name=frontend]{Demo-frontend}{9}{19} \\
+\ganttbar[bar/.append style={fill=olive!50}, name=infra]{Infrastruktur og deployment}{6}{12} \\
+\ganttbar[bar/.append style={fill=olive!50}, name=obs]{Observability}{11}{18} \\
+\ganttmilestone{M4: Demo ferdig}{15} \\
 
-\ganttbar[bar/.append style={fill=orange!30}]{Testing og QA}{6}{19} \\
-\ganttbar[bar/.append style={fill=orange!30}]{Stabilisering og sikkerhetsherding}{15}{18} \\
-\ganttbar[bar/.append style={fill=orange!30}]{Provider-validering med mock/Daily}{18}{19} \\
+\ganttbar[bar/.append style={fill=brown!50}]{Testing (kontinuerlig)}{6}{19} \\
+\ganttbar[bar/.append style={fill=brown!50}]{Stabilisering}{16}{18} \\
+\ganttbar[bar/.append style={fill=brown!50}]{Provider-validering}{18}{19} \\
 
-\ganttbar[bar/.append style={fill=purple!30}]{Dokumentasjon og README/API-docs}{9}{18} \\
-\ganttbar[bar/.append style={fill=purple!30}]{Rapportskriving og revisjon}{10}{20} \\
-\ganttbar[bar/.append style={fill=yellow!30}]{Sluttkontroll og innlevering}{20}{20} \\
+\ganttbar[bar/.append style={fill=magenta!40}]{Dokumentasjon}{10}{18} \\
+\ganttbar[bar/.append style={fill=magenta!40}]{Rapport (løpende)}{8}{20} \\
+\ganttbar[bar/.append style={fill=pink!50}]{Sluttkontroll}{20}{20} \\
 
 \ganttmilestone{M5: Produktleveranse}{18} \\
-\ganttmilestone{M6: Rapportutkast/review}{19} \\
-\ganttmilestone{M7: Endelig innlevering}{20} \\
+\ganttmilestone{M6: Rapport ferdig (soft)}{19} \\
+\ganttmilestone{M7: Innlevering}{20} \\
 
 % Viktige avhengigheter
 \ganttlink{arkitektur}{kjerne}

@@ -46,7 +46,7 @@
 \subsection{Planlagt fremdrift}
 
 Prosjektet ble planlagt over 19 uker, fra 12. januar til 20. mai 2026. Fremdriftsplanen fra prosjekplanen
-er visualisert i Gantt-diagrammet i Figur~\ref{fig:gantt} og organisert rundt fire
+er visualisert i Gantt-diagrammet i Figur~\ref{fig:gantt} (Vedlegg~\ref{app:gantt}) og organisert rundt fire
 parallelle arbeidsstrømmer: analyse og design, implementasjon, testing og dokumentasjon.
 Testing og rapportskriving foregikk løpende gjennom hele perioden fremfor å samles i
 en avsluttende fase. Siden ingen på teamet hadde erfaring med C\# eller .NET fra før,
@@ -61,45 +61,11 @@ Planen definerte syv milepæler:
     \item \textbf{M5} (Produktleveranse) representerte det tidspunktet løsningen ble betraktet som komplett og overlevert oppdragsgiver. \item \textbf{M6} og \textbf{M7} markerte henholdsvis myk rapportfrist og endelig innlevering.
 \end{enumerate}
 
-\newpage
-\begin{figure}[H]
-\centering
-\input{figures/plan-gant}
-\caption{Gantt-diagram for HDO VideoAPI (uke 1--19).}
-\label{fig:gantt}
-\end{figure}
-
-\noindent\textbf{Fargeforklaring:}
-\begin{itemize}
-  \item \textcolor{red!40}{\rule{1cm}{0.25cm}} Kritisk sti
-  \item \textcolor{blue!30}{\rule{1cm}{0.25cm}} Analyse og design
-  \item \textcolor{green!30}{\rule{1cm}{0.25cm}} Implementasjon
-  \item \textcolor{orange!30}{\rule{1cm}{0.25cm}} Testing
-  \item \textcolor{purple!30}{\rule{1cm}{0.25cm}} Dokumentasjon
-\end{itemize}
-
 \subsection{Gjennomføring}
 
 Gjennomføringen avvek fra planen på flere punkter.
 
-\begin{figure}[H]
-\centering
-\input{figures/real-gant}
-\caption{Faktisk gjennomføring av HDO VideoAPI (uke 1--20).}
-\label{fig:gantt-faktisk}
-\end{figure}
-
-\noindent\textbf{Fargeforklaring:}
-\begin{itemize}
-  \item \textcolor{red!40}{\rule{1cm}{0.25cm}} Kritisk implementasjonsarbeid
-  \item \textcolor{blue!30}{\rule{1cm}{0.25cm}} Oppstart, læring og avklaring
-  \item \textcolor{green!30}{\rule{1cm}{0.25cm}} Infrastruktur, demo og observability
-  \item \textcolor{orange!30}{\rule{1cm}{0.25cm}} Testing, stabilisering og validering
-  \item \textcolor{purple!30}{\rule{1cm}{0.25cm}} Dokumentasjon og rapport
-  \item \textcolor{yellow!30}{\rule{1cm}{0.25cm}} Sluttkontroll og innlevering
-\end{itemize}
-
-Figur~\ref{fig:gantt-faktisk} viser den faktiske arbeidsflyten basert på timelogger, commit-historikk og ukentlige refleksjoner. I motsetning til den opprinnelige planen ble arbeidet mer iterativt, særlig fordi læring i C\#/.NET, pilotarbeid, integrasjon, testing og dokumentasjon overlappet gjennom store deler av prosjektperioden. Timeloggen dekker hovedsakelig dokumentert arbeid frem til uke 19, mens uke 20 bestod av sluttkontroll, korrektur og innleveringsarbeid som ikke ble ført like detaljert.
+Den faktiske arbeidsflyten (Figur~\ref{fig:gantt-faktisk}, Vedlegg~\ref{app:gantt}) ble mer iterativ enn planlagt fordi læring, integrasjon og testing overlappet.
 
 Hovedtyngden av forsinkelsene var knyttet til eksterne avhengigheter og tredjepartsplattformer utenfor gruppens kontroll, mens enkelte tekniske utfordringer i integrasjonsarbeidet krevde ekstra tid til feilsøking og tilpasning. Mot slutten av perioden ble noe av tapt tid hentet inn gjennom raskere fremdrift mellom M3 og M4 enn opprinnelig planlagt.
 

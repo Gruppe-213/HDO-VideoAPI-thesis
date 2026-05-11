@@ -1,0 +1,44 @@
+\chapter{Gantt-diagrammer}
+\label{app:gantt}
+
+Dette vedlegget inneholder Gantt-diagrammene som visualiserer prosjektets
+fremdrift. Figur~\ref{fig:gantt} viser den opprinnelige planen, og
+Figur~\ref{fig:gantt-faktisk} viser den faktiske gjennomføringen. Begge
+diagrammene refereres fra kapittel~\ref{ch:utvikling}.
+
+\begin{landscape}
+\begin{figure}[H]
+\centering
+\input{figures/plan-gant}
+\caption{Gantt-diagram for HDO VideoAPI (uke 1--19).}
+\label{fig:gantt}
+\end{figure}
+
+\noindent\textbf{Fargeforklaring:}
+\begin{itemize}
+  \item \textcolor{red!40}{\rule{1cm}{0.25cm}} Kritisk sti
+  \item \textcolor{blue!30}{\rule{1cm}{0.25cm}} Analyse og design
+  \item \textcolor{green!30}{\rule{1cm}{0.25cm}} Implementasjon
+  \item \textcolor{orange!30}{\rule{1cm}{0.25cm}} Testing
+  \item \textcolor{purple!30}{\rule{1cm}{0.25cm}} Dokumentasjon
+\end{itemize}
+\end{landscape}
+
+\begin{landscape}
+\begin{figure}[H]
+\centering
+\input{figures/real-gant}
+\caption{Faktisk gjennomføring av HDO VideoAPI (uke 1--20).}
+\label{fig:gantt-faktisk}
+\end{figure}
+
+\noindent\textbf{Fargeforklaring:}
+\begin{itemize}
+  \item \textcolor{teal!60}{\rule{1cm}{0.25cm}} Kritisk sti
+  \item \textcolor{cyan!40}{\rule{1cm}{0.25cm}} Oppstart og læring
+  \item \textcolor{olive!50}{\rule{1cm}{0.25cm}} Implementasjon
+  \item \textcolor{brown!50}{\rule{1cm}{0.25cm}} Testing
+  \item \textcolor{magenta!40}{\rule{1cm}{0.25cm}} Dokumentasjon
+  \item \textcolor{pink!50}{\rule{1cm}{0.25cm}} Sluttkontroll
+\end{itemize}
+\end{landscape}
