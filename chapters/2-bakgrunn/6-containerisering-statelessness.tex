@@ -6,9 +6,4 @@ i et isolert miljø som kan kjøres konsistent på tvers av ulike plattformer \c
 Docker er den mest utbredte teknologien for dette, og muliggjør reproduserbare bygge-
 og kjøremiljøer uten avhengighet av vertssystemets konfigurasjon.
 
-Twelve-Factor App-metodologien definerer et sett prinsipper for å bygge skalerbare
-og vedlikeholdbare tjenester. To av prinsippene er særlig relevante for VideoAPI:
-konfigurasjon skal lagres i \gls{miljøvar} fremfor i kode, og tjenesten skal være
-tilstandsløs slik at flere instanser kan kjøre parallelt uten å dele \gls{prosess-intern-state} \cite{twelve_factor}. VideoAPI følger begge disse prinsippene — all konfigurasjon
-styres via miljøvariabler, og API-et behandler hver forespørsel uavhengig av tidligere
-forespørsler.
+Twelve-Factor App-metodologien er et sett prinsipper for å bygge skalerbare og vedlikeholdbare tjenester. To av prinsippene er særlig relevante for VideoAPI: konfigurasjon skal lagres i \gls{miljøvar} fremfor i kode, og tjenesten skal være tilstandsløs slik at flere instanser kan kjøre parallelt uten å dele \gls{prosess-intern-state} \cite{twelve_factor}. VideoAPI følger begge disse prinsippene — all konfigurasjon styres via miljøvariabler, og API-et behandler hver forespørsel uavhengig av tidligere forespørsler.

@@ -1,25 +1,57 @@
+% \section{Helsetjenestens driftsorganisasjon for nødnett HF}
+% \label{sec:hdo}
+
+% Helsetjenestens driftsorganisasjon for nødnett HF (HDO) ble stiftet 29. april 2013 og har hovedsete på Gjøvik \cite{hdo_om_oss}. Foretaket eies av de fire regionale helseforetakene og er organisert etter helseforetaksloven \cite{hdo_eierstyring}.
+
+% HDOs samfunnsoppdrag er å levere kommunikasjons- og beslutningsstøtte\- løsninger til den akuttmedisinske kjede, inkludert drift av nødnummer 113, legevaktnummer 116~117 og løsninger for video- og datadeling \cite{hdo_om_oss}. Som del av dette har HDO ansvar for videoløsningen som benyttes av 109 AMK- og legevaktsentraler over hele Norge \cite{hdo_kravspec}.
+
+% Når en innringer kontakter en AMK- eller legevaktsentral per telefon, kan operatøren sende en SMS-lenke som gir innringeren mulighet til å starte en enveis videostrøm tilbake til sentralen. Lyd går via den ordinære telefonsamtalen, mens video brukes som beslutningsstøtte for å gi operatøren bedre situasjonsforståelse. Løsningen lagrer ingen lyd, bilde eller pasientopplysninger \cite{hdo_produktark}.
+
+% HDOs oppdragsdokument for 2026 viderefører ansvaret for videokommunikasjon i akuttmedisinsk kjede og pålegger HDO å bidra til interoperabilitet og økt standardisering av videoløsninger \cite{hdo_oppdrag2026}.
+
 \section{Helsetjenestens driftsorganisasjon for nødnett HF}
 \label{sec:hdo}
+Helsetjenestens driftsorganisasjon for nødnett HF (HDO) ble stiftet 29. april 2013 og har hovedsete på Gjøvik \cite{hdo_om_oss}. Foretaket eies av de fire regionale helseforetakene og er organisert etter helseforetaksloven \cite{hdo_eierstyring}. HDOs samfunnsoppdrag er å levere kommunikasjons- og beslutningsstøtteløsninger til den akuttmedisinske kjede, inkludert drift av nødnummer 113, legevaktnummer 116~117 og løsninger for video- og datadeling \cite{hdo_om_oss}.
 
-Helsetjenestens driftsorganisasjon for nødnett HF (HDO) ble stiftet
-29. april 2013 og har hovedsete på Gjøvik \cite{hdo_om_oss}. Foretaket
-eies av de fire regionale helseforetakene og er organisert etter
-helseforetaksloven \cite{hdo_eierstyring}.
+De eksisterende videoløsningene benyttes i dag av 109 AMK- og legevaktsentraler over hele Norge \cite{hdo_kravspec}. Som vist i figur~\ref{fig:kommunikasjonsflyt} kan operatøren, når en innringer kontakter en sentral per telefon, sende en SMS-lenke som gir innringeren mulighet til å starte en enveis videostrøm tilbake til sentralen. Lyd går via den ordinære telefonsamtalen, mens video brukes som beslutningsstøtte for å gi operatøren bedre situasjonsforståelse. Løsningene lagrer ingen lyd, bilde eller pasientopplysninger \cite{hdo_produktark}
 
-HDOs samfunnsoppdrag er å levere kommunikasjons- og beslutningsstøtte\-
-løsninger til den akuttmedisinske kjede, inkludert drift av nødnummer 113,
-legevaktnummer 116~117 og løsninger for video- og datadeling
-\cite{hdo_om_oss}. Som del av dette har HDO ansvar for videoløsningen som
-benyttes av 109 AMK- og legevaktsentraler over hele Norge
-\cite{hdo_kravspec}.
+\begin{figure}[h]
+\centering
+\begin{tikzpicture}[
+    box/.style={
+        rectangle, draw=black, thick,
+        rounded corners=4pt,
+        minimum width=3cm, minimum height=1.2cm,
+        align=center, font=\small
+    },
+    arr/.style={-{Stealth[length=5pt]}, thick},
+    darr/.style={-{Stealth[length=5pt]}, thick, dashed},
+    biarr/.style={{Stealth[length=5pt]}-{Stealth[length=5pt]}, thick}
+]
 
-Når en innringer kontakter en AMK- eller legevaktsentral per telefon,
-kan operatøren sende en SMS-lenke som gir innringeren mulighet til å
-starte en enveis videostrøm tilbake til sentralen. Lyd går via den
-ordinære telefonsamtalen, mens video brukes som beslutningsstøtte for å
-gi operatøren bedre situasjonsforståelse. Løsningen lagrer ingen lyd,
-bilde eller pasientopplysninger \cite{hdo_produktark}.
+\node[box] (inn) at (0,0) {Innringer};
+\node[box] (op)  at (9,0) {Operatør};
+\node[box, fill=gray!15] (mot) at (4.5,-2) {Videomotor};
 
-HDOs oppdragsdokument for 2026 viderefører ansvaret for videokommunikasjon
-i akuttmedisinsk kjede og pålegger HDO å bidra til interoperabilitet og
-økt standardisering av videoløsninger \cite{hdo_oppdrag2026}.
+% SMS-lenke (stiplet bue over)
+\draw[darr] (op.north) to[out=150, in=30]
+    node[above, font=\footnotesize] {SMS-lenke}
+    (inn.north);
+
+% Lyd via telefon (direkte)
+\draw[biarr] (inn.east) -- (op.west)
+    node[midway, above, font=\footnotesize] {Lyd (telefon)};
+
+% Video: innringer -> videomotor -> operatør
+\draw[arr] (inn.south) to[out=270, in=180] (mot.west);
+\draw[arr] (mot.east) to[out=0,   in=270] (op.south);
+\node[font=\footnotesize] at (4.5,-1) {Video (WebRTC)};
+
+\end{tikzpicture}
+\caption{Kommunikasjonsflyt mellom innringer og AMK-operatør. SMS-lenken
+initierer videostrømmen; lyd overføres parallelt via ordinær telefon.}
+\label{fig:kommunikasjonsflyt}
+\end{figure}
+\newpage
+
+HDOs oppdragsdokument for 2026 viderefører ansvaret for videokommunikasjon i akuttmedisinsk kjede og pålegger HDO å bidra til interoperabilitet og økt standardisering av videoløsninger \cite{hdo_oppdrag2026}.

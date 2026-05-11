@@ -1,36 +1,37 @@
-
 \section{Videomotorene}
 \label{sec:videomotorer}
+De to motorene representerer ulike tilnærminger til videostrømming, noe som påvirker både hvordan videorom administreres og hvordan VideoAPI må forholde seg til hver motor. Tabell~\ref{tab:videomotorer} oppsummerer de viktigste forskjellene.
+
+\begin{table}[h]
+\centering
+\caption{Sammenligning av AntMedia Server og NHN Video.}
+\label{tab:videomotorer}
+\begin{tabular}{lll}
+\toprule
+& \textbf{AntMedia Server} & \textbf{NHN Video} \\
+\midrule
+Paradigme         & Strømorientert                  & Møteorientert \\
+Romopprettelse    & \texttt{POST /broadcasts/create} & \texttt{POST /api/client/v1/booking/} \\
+Romidentifikator  & \texttt{streamId}               & \texttt{guestURL} / \texttt{hostURL} \\
+Start/stopp       & Eksplisitt via egne endepunkter & Ikke nødvendig \\
+Autentisering     & SHA-256-signert JWT             & OAuth~2.0 password grant \\
+Tokengyldighet    & Per forespørsel                 & 14 dager \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \subsection{AntMedia Server}
 \label{sec:antmedia}
 
-AntMedia Server er en skalerbar videostrømmingsplattform som støtter WebRTC
-for sanntidsstrømming, i tillegg til \gls{LL-HLS} og \gls{LL-DASH} \cite{antmedia_intro}.
-Plattformen tilbyr et REST-API organisert i tre tjenester: \Gls{broadcast-service}
-for administrasjon av strømmer, \gls{vod-service}, og
-\Gls{management-service} for serverkonfigurasjon \cite{antmedia_rest}.
+AntMedia Server er en skalerbar videostrømmingsplattform som støtter WebRTC for sanntidsstrømming, i tillegg til \gls{LL-HLS} og \gls{LL-DASH} \cite{antmedia_intro}. Plattformen tilbyr et REST-API organisert i tre tjenester: \Gls{broadcast-service} for administrasjon av strømmer, \gls{vod-service}, og \Gls{management-service} for serverkonfigurasjon \cite{antmedia_rest}.
 
-AntMedia er strømorientert. Et videorom opprettes som et broadcast-objekt
-via \texttt{POST /broadcasts/create} og returnerer en \texttt{streamId} som
-brukes i alle videre operasjoner. Videostrømming må startes og stoppes
-eksplisitt via egne endepunkter \cite{antmedia_rest_examples}. Autentisering
-mot API-et skjer med \gls{sha256}-signerte JWT-tokens som legges på som
-\texttt{Authorization: Bearer} i forespørselshodet \cite{antmedia_jwt}.
+AntMedia er strømorientert. Et videorom opprettes som et broadcast-objekt via \texttt{POST /broadcasts/create} og returnerer en \texttt{streamId} som brukes i alle videre operasjoner. Videostrømming må startes og stoppes eksplisitt via egne endepunkter \cite{antmedia_rest_examples}. Autentisering mot API-et skjer med \gls{sha256}-signerte JWT-tokens som legges på som \texttt{Authorization: Bearer} i forespørselshodet \cite{antmedia_jwt}.
 
 \subsection{NHN Video}
 \label{sec:nhn}
 
-NHN Video er en møtebasert videoplattform bygget på Pexip Infinity. Pexip
-Infinity er en skalerbar videokonferanseplattform der virtuelle møterom er
-alltid tilgjengelige og ikke bruker ressurser når de ikke er i bruk
-\cite{pexip_intro}. NHN tilbyr denne plattformen som en administrert
-tjeneste med et Booking API for dynamiske møterom \cite{nhn_booking}.
+NHN Video er en møtebasert videoplattform levert av Norsk Helsenett og bygget på Pexip Infinity — en skalerbar videokonferanseplattform der virtuelle møterom alltid er tilgjengelige, men kun bruker ressurser når de er i aktiv bruk \cite{pexip_intro}. NHN tilbyr denne plattformen som en administrert tjeneste med et Booking API for opprettelse og administrasjon av dynamiske møterom \cite{nhn_booking}.
 
-Et videorom opprettes via \texttt{POST /api/client/v1/booking/} med start-
-og sluttidspunkt, emne og en forhåndsdefinert mal. Responsen returnerer
-direkte en \texttt{guestURL} og \texttt{hostURL} som kan brukes til å koble
-seg til møtet \cite{nhn_booking}. Det finnes ingen separat start- eller
-stopp-operasjon; rommet er klart med en gang det er opprettet. Autentisering
-mot API-et skjer via OAuth 2.0 \gls{password-grant}, og NHN utsteder tokens med
-14 dagers gyldighet \cite{nhn_booking}.
+% Et videorom opprettes via \texttt{POST /api/client/v1/booking/} med start- og sluttidspunkt, emne og en forhåndsdefinert mal. Responsen returnerer direkte en \texttt{guestURL} og \texttt{hostURL} som kan brukes til å koble seg til møtet \cite{nhn_booking}. Det finnes ingen separat start- eller stopp-operasjon; rommet er klart med en gang det er opprettet. Autentisering mot API-et skjer via OAuth 2.0 \gls{password-grant}, og NHN utsteder tokens med 14 dagers gyldighet \cite{nhn_booking}.
+
+Et videorom opprettes via \texttt{POST /api/client/v1/booking/} med start- og sluttidspunkt, emne og en forhåndsdefinert mal. I motsetning til AntMedia returnerer responsen direkte en \texttt{guestURL} og \texttt{hostURL} som kan brukes til å koble seg til møtet — det finnes ingen separat start- eller stopp-operasjon \cite{nhn_booking}. Autentisering skjer via OAuth~2.0 \gls{password-grant}, og NHN utsteder tokens med 14 dagers gyldighet \cite{nhn_booking}.

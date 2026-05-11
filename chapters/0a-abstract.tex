@@ -1,9 +1,33 @@
 \chapter*{Abstract}
+\gls{hdo} drifter videoløsninger som er beslutningsstøtte for \gls{amk}
+og \gls{lvs} i Norge. Løsningene bygger på to videomotorer, AntMedia
+Server og \gls{nhn} Video, som dekker det samme behovet, men har ulike
+\gls{api}-er, autentiseringsmekanismer og domenemodeller. Parallell
+integrasjon mot begge motorene øker kompleksiteten i drift og
+videreutvikling, og hever terskelen for å bytte leverandør eller legge
+til nye videomotorer.
 
-\gls{hdo} drifter videoløsninger som benyttes som beslutningsstøtte for \gls{amk} og \gls{lvs} i Norge. Løsningene baserer seg i dag på to ulike videomotorer, AntMedia Server og \gls{nhn} Video, som dekker samme overordnede behov, men har ulike \gls{api}-er, autentiseringsmekanismer og domenemodeller. Den parallelle integrasjonen øker kompleksiteten i drift, opplæring og videreutvikling, og hever terskelen for å bytte leverandør eller legge til nye videomotorer i fremtiden.
+Oppgaven undersøker om en \gls{provider}-basert \gls{mellomvare} kan
+gi HDO ett felles API for håndtering av videorom, mens logikk som er
+spesifikk for hver videomotor holdes adskilt fra resten av systemet.
+Prosjektet ble gjennomført som et design- og implementasjonsprosjekt.
+Løsningen ble utviklet i ASP.NET Core med egne providere for AntMedia
+Server og NHN Video, \gls{token}-basert autentisering, Docker-støtte,
+helsesjekker, strukturert logging og Prometheus-metrikker.
 
-Denne bacheloroppgaven undersøker om en \gls{provider}-basert \gls{mellomvare} kan gi HDO ett felles API for håndtering av videorom, samtidig som logikk som er spesifikk for hver videomotor holdes adskilt fra resten av systemet. Prosjektet ble gjennomført som et design- og implementasjonsprosjekt. Løsningen ble utviklet i ASP.NET Core med egne providere for AntMedia Server og NHN Video, \gls{token}-basert autentisering, Docker-støtte, helsesjekker, strukturert logging og Prometheus-metrikker.
+Evalueringen besto av kravsporing, automatiserte enhets- og
+integrasjonstester, ende-til-ende-testing mot HDOs testmiljøer og en
+sluttevaluering fra HDO. Arkitekturen dekker kjerneoperasjonene
+oppretting, henting og sletting av videorom på tvers av begge motorene,
+og provider-laget isolerer det meste av den backend-spesifikke
+logikken. Full standardisering er likevel vanskelig når videomotorene
+bygger på ulike domenemodeller. Det gjelder særlig start og stopp av
+videostrøm, som ikke har samme betydning i AntMedia og NHN Video.
 
-Løsningen ble evaluert gjennom kravsporing, automatiserte enhets- og integrasjonstester, ende-til-ende-testing mot HDOs testmiljøer og en sluttevaluering fra HDO. Resultatene viser at arkitekturen fungerer godt for kjerneoperasjoner som oppretting, henting og sletting av videorom. Provider-laget gjør det også mulig å isolere store deler av den backend-spesifikke logikken. Samtidig viser arbeidet at full standardisering er vanskelig når videomotorene bygger på ulike domenemodeller. Spesielt gjelder dette operasjoner som start og stopp av videostrøm, som ikke har samme betydning i AntMedia og NHN Video.
-
-Oppgaven konkluderer med at en provider-basert mellomvare er en egnet tilnærming for å redusere koblingen mellom HDOs klientsystemer og de underliggende videomotorene, samtidig som den legger til rette for enklere videreutvikling og støtte for nye videoplattformer. Løsningen fungerer som et proof-of-concept som demonstrerer at arkitekturen er gjennomførbar i praksis. Videre arbeid bør omfatte produksjonsrettede tiltak som strengere autorisasjon, robust tokenvalidering, skaleringstesting og forbedret feilhåndtering mot eksterne videomotorer.
+En provider-basert mellomvare reduserer koblingen mellom HDOs
+klientsystemer og de underliggende videomotorene, og gjør det enklere
+å støtte nye videoplattformer i fremtiden. Resultatet er et
+proof-of-concept som viser at arkitekturen er gjennomførbar i praksis.
+Skal løsningen tas i produksjon, må den videreutvikles med strengere
+autorisasjon, robust tokenvalidering, skaleringstesting og bedre
+feilhåndtering mot eksterne videomotorer.

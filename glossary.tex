@@ -20,6 +20,7 @@
 \newacronym{vod}{VoD}{Video on Demand}
 \newacronym{ki}{KI}{Kunstig intelligens}
 \newacronym{http}{HTTP}{Hypertext Transfer Protocol}
+\newacronym{uri}{URI}{Uniform Resource Identifier}
 
 % ============================================================================
 % FAGTERMER - kun prosjektspesifikke
@@ -34,7 +35,7 @@
     name={Keycloak},
     description={Åpen kildekode-løsning for identitets- og tilgangsstyring som 
     støtter OAuth 2.0 og OpenID Connect. Benyttes som 
-    autorisasjonsserver for utstedelse av tilgangstokener til VideoAPI}
+    autorisasjonsserver for utstedelse av tilgangstokener i prosjektet}
 }
 
 \newglossaryentry{prosess-intern-state}{
@@ -45,8 +46,8 @@
 \newglossaryentry{demo-frontend}{
     name={demo-frontend},
     description={En forenklet webapplikasjon utviklet for å demonstrere og 
-    teste funksjonaliteten til VideoAPI. Er ikke ment for produksjonsbruk, 
-    men fungerer som et visuelt grensesnitt mot mellomvare-APIet}
+    teste funksjonaliteten til en tjeneste. Er ikke ment for produksjonsbruk, 
+    men fungerer som et visuelt grensesnitt mot et API}
 }
 
 \newglossaryentry{teknologisk-innlåsing}{
@@ -93,7 +94,7 @@
 
 \newglossaryentry{provider-adapter}{
     name={provider-adapter},
-    description={Konkret implementasjon av en provider som oversetter mellom VideoAPI sitt interne grensesnitt og en spesifikk videomotors API og dataformat}
+    description={Konkret implementasjon av en provider som oversetter mellom prosjektet sitt interne grensesnitt og en spesifikk videomotors API og dataformat}
 }
 
 \newglossaryentry{broadcast-service}{
@@ -203,7 +204,7 @@
 \newglossaryentry{LL-HLS}{
     name={LL-HLS},
     description={Low-Latency HTTP Live Streaming — en utvidelse av HLS-protokollen 
-    utviklet av Apple for å redusere forsinkelse i videostrømming til under tre sekunder}
+    utviklet av Apple for å redusere forsinkelse i videostrømming til 2-5 sekunder}
 }
 
 \newglossaryentry{LL-DASH}{
@@ -217,4 +218,9 @@
     description={Navngitt variabel definert i kjøretidsmiljøet utenfor 
     applikasjonskoden, brukt til å styre konfigurasjon som API-nøkler, 
     tilkoblingsstrenger og tjenesteparametere uten å hardkode verdier i kildekoden}
+}
+
+\newglossaryentry{constraints}{
+    name={constraints},
+    description={Arkitektoniske begrensninger som et system må overholde for å oppfylle en bestemt arkitekturstil}
 }

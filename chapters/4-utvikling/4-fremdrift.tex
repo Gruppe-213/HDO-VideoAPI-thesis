@@ -45,7 +45,7 @@
 
 \subsection{Planlagt fremdrift}
 
-Prosjektet ble planlagt over 19 uker, fra 12. januar til 20. mai 2026. Fremdriftsplanen
+Prosjektet ble planlagt over 19 uker, fra 12. januar til 20. mai 2026. Fremdriftsplanen fra prosjekplanen
 er visualisert i Gantt-diagrammet i Figur~\ref{fig:gantt} og organisert rundt fire
 parallelle arbeidsstrømmer: analyse og design, implementasjon, testing og dokumentasjon.
 Testing og rapportskriving foregikk løpende gjennom hele perioden fremfor å samles i
@@ -80,7 +80,28 @@ Planen definerte syv milepæler:
 
 \subsection{Gjennomføring}
 
-Gjennomføringen avvek fra planen på flere punkter. Hovedtyngden av forsinkelsene var knyttet til eksterne avhengigheter og tredjepartsplattformer utenfor gruppens kontroll, mens enkelte tekniske utfordringer i integrasjonsarbeidet krevde ekstra tid til feilsøking og tilpasning. Mot slutten av perioden ble noe av tapt tid hentet inn gjennom raskere fremdrift mellom M3 og M4 enn opprinnelig planlagt.
+Gjennomføringen avvek fra planen på flere punkter.
+
+\begin{figure}[H]
+\centering
+\input{figures/real-gant}
+\caption{Faktisk gjennomføring av HDO VideoAPI (uke 1--20).}
+\label{fig:gantt-faktisk}
+\end{figure}
+
+\noindent\textbf{Fargeforklaring:}
+\begin{itemize}
+  \item \textcolor{red!40}{\rule{1cm}{0.25cm}} Kritisk implementasjonsarbeid
+  \item \textcolor{blue!30}{\rule{1cm}{0.25cm}} Oppstart, læring og avklaring
+  \item \textcolor{green!30}{\rule{1cm}{0.25cm}} Infrastruktur, demo og observability
+  \item \textcolor{orange!30}{\rule{1cm}{0.25cm}} Testing, stabilisering og validering
+  \item \textcolor{purple!30}{\rule{1cm}{0.25cm}} Dokumentasjon og rapport
+  \item \textcolor{yellow!30}{\rule{1cm}{0.25cm}} Sluttkontroll og innlevering
+\end{itemize}
+
+Figur~\ref{fig:gantt-faktisk} viser den faktiske arbeidsflyten basert på timelogger, commit-historikk og ukentlige refleksjoner. I motsetning til den opprinnelige planen ble arbeidet mer iterativt, særlig fordi læring i C\#/.NET, pilotarbeid, integrasjon, testing og dokumentasjon overlappet gjennom store deler av prosjektperioden. Timeloggen dekker hovedsakelig dokumentert arbeid frem til uke 19, mens uke 20 bestod av sluttkontroll, korrektur og innleveringsarbeid som ikke ble ført like detaljert.
+
+Hovedtyngden av forsinkelsene var knyttet til eksterne avhengigheter og tredjepartsplattformer utenfor gruppens kontroll, mens enkelte tekniske utfordringer i integrasjonsarbeidet krevde ekstra tid til feilsøking og tilpasning. Mot slutten av perioden ble noe av tapt tid hentet inn gjennom raskere fremdrift mellom M3 og M4 enn opprinnelig planlagt.
 
 Tidlig i prosjektet fikk gruppen utleverte credentials til NHN-miljøet som viste
 seg å være utløpt. Det tok betydelig tid før nye og fungerende credentials ble

@@ -1,32 +1,87 @@
 \section{Innledning}
 \label{sec:krav-innledning}
 
-Kravspesifikasjonen ble utarbeidet av HDO ved prosjektstart og 
-dannet grunnlaget for all videre utvikling. Kravene ble mottatt 
-fra Magne Henriksen og er gjengitt i sin helhet i 
-vedlegg~\ref{app:kravspec}~\cite{hdo_kravspec}.
+Kravspesifikasjonen ble utarbeidet av HDO ved prosjektstart og dannet grunnlaget for all videre utvikling. Kravene ble mottatt fra Magne Henriksen og er gjengitt i sin helhet i vedlegg~\ref{app:kravspec}~\cite{hdo_kravspec}.
 
-Krav-ID-ene er beholdt fra HDOs opprinnelige kravspesifikasjon for å 
-sikre sporbarhet mellom krav, design, implementasjon og testing. Der kravene 
-var åpne eller backend-avhengige, beskriver dette kapittelet gruppens tolkning 
-og avgrensning. Selve løsningen og graden av kravoppfyllelse vurderes senere 
-i design-, implementasjons-, test- og diskusjonskapitlene.
+Krav-ID-ene er beholdt fra HDOs opprinnelige kravspesifikasjon for å sikre sporbarhet mellom krav, design, implementasjon og testing. Der kravene var åpne eller backend-avhengige, beskriver dette kapittelet gruppens tolkning og avgrensning. Selve løsningen og graden av kravoppfyllelse vurderes senere i design-, implementasjons-, test- og diskusjonskapitlene.
 
 HDOs opprinnelige kravspesifikasjon inneholdt ikke en eksplisitt prioritering av kravene. I prosjektet ble funksjonelle kjerneoperasjoner, sikkerhet og støtte for begge videomotorer behandlet som må-ha-krav, mens observability og dokumentasjon ble behandlet som viktige støttekrav for drift, testing og overlevering.
 
 Kravene er organisert i følgende kategorier:
-\begin{itemize}
+\begin{enumerate}
     \item Funksjonelle krav (F1.1--F1.5)
     \item Sikkerhetskrav (S1.1--S1.2)
     \item Infrastrukturkrav (I1.1--I1.2)
     \item Observability-krav (O1.1--O1.3)
     \item Dokumentasjonskrav (D1.1)
-\end{itemize}
+\end{enumerate}
 
-\section{Oversikt over krav og evaluering}
-\label{sec:krav-oversikt}
+Figur~\ref{fig:usecase} gir en visuell oversikt over operasjonene klienten kan utføre mot VideoAPI. Tabell~\ref{tab:krav-oversikt} viser alle kravene med prioritet og evalueringsgrunnlag
 
-\begin{table}[H]
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    uc/.style={ellipse, draw=black, normal, align=center,
+               font=\footnotesize, minimum width=5cm, minimum height=1.2cm},
+    ln/.style={-, normal}
+]
+
+\newcommand{\stickfigure}[3]{
+    \draw[thick] (#1, #2+0.8) circle (0.25);
+    \draw[thick] (#1, #2+0.55) -- (#1, #2-0.1);
+    \draw[thick] (#1-0.35, #2+0.2) -- (#1+0.35, #2+0.2);
+    \draw[thick] (#1, #2-0.1) -- (#1-0.3, #2-0.7);
+    \draw[thick] (#1, #2-0.1) -- (#1+0.3, #2-0.7);
+    \node[below, font=\small\bfseries, align=center] at (#1, #2-0.85) {#3};
+}
+
+% Systemgrense
+\draw[thick] (2.0, 1.1) rectangle (9.2, -11.0);
+\node[font=\small\bfseries] at (5.6, 1.45) {VideoAPI};
+
+% Use cases
+\node[uc, fill=blue!10]   (auth)   at (5.6,  0.0) {Autentisere};
+\node[uc, fill=green!10]  (create) at (5.6, -1.7) {Opprette videorom};
+\node[uc, fill=green!10]  (get)    at (5.6, -3.4) {Hente rominformasjon};
+\node[uc, fill=green!10]  (delete) at (5.6, -5.1) {Slette videorom};
+\node[uc, fill=orange!10] (start)  at (5.6, -6.8) {Starte videostrøm};
+\node[uc, fill=orange!10] (stop)   at (5.6, -8.5) {Stoppe videostrøm};
+\node[uc, fill=orange!10] (webrtc) at (5.6,-10.0) {Generere WebRTC-token};
+
+% Primæraktør: Klient
+\stickfigure{0.5}{-4.5}{Klient}
+
+% Sekundæraktører
+\stickfigure{11.2}{ 0.0}{Keycloak}
+\stickfigure{11.2}{-4.5}{NHN Video}
+\stickfigure{11.2}{-9.0}{AntMedia\\Server}
+
+
+% Klient → use cases
+\foreach \target in {auth, create, get, delete, start, stop, webrtc} {
+    \draw[ln] (0.85, -4.5) -- (\target.west);
+}
+
+% Keycloak → Autentisere
+\draw[ln] (10.85, 0.0) -- (auth.east);
+
+% NHN → use cases
+\foreach \target in {create, get, delete, webrtc} {
+    \draw[ln] (10.85, -4.5) -- (\target.east);
+}
+
+% AntMedia → use cases
+\foreach \target in {create, get, delete, start, stop, webrtc} {
+    \draw[ln] (10.85, -9.0) -- (\target.east);
+}
+
+\end{tikzpicture}
+\caption{Use case-diagram for VideoAPI. Fargekoder: blå = autentisering, grønn = strømstyring og oransje = strømstyring. Alle operasjoner forutsetter gyldig autentisering via Keycloak. Klienten er primæraktør; Keycloak, AntMedia Server og NHN Video
+er sekundæraktører.}
+\label{fig:usecase}
+\end{figure}
+
+\begin{table}[h]
 \centering
 \begin{threeparttable}
 \caption{Oversikt over krav, prioritet og evalueringsgrunnlag.}
@@ -50,9 +105,10 @@ O1.3 & Prometheus-metrikker & Viktig & Metrics-test, Grafana-verifisering \\
 D1.1 & Dokumentasjon & Viktig & Dokumentasjonsgjennomgang \\
 \bottomrule
 \end{tabular}
-\begin{tablenotes}
-\footnotesize
-\item F1.6 var ikke spesifisert av HDO og er utelatt.
-\end{tablenotes}
+% \begin{tablenotes}
+% \footnotesize
+% \item F1.6 var ikke spesifisert av HDO og er utelatt.
+% \end{tablenotes}
 \end{threeparttable}
 \end{table}
+\newpage

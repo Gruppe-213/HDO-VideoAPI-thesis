@@ -1,29 +1,23 @@
 \section{Problemstilling}
-HDO benytter i dag to separate videoplattformer med ulike API-er og integrasjonsmetoder. Eksisterende løsninger er tett koblet til én leverandørspesifikk backend, noe som vanskeliggjør leverandørbytte, utvidelse med nye tjenester og standardisering av funksjonalitet på tvers av plattformene. Systemets rolle i akuttmedisinsk infrastruktur innebærer at løsningen må oppfylle strenge krav til sikkerhet, tilgjengelighet, stabilitet og responstid.
-
+Eksisterende løsninger er hver bygget rundt sin egen videomotor, noe som vanskeliggjør både eksponering av et uniformt grensesnitt mot klientene og integrasjon av nye videomotorer. Systemets rolle i akuttmedisinsk infrastruktur innebærer at løsningen må oppfylle strenge krav til sikkerhet, tilgjengelighet, stabilitet og responstid.
 
 % Dette prosjektet utviklet og evaluerte en plugin-basert mellomvare, VideoAPI, som standardiserer tilgang til ulike videomotorer. Løsningen ble implementert som proof-of-concept med støtte for AntMedia Server og NHN Video.
 
-Forskningsspørsmålet oppgaven besvarer er:
+Med dette som utgangspunkt undersøker oppgaven følgende forskningsspørsmål:
 
 \begin{quote}
-I hvilken grad kan en \gls{plugin-basert} mellomvarearkitektur standardisere tilgang
-til AntMedia Server og NHN Video gjennom ett felles API, samtidig som
-backend-spesifikk logikk isoleres fra kjernelogikken i VideoAPI?
+I hvilken grad kan en \gls{plugin-basert} mellomvarearkitektur standardisere tilgang til AntMedia Server og NHN Video gjennom ett felles API, samtidig som backend-spesifikk logikk isoleres fra kjernelogikken i VideoAPI?
 \end{quote}
 
-Forskningsspørsmålet vurderes langs tre dimensjoner. \emph{Dimensjon 1
-(API-dekning)} vurderer om ett felles API faktisk dekker kjerneoperasjonene
-fra HDOs kravspesifikasjon på en måte klientene kan bruke uavhengig av
-underliggende videomotor. \emph{Dimensjon 2 (backend-isolering)} vurderer i
-hvilken grad forskjeller mellom AntMedia Server og NHN Video kan holdes
-innenfor \gls{provider-laget}, slik at \gls{controller-laget} og API-kontrakten forblir
-uendret når en ny videomotor legges til. \emph{Dimensjon 3 (ikke-funksjonelle
-krav)} vurderer om sikkerhets-, infrastruktur- og observability-kravene fra
-kravspesifikasjonen er oppfylt på et nivå som er hensiktsmessig for et
-proof-of-concept i akuttmedisinsk kontekst.
+For å strukturere evalueringen er forskningsspørsmålet brutt ned i tre dimensjoner:
+\begin{description}
+    \item[Dimensjon 1 - API-dekning] vurderer om ett felles API faktisk dekker kjerneoperasjonene fra HDOs kravspesifikasjon på en måte klientene kan bruke uavhengig av underliggende videomotor.
+    \item[Dimensjon 2 - backend-isolering] vurderer i hvilken grad forskjeller mellom AntMedia Server og NHN Video kan holdes innenfor \gls{provider-laget}, slik at \gls{controller-laget} og API-kontrakten forblir uendret når en ny videomotor legges til.
+    \item[Dimensjon 3 - ikke-funksjonelle krav] vurderer om sikkerhets-, infrastruktur- og observability-kravene fra kravspesifikasjonen er oppfylt på et nivå som er hensiktsmessig for et proof-of-concept.
+\end{description}
 
-Begrensninger som oppstår når to videomotorer har fundamentalt ulike
-domenemodeller diskuteres i kapittel~\ref{ch:diskusjon}, ikke som et eget
-evalueringsspørsmål, men som en realitet løsningen må forholde seg til.
+% \emph{Dimensjon 1
+% (API-dekning)} vurderer om ett felles API faktisk dekker kjerneoperasjonene fra HDOs kravspesifikasjon på en måte klientene kan bruke uavhengig av underliggende videomotor. \emph{Dimensjon 2 (backend-isolering)} vurderer i hvilken grad forskjeller mellom AntMedia Server og NHN Video kan holdes innenfor \gls{provider-laget}, slik at \gls{controller-laget} og API-kontrakten forblir uendret når en ny videomotor legges til. \emph{Dimensjon 3 (ikke-funksjonelle krav)} vurderer om sikkerhets-, infrastruktur- og observability-kravene fra kravspesifikasjonen er oppfylt på et nivå som er hensiktsmessig for et proof-of-concept i akuttmedisinsk kontekst.
+
+Begrensninger som oppstår når to videomotorer har fundamentalt ulike domenemodeller diskuteres i kapittel~\ref{ch:diskusjon}, ikke som et eget evalueringsspørsmål, men som en realitet løsningen må forholde seg til.
 

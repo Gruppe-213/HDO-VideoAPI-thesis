@@ -1,20 +1,26 @@
+% \section{Eksisterende videoløsninger}
+% \label{sec:eksisterende}
+
+% HDO leverer i dag to separate videoløsninger til den akuttmedisinske kjede.
+% Begge bruker \gls{webrtc} for å strømme video fra innringers kamera til
+% operatøren, og begge følger samme arbeidsflyt: operatøren sender en
+% SMS-lenke til innringeren, som godtar kameradeling og starter
+% videostrømmen. Videostrømmen er kryptert og går via en sentralisert
+% videomotor, mens lyd overføres via den ordinære telefonsamtalen
+% \cite{hdo_oppgave}.
+
+% Til tross for lik funksjonalitet benytter de to løsningene forskjellig
+% infrastruktur og videomotorer: AntMedia Server og NHN Video. Hver motor
+% har sitt eget API og sine egne integrasjonsmetoder, noe som innebærer at
+% ny funksjonalitet må implementeres separat for begge, og at driftspersonell
+% må forholde seg til to ulike systemer \cite{hdo_oppgave}.
+
+% VideoAPI-prosjektet ble initiert for å adressere denne dupliseringen ved
+% å tilby én mellomvare som abstraherer forskjellene mellom motorene, slik
+% at fremtidige endringer kan gjøres ett sted.
+
 \section{Eksisterende videoløsninger}
 \label{sec:eksisterende}
+HDO leverer i dag to separate videoløsninger til den akuttmedisinske kjede. Begge følger arbeidsflyten beskrevet i avsnitt~\ref{sec:hdo} og bruker \gls{webrtc} for å strømme kryptert video fra innringers kamera til operatøren \cite{hdo_oppgave}.
 
-HDO leverer i dag to separate videoløsninger til den akuttmedisinske kjede.
-Begge bruker \gls{webrtc} for å strømme video fra innringers kamera til
-operatøren, og begge følger samme arbeidsflyt: operatøren sender en
-SMS-lenke til innringeren, som godtar kameradeling og starter
-videostrømmen. Videostrømmen er kryptert og går via en sentralisert
-videomotor, mens lyd overføres via den ordinære telefonsamtalen
-\cite{hdo_oppgave}.
-
-Til tross for lik funksjonalitet benytter de to løsningene forskjellig
-infrastruktur og videomotorer: AntMedia Server og NHN Video. Hver motor
-har sitt eget API og sine egne integrasjonsmetoder, noe som innebærer at
-ny funksjonalitet må implementeres separat for begge, og at driftspersonell
-må forholde seg til to ulike systemer \cite{hdo_oppgave}.
-
-VideoAPI-prosjektet ble initiert for å adressere denne dupliseringen ved
-å tilby én mellomvare som abstraherer forskjellene mellom motorene, slik
-at fremtidige endringer kan gjøres ett sted.
+Til tross for lik funksjonalitet er de to løsningene basert på forskjellige videomotorer med ulik underliggende teknologi: AntMedia Server og NHN Video. De to motorene beskrives nærmere i avsnitt~\ref{sec:antmedia} og~\ref{sec:nhn}.

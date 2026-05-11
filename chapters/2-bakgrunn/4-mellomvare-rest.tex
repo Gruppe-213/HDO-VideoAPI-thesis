@@ -1,8 +1,45 @@
 \section{Mellomvare og REST}
 \label{sec:mellomvare-rest}
 
-Mellomvare er programvare som fungerer som et kommunikasjonslag mellom applikasjoner og tjenester. I stedet for at hver applikasjon må koble seg direkte til alle andre, kobler de seg til mellomvaren, som håndterer ruting, sikkerhet og protokolloversettelse på tvers av systemene \cite{azure_middleware}.
+Mellomvare er programvare som fungerer som et kommunikasjonslag mellom applikasjoner og tjenester. I stedet for at hver applikasjon må koble seg direkte til alle andre, kobler de seg til mellomvaren, som håndterer ruting, sikkerhet og protokolloversettelse på tvers av systemene \cite{azure_middleware}. Figur~\ref{fig:mellomvare} illustrerer dette prinsippet i kontekst av prosjektet: klienten forholder seg utelukkende til VideoAPI, mens kommunikasjonen med de underliggende videomotorene håndteres internt.
 
-REST bygger på et sett constraints: klient-tjener-separasjon, tilstandsløshet, og et uniformt grensesnitt
-basert på ressursidentifikasjon via URI-er \cite{wiki_rest}. VideoAPI følger disse
-prinsippene ved å eksponere videorom som ressurser over \gls{http}.
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    box/.style={
+        rectangle,
+        draw=black,
+        thick,
+        rounded corners=4pt,
+        minimum width=3.2cm,
+        minimum height=1.2cm,
+        align=center,
+        font=\small
+    },
+    biarr/.style={
+        {Stealth[length=5pt]}-{Stealth[length=5pt]},
+        thick
+    }
+]
+
+\node[box] (client) at (0,0) {Klient};
+\node[box, fill=gray!15] (api) at (5.5,0) {\textit{VideoAPI}};
+\node[box] (antmedia) at (11,1.2) {AntMedia\\Server};
+\node[box] (nhn) at (11,-1.2) {NHN Video};
+
+\draw[biarr] (client) -- (api)
+    node[midway, above, font=\footnotesize] {Felles REST-API};
+
+\draw[biarr] (api.east) -- ++(0.7,0) |- (antmedia.west);
+\draw[biarr] (api.east) -- ++(0.7,0) |- (nhn.west);
+
+\end{tikzpicture}
+\caption{VideoAPI som mellomvare mellom klienter og de to videomotorene.}
+\label{fig:mellomvare}
+\end{figure}
+
+% REST bygger på et sett constraints: klient-tjener-separasjon, tilstandsløshet, og et uniformt grensesnitt
+% basert på ressursidentifikasjon via URI-er \cite{wiki_rest}. VideoAPI følger disse
+% prinsippene ved å eksponere videorom som ressurser over \gls{http}.
+
+REST bygger på et sett \gls{constraints}: klient-tjener-separasjon, tilstandsløshet og et uniformt grensesnitt basert på ressursidentifikasjon via \gls{uri}-er \cite{fielding2000}. Tilstandsløshet innebærer at hver forespørsel må inneholde all nødvendig informasjon for å behandles, uten at tjeneren lagrer sesjonstilstand mellom kall. VideoAPI følger disse prinsippene ved å eksponere videorom som ressurser med entydige URI-er (f.eks.\ \texttt{/api/rooms/{id}}), bruke \gls{http}-metoder semantisk korrekt og holde hvert kall tilstandsløst slik at ingen sesjonsdata lagres på tjenersiden.

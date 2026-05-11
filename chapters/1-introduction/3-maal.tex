@@ -2,17 +2,20 @@
 \label{sec:maal}
 
 \subsection{Effektmål}
-VideoAPI skal bidra til økt fleksibilitet ved integrasjon av nye videomotorer med minimale
-endringer i eksisterende løsninger. Løsningen skal redusere \gls{teknologisk-innlåsing} ved å gjøre
-det enklere å bytte leverandør etter HDOs drifts- og funksjonsbehov. Effektmålene
-er kvalitative og kan først verifiseres gjennom faktisk produksjonssetting og videre integrasjon
-hos HDO.
+VideoAPI skal forenkle HDOs håndtering av videotjenester ved å tilby ett uniformt \gls{mellomvare}-\gls{api} som abstraherer forskjellene mellom videomotorer. Dette skal gjøre det enklere å integrere nye videomotorer uten at eksisterende klientløsninger må endres, og bidra til å redusere \gls{teknologisk-innlåsing} ved leverandørbytte. Ved å samle kommunikasjonen med videomotorene i ett lag skal løsningen også forenkle drift og overvåking sammenlignet med å forholde seg til hver motor separat. Effektmålene er kvalitative og kan først verifiseres gjennom faktisk produksjonssetting og videre integrasjon hos HDO.
+
+% \subsection{Effektmål}
+% VideoAPI skal bidra til økt fleksibilitet ved integrasjon av nye videomotorer med minimale
+% endringer i eksisterende løsninger. Videre skal det også redusere \gls{teknologisk-innlåsing} ved å gjøre
+% det enklere å bytte leverandør etter HDOs drifts- og funksjonsbehov. Effektmålene
+% er kvalitative og kan først verifiseres gjennom faktisk produksjonssetting og videre integrasjon
+% hos HDO.
 
 \subsection{Resultatmål}
-Prosjektet resulterte i følgende leveranser:
+Prosjektet skal resultere i følgende leveranser:
 \begin{enumerate}
-  \item Et \gls{rest-api} med plugin-arkitektur, \gls{oauth2}/\gls{jwt}-autentisering,
-        health-endepunkter, strukturert logging og Prometheus-monitorering.
+  \item Et \gls{rest-api} med plugin-arkitektur og \gls{oauth2}/\gls{jwt}-autentisering.
+  \item Helsesjekker, strukturert logging og Prometheus-monitorering.
   \item \Glspl{provider-adapter} for AntMedia Server og NHN Video.
   \item En enkel \gls{demo-frontend} for å demonstrere API-et i praksis.
   \item OpenAPI/Swagger-dokumentasjon beregnet på eksterne leverandører.
@@ -22,4 +25,8 @@ Prosjektet resulterte i følgende leveranser:
 
 \subsection{Læringsmål}
 
-Teamet hadde ingen tidligere erfaring med C\# eller .NET. De første sprintene ble derfor benyttet til å tilegne seg språket og økosystemet parallelt med utvikling. Gjennom prosjektet opparbeidet teamet praktisk erfaring med .NET 10, ASP.NET Core, REST-API-design, plugin-arkitektur, Docker, GitHub Actions og Prometheus/Grafana. Samarbeidet med HDO som ekstern oppdragsgiver ga også erfaring med kravhåndtering, tekniske avklaringer og arbeid under leveransekrav i et reelt prosjekt.
+Ettersom gruppen ikke har tidligere erfaring med C\# eller .NET, vil de første sprintene benyttes til å tilegne seg språket og økosystemet parallelt med utvikling. Gjennom prosjektet skal gruppen opparbeide praktisk erfaring med .NET 10, ASP.NET Core, REST-API-design, plugin-arkitektur, Docker, GitHub Actions og Prometheus/Grafana.
+
+Samarbeidet med HDO som ekstern oppdragsgiver skal i tillegg gi erfaring av mer prosjektfaglig karakter: kravhåndtering, tekniske avklaringer og arbeid under leveransekrav i et reelt prosjekt.
+
+% Teamet hadde ingen tidligere erfaring med C\# eller .NET. De første sprintene ble derfor benyttet til å tilegne seg språket og økosystemet parallelt med utvikling. Gjennom prosjektet opparbeidet teamet praktisk erfaring med .NET 10, ASP.NET Core, REST-API-design, plugin-arkitektur, Docker, GitHub Actions og Prometheus/Grafana. Samarbeidet med HDO som ekstern oppdragsgiver ga også erfaring med kravhåndtering, tekniske avklaringer og arbeid under leveransekrav i et reelt prosjekt.
