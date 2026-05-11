@@ -6,39 +6,48 @@ fremdrift. Figur~\ref{fig:gantt} viser den opprinnelige planen, og
 Figur~\ref{fig:gantt-faktisk} viser den faktiske gjennomføringen. Begge
 diagrammene refereres fra kapittel~\ref{ch:utvikling}.
 
-\begin{sidewaysfigure}
-\centering
+\clearpage
+\thispagestyle{plain}
+\begin{center}
+\rotatebox{90}{%
 \begin{minipage}{0.95\textheight}
 \centering
+\refstepcounter{figure}\label{fig:gantt}%
 \input{figures/plan-gant}
 
-\vspace{1.2em}
+\vspace{1em}
 \noindent\textbf{Fargeforklaring:}\quad
-\textcolor{red!40}{\rule{0.7cm}{0.22cm}}~Kritisk sti \quad
-\textcolor{blue!30}{\rule{0.7cm}{0.22cm}}~Analyse og design \quad
-\textcolor{green!30}{\rule{0.7cm}{0.22cm}}~Implementasjon \quad
-\textcolor{orange!30}{\rule{0.7cm}{0.22cm}}~Testing \quad
-\textcolor{purple!30}{\rule{0.7cm}{0.22cm}}~Dokumentasjon og rapport
-\end{minipage}
-\caption{Gantt-diagram for HDO VideoAPI (uke 1--19).}
-\label{fig:gantt}
-\end{sidewaysfigure}
+\textcolor{red!40}{\rule{0.6cm}{0.2cm}}~Kritisk sti \quad
+\textcolor{blue!30}{\rule{0.6cm}{0.2cm}}~Analyse og design \quad
+\textcolor{green!30}{\rule{0.6cm}{0.2cm}}~Implementasjon \quad
+\textcolor{orange!30}{\rule{0.6cm}{0.2cm}}~Testing \quad
+\textcolor{purple!30}{\rule{0.6cm}{0.2cm}}~Dokumentasjon og rapport
 
-\begin{sidewaysfigure}
-\centering
+\vspace{0.8em}
+{\small\textit{Figur~\thefigure: Gantt-diagram for HDO VideoAPI (uke 1--19).}}
+\end{minipage}}
+\end{center}
+
+\clearpage
+\thispagestyle{plain}
+\begin{center}
+\rotatebox{90}{%
 \begin{minipage}{0.95\textheight}
 \centering
+\refstepcounter{figure}\label{fig:gantt-faktisk}%
 \input{figures/real-gant}
 
-\vspace{1.2em}
+\vspace{1em}
 \noindent\textbf{Fargeforklaring:}\quad
-\textcolor{teal!60}{\rule{0.7cm}{0.22cm}}~Kritisk sti \quad
-\textcolor{cyan!40}{\rule{0.7cm}{0.22cm}}~Oppstart og læring \quad
-\textcolor{olive!50}{\rule{0.7cm}{0.22cm}}~Implementasjon \quad
-\textcolor{brown!50}{\rule{0.7cm}{0.22cm}}~Testing \quad
-\textcolor{magenta!40}{\rule{0.7cm}{0.22cm}}~Dokumentasjon og rapport \quad
-\textcolor{pink!50}{\rule{0.7cm}{0.22cm}}~Sluttkontroll
-\end{minipage}
-\caption{Faktisk gjennomføring av HDO VideoAPI (uke 1--20).}
-\label{fig:gantt-faktisk}
-\end{sidewaysfigure}
+\textcolor{teal!60}{\rule{0.6cm}{0.2cm}}~Kritisk sti \quad
+\textcolor{cyan!40}{\rule{0.6cm}{0.2cm}}~Oppstart og læring \quad
+\textcolor{olive!50}{\rule{0.6cm}{0.2cm}}~Implementasjon \quad
+\textcolor{brown!50}{\rule{0.6cm}{0.2cm}}~Testing \quad
+\textcolor{magenta!40}{\rule{0.6cm}{0.2cm}}~Dokumentasjon og rapport \quad
+\textcolor{pink!50}{\rule{0.6cm}{0.2cm}}~Sluttkontroll
+
+\vspace{0.8em}
+{\small\textit{Figur~\thefigure: Faktisk gjennomføring av HDO VideoAPI (uke 1--20).}}
+\end{minipage}}
+\end{center}
+\clearpage
