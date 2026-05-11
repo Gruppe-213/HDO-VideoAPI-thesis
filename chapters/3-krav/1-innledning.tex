@@ -36,8 +36,8 @@ Figur~\ref{fig:usecase} gir en visuell oversikt over operasjonene klienten kan u
 }
 
 % Systemgrense
-\draw[thick] (2.0, 1.1) rectangle (9.2, -11.0);
-\node[font=\small\bfseries] at (5.6, 1.45) {VideoAPI};
+\draw[thick] (2.0, 1.8) rectangle (9.2, -11.3);
+\node[font=\small\bfseries] at (5.6, 1.3) {VideoAPI};
 
 % Use cases
 \node[uc, fill=blue!10]   (auth)   at (5.6,  0.0) {Autentisere};
@@ -49,12 +49,12 @@ Figur~\ref{fig:usecase} gir en visuell oversikt over operasjonene klienten kan u
 \node[uc, fill=orange!10] (webrtc) at (5.6,-10.0) {Generere WebRTC-token};
 
 % Primæraktør: Klient
-\stickfigure{0.5}{-4.5}{Klient}
+\stickfigure{0.2}{-4.5}{Klient}
 
 % Sekundæraktører
-\stickfigure{11.2}{ 0.0}{Keycloak}
-\stickfigure{11.2}{-4.5}{NHN Video}
-\stickfigure{11.2}{-9.0}{AntMedia\\Server}
+\stickfigure{11.5}{ 0.0}{Keycloak}
+\stickfigure{11.5}{-4.5}{NHN Video}
+\stickfigure{11.5}{-9.0}{AntMedia\\Server}
 
 
 % Klient → use cases
@@ -75,9 +75,17 @@ Figur~\ref{fig:usecase} gir en visuell oversikt over operasjonene klienten kan u
     \draw[ln] (10.85, -9.0) -- (\target.east);
 }
 
+% Fargeforklaring (horisontal, under systemgrensen)
+\node[anchor=north, font=\footnotesize] at (5.6, -11.8) {
+    \begin{tabular}{cl@{\hspace{1.5em}}cl@{\hspace{1.5em}}cl}
+        \tikz\draw[fill=blue!10,  draw=black] (0,0) rectangle (0.3,0.2); & Autentisering &
+        \tikz\draw[fill=green!10,  draw=black] (0,0) rectangle (0.3,0.2); & Romstyring &
+        \tikz\draw[fill=orange!10, draw=black] (0,0) rectangle (0.3,0.2); & Strømstyring \\
+    \end{tabular}
+};
+
 \end{tikzpicture}
-\caption{Use case-diagram for VideoAPI. Fargekoder: blå = autentisering, grønn = strømstyring og oransje = strømstyring. Alle operasjoner forutsetter gyldig autentisering via Keycloak. Klienten er primæraktør; Keycloak, AntMedia Server og NHN Video
-er sekundæraktører.}
+\caption{Use case-diagram for VideoAPI. Alle operasjoner forutsetter gyldig autentisering via Keycloak. Klienten er primæraktør; Keycloak, AntMedia Server og NHN Video er sekundæraktører.}
 \label{fig:usecase}
 \end{figure}
 
