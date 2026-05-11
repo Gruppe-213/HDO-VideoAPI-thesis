@@ -3,51 +3,52 @@
 
 Dette vedlegget inneholder Gantt-diagrammene som visualiserer prosjektets
 fremdrift. Figur~\ref{fig:gantt} viser den opprinnelige planen, og
-Figur~\ref{fig:gantt-faktisk} viser den faktiske gjennomføringen. Begge
-diagrammene refereres fra kapittel~\ref{ch:utvikling}.
+Figur~\ref{fig:gantt-faktisk} viser den faktiske gjennomføringen.
 
 \clearpage
 \thispagestyle{plain}
-\begin{center}
-\rotatebox{90}{%
-\begin{minipage}{0.95\textheight}
+\begin{figure}[p]
 \centering
-\refstepcounter{figure}\label{fig:gantt}%
+\rotatebox{90}{%
+\resizebox{0.88\textheight}{!}{%
 \input{figures/plan-gant}
+}}
+\vspace{0.5em}
 
-\vspace{1em}
-\noindent\textbf{Fargeforklaring:}\quad
+{\scriptsize
+\textbf{Fargeforklaring:}\quad
 \textcolor{red!40}{\rule{0.6cm}{0.2cm}}~Kritisk sti \quad
 \textcolor{blue!30}{\rule{0.6cm}{0.2cm}}~Analyse og design \quad
 \textcolor{green!30}{\rule{0.6cm}{0.2cm}}~Implementasjon \quad
 \textcolor{orange!30}{\rule{0.6cm}{0.2cm}}~Testing \quad
-\textcolor{purple!30}{\rule{0.6cm}{0.2cm}}~Dokumentasjon og rapport
+\textcolor{purple!30}{\rule{0.6cm}{0.2cm}}~Dokumentasjon
+}
 
-\vspace{0.8em}
-{\small\textit{Figur~\thefigure: Gantt-diagram for HDO VideoAPI (uke 1--19).}}
-\end{minipage}}
-\end{center}
+\caption{Gantt-diagram for HDO VideoAPI (uke 1--19).}
+\label{fig:gantt}
+\end{figure}
+\clearpage
 
 \clearpage
-\thispagestyle{plain}
-\begin{center}
-\rotatebox{90}{%
-\begin{minipage}{0.95\textheight}
+\begin{figure}[p]
 \centering
-\refstepcounter{figure}\label{fig:gantt-faktisk}%
+\rotatebox{90}{%
+\resizebox{0.82\textheight}{!}{%
 \input{figures/real-gant}
+}}
+\vspace{0.5em}
 
-\vspace{1em}
-\noindent\textbf{Fargeforklaring:}\quad
-\textcolor{teal!60}{\rule{0.6cm}{0.2cm}}~Kritisk sti \quad
-\textcolor{cyan!40}{\rule{0.6cm}{0.2cm}}~Oppstart og læring \quad
-\textcolor{olive!50}{\rule{0.6cm}{0.2cm}}~Implementasjon \quad
+{\scriptsize
+\textbf{Fargeforklaring:}\quad
+\textcolor{teal!60}{\rule{0.6cm}{0.2cm}}~Implementasjon/design \quad
+\textcolor{cyan!40}{\rule{0.6cm}{0.2cm}}~Oppstart/læring \quad
+\textcolor{olive!50}{\rule{0.6cm}{0.2cm}}~Infrastruktur/demo \quad
 \textcolor{brown!50}{\rule{0.6cm}{0.2cm}}~Testing \quad
-\textcolor{magenta!40}{\rule{0.6cm}{0.2cm}}~Dokumentasjon og rapport \quad
+\textcolor{magenta!40}{\rule{0.6cm}{0.2cm}}~Dokumentasjon/rapport \quad
 \textcolor{pink!50}{\rule{0.6cm}{0.2cm}}~Sluttkontroll
+}
 
-\vspace{0.8em}
-{\small\textit{Figur~\thefigure: Faktisk gjennomføring av HDO VideoAPI (uke 1--20).}}
-\end{minipage}}
-\end{center}
+\caption{Faktisk gjennomføring av HDO VideoAPI (uke 1--20).}
+\label{fig:gantt-faktisk}
+\end{figure}
 \clearpage

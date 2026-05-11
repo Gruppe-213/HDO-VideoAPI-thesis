@@ -1,17 +1,19 @@
 \section{Integrasjonstester}
 \label{sec:integrasjonstester}
 
-Integrasjonstestene brukte \texttt{WebApplicationFactory<Program>} til
-å starte API-et in-memory uten å åpne en faktisk TCP-port. En
-\texttt{CustomWebApplicationFactory} erstattet alle eksterne
-avhengigheter med Moq-instanser og simulerte autentisering via en
-\texttt{TestAuthHandler} (\texttt{AuthenticationHandler<AuthenticationSchemeOptions>})
-som returnerte en \texttt{ClaimsPrincipal} med en valgfri
-\texttt{api\_access}-claim styrt av factory-parameteret. Hver
-testklasse opprettet sin egen \texttt{CustomWebApplicationFactory} og
-egen \texttt{HttpClient}, slik at mock-oppsett og keyed
-DI-registreringer ikke lekket mellom tester og ga
-ikke-deterministiske resultater.
+Integrasjonstestene brukte \texttt{WebApplicationFactory<Program>} til å starte API-et in-memory uten å åpne en faktisk TCP-port. En \texttt{CustomWebApplicationFactory} erstattet alle eksterne avhengigheter med Moq-instanser og simulerte autentisering via en egen \texttt{TestAuthHandler} — en implementasjon av \texttt{AuthenticationHandler} — som returnerte en \texttt{ClaimsPrincipal} med en valgfri \texttt{api\_access}-claim styrt av factory-parameteret. Hver testklasse opprettet sin egen factory og \texttt{HttpClient}, slik at mock-oppsett og DI-registreringer ikke lekket mellom tester og ga ikke-deterministiske resultater.
+
+% Integrasjonstestene brukte \texttt{WebApplicationFactory<Program>} til
+% å starte API-et in-memory uten å åpne en faktisk TCP-port. En
+% \texttt{CustomWebApplicationFactory} erstattet alle eksterne
+% avhengigheter med Moq-instanser og simulerte autentisering via en
+% \url{TestAuthHandler} \url{(AuthenticationHandler<AuthenticationSchemeOptions>)}
+% som returnerte en \texttt{ClaimsPrincipal} med en valgfri
+% \texttt{api\_access}-claim styrt av factory-parameteret. Hver
+% testklasse opprettet sin egen \texttt{CustomWebApplicationFactory} og
+% egen \texttt{HttpClient}, slik at mock-oppsett og keyed
+% DI-registreringer ikke lekket mellom tester og ga
+% ikke-deterministiske resultater.
 
 Suiten dekket samtlige rom-endepunkter på tvers av suksess, validering,
 feilstier og sikkerhet. Under følger tre representative kodelister fra

@@ -1,13 +1,15 @@
 % Tabeller/gantt-actual.tex  (faktisk gjennomføring)
-{\small
-\centering
 \begin{ganttchart}[
     hgrid,
     vgrid,
-    x unit=0.48cm,
-    y unit chart=0.75cm,
-    bar height=0.6,
-    milestone height=0.8
+    x unit=0.50cm,
+    y unit chart=0.60cm,
+    bar height=0.55,
+    milestone height=0.7,
+    bar label font=\scriptsize,
+    group label font=\scriptsize\bfseries,
+    milestone label font=\scriptsize\itshape,
+    title label font=\scriptsize\bfseries
 ]{1}{20}
 
 \ganttset{
@@ -37,16 +39,16 @@
 \ganttbar[bar/.append style={fill=olive!50}, name=obs]{Observability}{11}{18} \\
 \ganttmilestone{M4: Demo ferdig}{15} \\
 
-\ganttbar[bar/.append style={fill=brown!50}]{Testing (kontinuerlig)}{6}{19} \\
+\ganttbar[bar/.append style={fill=brown!50}]{Testing}{6}{19} \\nah
 \ganttbar[bar/.append style={fill=brown!50}]{Stabilisering}{16}{18} \\
 \ganttbar[bar/.append style={fill=brown!50}]{Provider-validering}{18}{19} \\
 
 \ganttbar[bar/.append style={fill=magenta!40}]{Dokumentasjon}{10}{18} \\
-\ganttbar[bar/.append style={fill=magenta!40}]{Rapport (løpende)}{8}{20} \\
+\ganttbar[bar/.append style={fill=magenta!40}]{Rapport}{8}{20} \\
 \ganttbar[bar/.append style={fill=pink!50}]{Sluttkontroll}{20}{20} \\
 
 \ganttmilestone{M5: Produktleveranse}{18} \\
-\ganttmilestone{M6: Rapport ferdig (soft)}{19} \\
+\ganttmilestone{M6: Rapport soft}{19} \\
 \ganttmilestone{M7: Innlevering}{20} \\
 
 % Viktige avhengigheter
@@ -58,4 +60,3 @@
 \ganttlink{frontend}{obs}
 
 \end{ganttchart}
-}
