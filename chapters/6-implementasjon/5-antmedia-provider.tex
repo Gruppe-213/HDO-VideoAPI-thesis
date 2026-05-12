@@ -28,7 +28,7 @@ private async Task<string?> GenerateAuthTokenAsync(CancellationToken cancellatio
         if (!string.IsNullOrEmpty(_cachedToken) && _tokenExpiry > now + TokenRefreshBufferSeconds)
             return _cachedToken;
 
-        // Generer nytt token
+        // Bygg og signer token (JWT)
         var expiry = now + TokenLifetimeSeconds;
         _tokenExpiry = expiry;
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret));
@@ -44,11 +44,13 @@ private async Task<string?> GenerateAuthTokenAsync(CancellationToken cancellatio
         };
         var tokenHandler = new JwtSecurityTokenHandler();
         var token = tokenHandler.CreateToken(tokenDescriptor);
+
+        // Lagre og returner token
         _cachedToken = tokenHandler.WriteToken(token);
-        
         return _cachedToken;
     }
-    finally { _semaphore.Release(); }   // Låser opp
+    finally 
+    { _semaphore.Release(); }   // Låser opp
 }
 \end{lstlisting}
 

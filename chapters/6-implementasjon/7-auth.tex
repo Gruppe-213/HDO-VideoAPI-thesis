@@ -5,27 +5,32 @@ Backenden bruker Keycloak som ekstern identitetsleverandør for autentisering, b
 
 \subsection{Token-flyt}
 
-Klienter autentiserer seg ved å sende en \texttt{POST}-forespørsel til \texttt{/auth/token}, der \texttt{clientId} og \texttt{clientSecret} inkluderes i request-bodyen. Endepunktet videresender forespørselen til Keycloaks token-endepunkt som en \texttt{client\_credentials}-forespørsel og returnerer \texttt{access\_token} til klienten. Systemet lagrer ingen tokens server-side og er dermed fullstendig tilstandsløst.
+Klienter autentiserer seg ved å sende en \texttt{POST}-forespørsel til \texttt{/auth/token}, der \texttt{clientId} og \texttt{clientSecret} inkluderes i request-bodyen. \texttt{AuthController} videresender forespørselen til \texttt{KeycloakService}, som kaller Keycloaks token-endepunkt med \texttt{client\_credentials}-grant og returnerer \texttt{access\_token} til klienten (jf. kodeliste~\ref{lst:auth-controller}--\ref{lst:keycloak-service}). Systemet lagrer ingen tokens server-side og er dermed fullstendig tilstandsløst.
 
-\begin{lstlisting}[language={[Sharp]C}, caption={AuthController.cs – token-endepunkt}]
+\begin{lstlisting}[language={[Sharp]C}, label=lst:auth-controller, caption={AuthController.cs – token-endepunkt}]
+// HDO-VideoAPI/Controllers/AuthController.cs
 [ApiController]
 [Route("auth")]
 public class AuthController(IKeycloakService keycloakService) : ControllerBase
 {
+    // Åpent endepunkt
     [AllowAnonymous]
+    [EnableRateLimiting("auth")]
     [HttpPost("token")]
     public async Task<IActionResult> GetToken([FromBody] TokenRequest request)
     {
-        var token = await keycloakService.GetTokenAsync(
-            request.ClientId, request.ClientSecret);
+        // Videresend til Keycloak og returner access_token
+        var token = await keycloakService.GetTokenAsync(request.ClientId, request.ClientSecret);
         return Ok(new { access_token = token });
     }
 }
 \end{lstlisting}
 
-\begin{lstlisting}[language={[Sharp]C}, caption={KeycloakService.cs – kall mot Keycloak}]
+\begin{lstlisting}[language={[Sharp]C}, label=lst:keycloak-service, caption={KeycloakService.cs – kall mot Keycloak}]
+// HDO-VideoAPI/Services/KeycloakService.cs
 public async Task<string> GetTokenAsync(string clientId, string clientSecret)
 {
+    // Bygg client_credentials-forespørsel (machine-to-machine auth)
     var formData = new Dictionary<string, string>
     {
         ["grant_type"] = "client_credentials",
@@ -33,44 +38,48 @@ public async Task<string> GetTokenAsync(string clientId, string clientSecret)
         ["client_secret"] = clientSecret
     };
 
+    // Send til Keycloak token-endepunkt
     var response = await httpClient.PostAsync(
-        $"{_config.BaseUrl}/realms/{_config.Realm}/protocol/openid-connect/token",
+        $"{_config.BaseUrl}/realms/{_config.Realm}/protocol/openid-connect/token", 
         new FormUrlEncodedContent(formData));
 
-    if (!response.IsSuccessStatusCode)
-        throw new ExternalServiceException("Keycloak",
-            await response.Content.ReadAsStringAsync(),
-            (int)response.StatusCode);
+    // ...
 
+    // Ekstraher og returner access_token
     var json = await response.Content.ReadFromJsonAsync<JsonElement>();
-    return json.GetProperty("access_token").GetString()!;
+    return accessTokenElement.GetString()!;
 }
 \end{lstlisting}
 
 \subsection{Tilgangskontroll}
 
-Autorisasjonspolicyen er flat, uten rollebasert tilgangsstyring. Alle klienter med et gyldig token og korrekt claim har identiske rettigheter. Et gyldig token uten \texttt{api\_access = true} resulterer i \texttt{403 Forbidden}, mens manglende eller ugyldig token gir \texttt{401 Unauthorized}.
+Autorisasjonspolicyen er flat, uten rollebasert tilgangsstyring. Alle klienter med et gyldig token og korrekt claim har identiske rettigheter. Et gyldig token uten \texttt{api\_access = true} resulterer i \texttt{403 Forbidden}, mens manglende eller ugyldig token gir \texttt{401 Unauthorized} (jf.\ kodeliste~\ref{lst:keycloak-extensions}).
 
-\begin{lstlisting}[language={[Sharp]C}, caption={KeycloakExtensions.cs – JWT-validering og autorisasjonspolicy}]
-services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.Authority = $"{baseUrl}/realms/{realm}";
-        options.RequireHttpsMetadata = false;
-        options.TokenValidationParameters = new()
-        {
-            ValidateAudience = false,
-            ValidateIssuer = false
-        };
-    });
-
-services.AddAuthorization(options =>
+\begin{lstlisting}[language={[Sharp]C}, label=lst:keycloak-extensions, caption={KeycloakExtensions.cs – JWT-validering og autorisasjonspolicy}]
+// HDO-VideoAPI/Extensions/KeycloakExtensions.cs
+public static IServiceCollection AddVideoKeycloak(this IServiceCollection services, IConfiguration configuration)
 {
-    options.DefaultPolicy = new AuthorizationPolicyBuilder()
-        .RequireAuthenticatedUser()
-        .RequireClaim("api_access", "true")
-        .Build();
-});
+    // ...
+    services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer(options =>
+        {
+            options.Authority = $"{baseUrl}/realms/{realm}";
+            options.RequireHttpsMetadata = false;
+            options.TokenValidationParameters = new()
+            {
+                ValidateAudience = false,
+                ValidateIssuer = false
+            };
+        });
+    
+    services.AddAuthorization(options =>
+    {
+        options.DefaultPolicy = new AuthorizationPolicyBuilder()
+            .RequireAuthenticatedUser()
+            .RequireClaim("api_access", "true")
+            .Build();
+    });
+}
 \end{lstlisting}
 
 Alle \texttt{/api/rooms/*}-endepunkter er beskyttet med
