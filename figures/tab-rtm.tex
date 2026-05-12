@@ -1,0 +1,61 @@
+\begin{table}[h]
+\centering
+\small
+\begin{threeparttable}
+\begin{tabular}{l p{5cm} p{5.5cm} r}
+\toprule
+\textbf{Krav} & \textbf{Implementasjon} & \textbf{Test(er)} & \textbf{Status} \\
+\midrule
+F1.1 & \texttt{RoomsController.CreateRoom}, \newline \texttt{\_.CreateRoomAsync}\tnote{*}
+     & Oppretting returnerer 201 med Location-header; verifisert i integrasjonstester og E2E. & \pass \\
+\addlinespace
+F1.2 & \texttt{RoomsController.DeleteRoom}, \newline \texttt{\_.DeleteRoomAsync}\tnote{*}
+     & Feilstier og sletting verifisert via E2E og manuell test. & \pass \\
+\addlinespace
+F1.3 & \texttt{RoomsController.GetRoom}, \newline \texttt{\_.GetRoomAsync}\tnote{*}
+     & Romsøk, validering og feilstier dekket; E2E verifisert. & \pass \\
+\addlinespace
+F1.4 & \texttt{RoomsController.StartStream}, \newline \texttt{\_.StartStreamAsync}\tnote{*}
+     & Strømstart delegeres korrekt; NHN returnerer \texttt{501}; AntMedia manuelt verifisert. & \delvis \\
+\addlinespace
+F1.5 & \texttt{RoomsController.StopStream}, \newline \texttt{\_.StopStreamAsync}\tnote{*}
+     & Strømstopp delegeres korrekt; NHN returnerer \texttt{501}; AntMedia manuelt verifisert. & \delvis \\
+\midrule
+S1.1 & \texttt{KeycloakExtensions}, \newline \texttt{[Authorize]} på \texttt{RoomsController}
+     & Endepunkter krever gyldig claim; \texttt{403} returneres ved manglende tilgang. & \pass \\
+\addlinespace
+S1.2 & \texttt{RoomsController.SetToken}, \newline \texttt{\_.GenerateWebRtcTokenAsync}\tnote{*}
+     &  SetToken delegeres korrekt; Token genereres og valideres korrekt for AntMedia; NHN returnerer 501. & \delvis \\
+\midrule
+I1.1 & \texttt{Dockerfile}, \texttt{compose.yaml}
+     & Tjenesten starter og svarer korrekt etter deploy på OpenStack-VM. & \pass \\
+\addlinespace
+I1.2 & \texttt{Program.cs}, env-vars, \newline \texttt{NHNTokenCache}
+     & Konfigurasjon og cache verifisert ved kodegjennomgang. & \verifisert \\
+\midrule
+O1.1 & \texttt{GlobalExceptionHandler}, \newline \texttt{ILogger}
+     & Uventede feil fanges og returnerer strukturert feilrespons. & \pass \\
+\addlinespace
+O1.2 & \texttt{AntMediaHealthCheck}, \newline \texttt{NHNHealthCheck}
+     & Helsesjekk mot begge providers returnerer korrekt status; E2E verifisert. & \pass \\
+\addlinespace
+O1.3 & \texttt{VideoMetrics}, \texttt{prometheus-net}
+     & Metrikker eksponeres på \texttt{/metrics} og verifisert i Grafana. & \pass \\
+\midrule
+D1.1 & \texttt{Swashbuckle}, \texttt{README}, \texttt{docs/}
+     & API-dokumentasjon og oppsettsveiledning verifisert ved gjennomgang. & \verifisert \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+  \small
+  \centering
+  \item[$*$] \texttt{\_} erstattes av \texttt{AntMediaProvider} og/eller \texttt{NHNVideoProvider}
+  \smallskip
+  \item \pass: Kravet er oppfylt og verifisert gjennom automatiserte tester, E2E eller manuell test.
+  \item \delvis: Kravet er oppfylt for AntMedia; NHN mangler tilsvarende operasjon.
+  \item \verifisert: Kravet er bekreftet gjennom kode- og dokumentasjonsgjennomgang.
+\end{tablenotes}
+\end{threeparttable}
+\caption{Krav-sporbarhetstabell (Requirements Traceability Matrix).}
+\label{tab:rtm}
+\end{table}

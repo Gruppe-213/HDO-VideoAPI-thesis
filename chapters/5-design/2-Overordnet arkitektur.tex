@@ -1,54 +1,41 @@
 \section{Overordnet arkitektur}
 \label{sec:arkitektur}
 
-VideoAPI er organisert som en lagdelt arkitektur, vist i
-figur~\ref{fig:lagarkitektur}. Lagdelingen ble valgt for å skille
-HTTP-håndtering, autentisering, provider-valg, backend-integrasjon og kryssende
-bekymringer fra hverandre. Dette reduserer koblingen mellom delene av systemet
-og gjør det enklere å endre én del uten å påvirke resten.
+VideoAPI er organisert som en lagdelt arkitektur, vist i figur~\ref{fig:lagarkitektur}. Lagdelingen skiller HTTP-håndtering, forretningslogikk og backend-integrasjon fra hverandre, noe som reduserer koblingen mellom delene av systemet og gjør det enklere å endre én del uten å påvirke resten.
 
 \input{figures/fig-arkitektur}
 
-HTTP-pipeline-laget håndterer innkommende trafikk og inneholder middleware for
-blant annet unntakshåndtering, HTTPS, CORS, rate limiting, JWT-autentisering,
-autorisasjon og Prometheus-metrikker. Disse mekanismene er lagt i pipelinen
-fordi de gjelder hele API-et, ikke én spesifikk romoperasjon.
+\begin{description}
+    \item[HTTP-pipeline-laget] håndterer innkommende trafikk og inneholder middleware for blant annet unntakshåndtering, HTTPS, CORS, rate limiting, JWT-autentisering, autorisasjon og Prometheus-metrikker. Disse mekanismene er lagt i pipelinen fordi de gjelder hele API-et, ikke én spesifikk romoperasjon.
+    
+    \item[Controller-laget] fungerer som et tynt bindeledd mellom HTTP-kontrakten og provider-laget. Controllerne binder innkommende forespørsler, velger riktig provider og returnerer HTTP-svar, men inneholder ikke backend-spesifikk logikk. Slik kan API-kontrakten holdes stabil selv om integrasjonen mot AntMedia eller NHN endres.
+    
+    \item[Provider-laget] er kjernen i arkitekturen. Resten av applikasjonen forholder seg til et felles \texttt{IVideoProvider}-grensesnitt, mens AntMedia- og NHN-spesifikk logikk holdes i egne provider-implementasjoner.
+    
+    \item[Service-laget] inneholder hjelpetjenester som brukes på tvers av provider-implementasjonene, særlig \texttt{KeycloakService} som håndterer uthenting og caching av tilgangstoken fra Keycloak.
+    
+    \item[Kryssende bekymringer] som feilhåndtering, metrikker og helsesjekker behandles utenfor kjerneflyten for romoperasjoner. Arkitekturen er også stateless: API-et lagrer ikke videorom eller sesjonsdata mellom forespørsler, men lar slik tilstand ligge hos de eksterne videomotorene. Dette støtter horisontal skalering og er i tråd med krav~I1.2~\cite{hdo_kravspec}.
+\end{description}
 
-Controller-laget fungerer som et tynt bindeledd mellom HTTP-kontrakten og
-provider-laget. Controllerne binder innkommende forespørsler, velger riktig
-provider og returnerer HTTP-svar, men inneholder ikke backend-spesifikk logikk.
-Slik kan API-kontrakten holdes stabil selv om integrasjonen mot AntMedia eller
-NHN endres.
-
-Provider-laget er kjernen i arkitekturen. Resten av applikasjonen forholder seg
-til et felles \texttt{IVideoProvider}-grensesnitt, mens AntMedia- og
-NHN-spesifikk logikk holdes i egne provider-implementasjoner. Service-laget
-inneholder støttefunksjonalitet som ikke hører direkte til romoperasjonene, særlig
-\texttt{KeycloakService} for uthenting av tilgangstoken fra Keycloak.
-
-Feilhåndtering, metrikker og helsesjekker behandles som kryssende bekymringer
-utenfor kjerneflyten for romoperasjoner. Arkitekturen er også stateless: API-et
-lagrer ikke videorom eller sesjonsdata mellom forespørsler, men lar slik
-tilstand ligge hos de eksterne videomotorene. Dette støtter horisontal skalering
-og er i tråd med krav~I1.2~\cite{hdo_kravspec}.
-
-\begin{lstlisting}[language=CSharp, caption={oppstartskonfigurasjon i \texttt{Program.cs}}, label={lst:program-startup}]
+\begin{lstlisting}[language=CSharp, caption={Oppstartskonfigurasjon delegert til navngitte extension-metoder}, label={lst:program-startup}]
+// HDO-VideoAPI/Program.cs
 var builder = WebApplication.CreateBuilder(args);
-builder.Configuration.AddEnvironmentVariables();
-builder.ConfigureVideoHosting();
 
-builder.Services.AddVideoRateLimiting();
-builder.Services.AddVideoApiCore();
-builder.Services.AddVideoCors(builder.Configuration);
-builder.Services.AddVideoProviders(builder.Configuration);
-builder.Services.AddVideoHealthChecks(builder.Environment);
-builder.Services.AddVideoKeycloak(builder.Configuration);
+// Konfigurasjon
+builder.Configuration.AddEnvironmentVariables();    // Miljøvariabler
+builder.ConfigureVideoHosting();                    // Kestrel og HTTPS
 
+// Tjenester registreres per ansvarsdomene
+builder.Services.AddVideoRateLimiting();    // Hastighetsbegrensning
+builder.Services.AddVideoApiCore();         // Controllers, JSON, OpenAPI
+builder.Services.AddVideoCors(builder.Configuration);       // CORS-policy
+builder.Services.AddVideoProviders(builder.Configuration);  // Plugin-arkitektur
+builder.Services.AddVideoHealthChecks(builder.Environment); // Helsesjekker 
+builder.Services.AddVideoKeycloak(builder.Configuration);   // OAuth2/JWT
+
+// Bygg og start applikasjonen
 var app = builder.Build();
-app.UseVideoApi();
+app.UseVideoApi();  // Middleware-kjeden i riktig rekkefølge
 app.Run();
 \end{lstlisting}
-Listing~\ref{lst:program-startup} viser hvordan oppstarten er holdt kompakt ved
-å delegere konfigurasjon til navngitte extension-metoder. Dette gjør
-\texttt{Program.cs} til en oversikt over systemets hovedmoduler, i stedet for å
-samle all konfigurasjon i én fil.
+Kodeliste~\ref{lst:program-startup} viser hvordan oppstarten er holdt kompakt ved å delegere konfigurasjon til navngitte extension-metoder. Dette gjør \texttt{Program.cs} til en oversikt over systemets hovedmoduler, i stedet for å samle all konfigurasjon i én fil.

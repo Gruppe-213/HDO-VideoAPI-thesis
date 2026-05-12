@@ -1,32 +1,40 @@
 \subsection{Sikkerhetskrav (S1.1--S1.2)}
 \label{sec:eval-sikkerhet}
 
-Krav S1.1 og S1.2 ble oppfylt. For S1.2 gikk selve implementasjonen greit -- å sette token
-på et AntMedia-rom var en rett frem operasjon, og for NHN Video håndteres tilgangskontrollen
-av NHNs eget API slik at vi ikke trengte å implementere noe selv. Det som krevde mest arbeid
-var Keycloak-integrasjonen som realiserer S1.1.
+% Krav S1.1 og S1.2 ble oppfylt. For S1.2 gikk selve implementasjonen greit -- å sette token
+% på et AntMedia-rom var en rett frem operasjon, og for NHN Video håndteres tilgangskontrollen
+% av NHNs eget API slik at vi ikke trengte å implementere noe selv. Det som krevde mest arbeid
+% var Keycloak-integrasjonen som realiserer S1.1.
 
-Den største praktiske utfordringen var oppsettet av selve Keycloak-instansen. Keycloak
-ble satt opp på vår egen backend-infrastruktur, og ingen på gruppen hadde konfigurert
-Keycloak fra bunnen av tidligere. Det tok tid å forstå realm-struktur, klientkonfigurasjon
-og hvordan JWT-tokens fra Keycloak ser ut. For å kunne teste autentiseringen lokalt under
-utvikling måtte vi tunnele Keycloak-instansen til \texttt{localhost}, siden API-et forventer
-en gyldig \texttt{Authority}-URL og Keycloak ikke var tilgjengelig direkte fra
-utviklermaskinen. Dette var en ekstra friksjon i arbeidsflyten vi ikke hadde forutsett.
+Krav S1.1 og S1.2 ble oppfylt. For S1.2 var selve implementasjonen uproblematisk — romtokens for AntMedia settes direkte via REST-API-et, mens tilgangskontroll for NHN Video håndteres av NHNs eget API uten at mellomvaren trenger å implementere dette selv. Hovedarbeidet på sikkerhetssiden lå i Keycloak-integrasjonen som realiserer S1.1.
 
-Validering av issuer og audience er i dag deaktivert. Dette var et bevisst valg -- siden
-HDO uansett skal rekonfigurere autentiseringsoppsettet for sin egen infrastruktur, vurderte
-vi det som lite hensiktsmessig å låse valideringen til vår midlertidige Keycloak-instans.
-Tokenet valideres fortsatt kryptografisk mot Keycloaks offentlige nøkler, og
-\texttt{api\_access}-claimet må være til stede. Det gir et tilstrekkelig grunnlag for
-prosjektfasen, men er ikke det man ville valgt i produksjon. Hadde vi prioritert det,
-burde issuer og audience vært aktivert med eksplisitte verdier, og
-\texttt{RequireHttpsMetadata} burde vært skrudd på for produksjonsmiljøet. Dette er de
-mest konkrete sikkerhetsforbedrningene som gjenstår før systemet er klart for reell drift.
+% Den største praktiske utfordringen var oppsettet av selve Keycloak-instansen. Keycloak
+% ble satt opp på vår egen backend-infrastruktur, og ingen på gruppen hadde konfigurert
+% Keycloak fra bunnen av tidligere. Det tok tid å forstå realm-struktur, klientkonfigurasjon
+% og hvordan JWT-tokens fra Keycloak ser ut. For å kunne teste autentiseringen lokalt under
+% utvikling måtte vi tunnele Keycloak-instansen til \texttt{localhost}, siden API-et forventer
+% en gyldig \texttt{Authority}-URL og Keycloak ikke var tilgjengelig direkte fra
+% utviklermaskinen. Dette var en ekstra friksjon i arbeidsflyten vi ikke hadde forutsett.
 
-Autorisasjonsmodellen er bevisst enkel: tokenet må inneholde claimet
-\texttt{api\_access = true}, og da har klienten full tilgang. Det er ingen rollestyring
-eller skille mellom ulike tilgangsnivåer. Dette var et gjennomtenkt valg -- HDO skal
-integrere VideoAPI i sin egen infrastruktur og legge til sine egne roller og claims
-tilpasset organisasjonens behov. Å bygge granulær tilgangskontroll nå ville vært å
-spekulere i krav vi ikke kjenner.
+Den største praktiske utfordringen var konfigurasjonen av Keycloak. Ingen på gruppen hadde satt opp Keycloak fra bunnen av tidligere, og det krevde betydelig tid å sette seg inn i realm-struktur, klientkonfigurasjon og JWT-tokenformatet Keycloak utsteder. Under lokal utvikling oppsto det i tillegg en praktisk komplikasjon: siden API-et forventer en gyldig \texttt{Authority}-URL, måtte Keycloak-instansen tunneles til \texttt{localhost} for at autentisering skulle fungere i utviklingsmiljøet — en friksjon i arbeidsflyten som ikke var forutsett ved prosjektstart.
+
+% Validering av issuer og audience er i dag deaktivert. Dette var et bevisst valg -- siden
+% HDO uansett skal rekonfigurere autentiseringsoppsettet for sin egen infrastruktur, vurderte
+% vi det som lite hensiktsmessig å låse valideringen til vår midlertidige Keycloak-instans.
+% Tokenet valideres fortsatt kryptografisk mot Keycloaks offentlige nøkler, og
+% \texttt{api\_access}-claimet må være til stede. Det gir et tilstrekkelig grunnlag for
+% prosjektfasen, men er ikke det man ville valgt i produksjon. Hadde vi prioritert det,
+% burde issuer og audience vært aktivert med eksplisitte verdier, og
+% \texttt{RequireHttpsMetadata} burde vært skrudd på for produksjonsmiljøet. Dette er de
+% mest konkrete sikkerhetsforbedrningene som gjenstår før systemet er klart for reell drift.
+
+Validering av issuer og audience er i det nåværende oppsettet deaktivert. Dette var et bevisst valg: siden HDO skal rekonfigurere autentiseringsoppsettet for sin egen infrastruktur, ble det vurdert som lite hensiktsmessig å låse valideringen til en midlertidig Keycloak-instans. Tokenet valideres kryptografisk mot Keycloaks offentlige nøkler, og \texttt{api\_access}-claimet må være til stede. Dette gir et tilstrekkelig grunnlag for proof-of-concept-fasen, men er ikke produksjonsklart. For produksjonssetting bør issuer- og audience-validering aktiveres med eksplisitte verdier, og \texttt{RequireHttpsMetadata} bør skrus på. Dette er de mest konkrete sikkerhetstiltakene som gjenstår før løsningen er egnet for reell drift.
+
+% Autorisasjonsmodellen er bevisst enkel: tokenet må inneholde claimet
+% \texttt{api\_access = true}, og da har klienten full tilgang. Det er ingen rollestyring
+% eller skille mellom ulike tilgangsnivåer. Dette var et gjennomtenkt valg -- HDO skal
+% integrere VideoAPI i sin egen infrastruktur og legge til sine egne roller og claims
+% tilpasset organisasjonens behov. Å bygge granulær tilgangskontroll nå ville vært å
+% spekulere i krav vi ikke kjenner.
+
+Autorisasjonsmodellen er bevisst enkel: et token med \texttt{api\_access = true} gir full tilgang, uten rollestyring eller skille mellom tilgangsnivåer. Dette var et gjennomtenkt valg — siden HDO skal integrere VideoAPI i sin egen infrastruktur og tilpasse rollemodellen til organisasjonens behov, ville det å bygge granulær tilgangskontroll på nåværende tidspunkt innebære å spesifisere krav som ikke er kjent. En mer finkornet autorisasjonsmodell er dokumentert som kandidat for videre arbeid i delkapittel~\ref{sec:videre-arbeid}.

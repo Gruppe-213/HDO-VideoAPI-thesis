@@ -47,28 +47,50 @@ Dette delkapittelet sammenligner den planlagte fremdriften med den faktiske gjen
 av hva som ble levert innenfor prosjektperioden.
 
 \subsection{Planlagt fremdrift}
+Fremdriftsplanen fra prosjektplanen er visualisert i Gantt-diagrammet i Figur~\ref{fig:gantt}.
+Planen var organisert rundt fire parallelle arbeidsstrømmer: analyse og design,
+implementasjon, testing og dokumentasjon. Testing og rapportskriving var planlagt
+som løpende aktiviteter gjennom hele perioden fremfor å samles i en avsluttende fase.
+Siden ingen på teamet hadde erfaring med C\# eller .NET fra før, ble den første delen
+av prosjektet planlagt med rom for opplæring parallelt med etablering av prosjektstruktur.
+\clearpage
+\begin{figure}[p]
+\centering
+\input{figures/plan-gant}
 
-Prosjektet ble planlagt over 19 uker, fra 12. januar til 20. mai 2026. Fremdriftsplanen fra prosjekplanen
-er visualisert i Gantt-diagrammet i Figur~\ref{fig:gantt} (Vedlegg~\ref{app:gantt}) og organisert rundt fire
-parallelle arbeidsstrømmer: analyse og design, implementasjon, testing og dokumentasjon.
-Testing og rapportskriving foregikk løpende gjennom hele perioden fremfor å samles i
-en avsluttende fase. Siden ingen på teamet hadde erfaring med C\# eller .NET fra før,
-ble den første delen av prosjektet planlagt med rom for opplæring parallelt med
-etablering av prosjektstruktur.
+\vspace{0.2em}
+{\tiny
+\textbf{Fargeforklaring:}\;
+\textcolor{red!40}{\rule{0.45cm}{0.13cm}}~Kritisk sti \;
+\textcolor{blue!30}{\rule{0.45cm}{0.13cm}}~Analyse og design \;
+\textcolor{green!30}{\rule{0.45cm}{0.13cm}}~Implementasjon \;
+\textcolor{orange!30}{\rule{0.45cm}{0.13cm}}~Testing \;
+\textcolor{purple!30}{\rule{0.45cm}{0.13cm}}~Dokumentasjon \;
+\textcolor{yellow!30}{\rule{0.45cm}{0.13cm}}~Buffer
+}
+
+\caption{Planlagt Gantt-diagram for HDO VideoAPI (uke 1--19).}
+\label{fig:gantt}
+\end{figure}
+\clearpage
 
 Planen definerte syv milepæler:
 \begin{enumerate}
     \item \textbf{M1} (Plan godkjent) markerte overgangen fra oppstart og kravanalyse til aktiv utvikling.
-    \item \textbf{M2} (Første fungerende API) markerte ferdigstillelsen av kjerne-API-et, med provider-grensesnitt, konfigurasjonssystem, autentisering og CI-oppsett på plass. 
-    \item \textbf{M3} (Begge videomotorer) markerte at adaptere for AntMedia Server og NHN Video begge var integrert og i fungerende stand. \item \textbf{M4} (Demo ferdig) avsluttet arbeidet med demo-frontend og observability-støtte. 
-    \item \textbf{M5} (Produktleveranse) representerte det tidspunktet løsningen ble betraktet som komplett og overlevert oppdragsgiver. \item \textbf{M6} og \textbf{M7} markerte henholdsvis myk rapportfrist og endelig innlevering.
+    \item \textbf{M2} (Første fungerende API) markerte ferdigstillelsen av kjerne-API-et, med provider-grensesnitt, konfigurasjonssystem, autentisering og CI-oppsett på plass.
+    \item \textbf{M3} (Begge videomotorer) markerte at adaptere for AntMedia Server og NHN Video begge var integrert og i fungerende stand.
+    \item \textbf{M4} (Demo ferdig) avsluttet arbeidet med demo-frontend og observability-støtte.
+    \item \textbf{M5} (Produktleveranse) representerte det tidspunktet løsningen ble betraktet som komplett og overlevert oppdragsgiver.
+    \item \textbf{M6} og \textbf{M7} markerte henholdsvis myk rapportfrist og endelig innlevering.
 \end{enumerate}
 
 \subsection{Gjennomføring}
 
 Gjennomføringen avvek fra planen på flere punkter.
 
-Den faktiske arbeidsflyten (Figur~\ref{fig:gantt-faktisk}, Vedlegg~\ref{app:gantt}) ble mer iterativ enn planlagt fordi læring, integrasjon og testing overlappet.
+En grov rekonstruksjon av den faktiske arbeidsflyten er vist i Vedlegg~\ref{app:gantt},
+Figur~\ref{fig:gantt-faktisk}. Diagrammet er ikke en presis dag-for-dag-fremstilling,
+men viser hovedtrekkene i hvordan arbeidet faktisk utviklet seg.
 
 Hovedtyngden av forsinkelsene var knyttet til eksterne avhengigheter og tredjepartsplattformer utenfor gruppens kontroll, mens enkelte tekniske utfordringer i integrasjonsarbeidet krevde ekstra tid til feilsøking og tilpasning. Mot slutten av perioden ble noe av tapt tid hentet inn gjennom raskere fremdrift mellom M3 og M4 enn opprinnelig planlagt.
 
@@ -96,6 +118,37 @@ innebygde støtte for helsesjekker og Prometheus-metrikker reduserte mengden
 egenskrevet infrastrukturkode vesentlig, containeriseringen med Docker Compose
 falt raskt på plass etter at grunnstrukturen var etablert, og utviklingen av
 demo-frontenden forløp uten større hindringer.
+
+
+Timeføringen viser at arbeidet var ganske jevnt fordelt. Samtidig er dette ikke en
+perfekt logg. Noe arbeid, særlig i starten og helt mot slutten, ble ikke ført like
+nøyaktig.En mer detaljert oversikt over timebruk og arbeidskategorier ligger i
+Vedlegg~\ref{app:timelog}, se Tabell~\ref{tab:timekategori} og Figur~\ref{fig:timefordeling-pie}.
+
+\subsection{Timebruk og arbeidsfordeling}
+
+Gruppen førte timer gjennom prosjektperioden for å få en oversikt over arbeidsinnsats
+og fordeling mellom medlemmene. Timeføringen var ikke helt konsekvent gjennom hele
+perioden, så tallene bør leses som et omtrentlig estimat over dokumentert arbeid.
+
+Totalt ble det ført omtrent 1276 timer.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lr}
+\toprule
+Gruppemedlem & Timer \\
+\midrule
+Nahom & 430 t \\
+Tim & 415 t \\
+Fredrik & 431 t \\
+\midrule
+Totalt & 1276 t \\
+\bottomrule
+\end{tabular}
+\caption{Omtrentlig dokumentert timebruk per gruppemedlem.}
+\label{tab:timebruk-medlem}
+\end{table}
 
 \subsection{Resultat}
 

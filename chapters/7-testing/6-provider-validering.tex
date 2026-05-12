@@ -1,64 +1,40 @@
 \section{Validering av provider-arkitekturen}
 \label{sec:provider-validering}
 
-For å teste om provider-arkitekturen faktisk var utvidbar, implementerte
-vi to ekstra providere etter at AntMedia- og NHN-integrasjonene var
-ferdige. \texttt{MockVideoProvider} var en enkel stub uten eksterne
-avhengigheter, mens \texttt{DailyProvider} var en reell integrasjon mot
-Daily.co sitt REST-API. Ingen av dem var del av HDOs kravspesifikasjon;
-de ble kun brukt for å validere arkitekturen.
+For å undersøke om provider-arkitekturen faktisk var utvidbar,
+implementerte vi to tillegsprovidere etter at AntMedia- og
+NHN-integrasjonene var ferdige. \texttt{MockVideoProvider} var en enkel
+stub uten eksterne avhengigheter, mens \texttt{DailyProvider} var en
+reell integrasjon mot Daily.cos REST-API. Ingen av dem inngikk i HDOs
+kravspesifikasjon; de ble kun brukt til arkitekturvalidering.
 
-Endringsomfanget ble målt med \texttt{git diff --stat},
-\texttt{git diff --name-status} og \texttt{git diff --shortstat}. Alle
-branchene hadde samme merge-base, \texttt{5dd99b5}, slik at målingene
-ble gjort mot samme baseline.
+Endringsomfanget ble målt med \texttt{git diff --shortstat} mot
+\texttt{develop}, med merge-base \texttt{5dd99b5} som felles baseline
+for alle tre branchene. Med kjerneendringer mener vi endringer i
+\texttt{RoomsController}, \texttt{IVideoProvider} eller de offentlige
+modellene \texttt{VideoRoom}, \texttt{CreateRoomRequest} og
+\texttt{WebRtcLinkResponse}. Provider-klasser, konfigurasjon,
+DI-registrering og tester ble ikke regnet som kjerneendringer, siden
+slike filer alltid må legges til når en ny provider innføres.
+\newpage
+\input{figures/tab-provider-validering}
 
-Med kjerneendringer mener vi endringer i \texttt{RoomsController},
-\texttt{IVideoProvider} eller de offentlige modellene
-\texttt{VideoRoom}, \texttt{CreateRoomRequest} og
-\texttt{WebRtcLinkResponse}. Dette er delene som utgjør controller-laget
-og API-kontrakten. Provider-klasser, konfigurasjon, dependency
-injection-registrering og tester ble ikke regnet som kjerneendringer,
-siden slike endringer er forventet når en ny provider legges til.
-
-\begin{table}[h]
-\centering
-\begin{tabular}{lrrrr}
-\toprule
-\textbf{Branch} & \textbf{Filer} & \textbf{Linjer +} &
-\textbf{Linjer -} & \textbf{Kjerneendringer} \\
-\midrule
-\texttt{feature/mock-provider}       & 6  & 249  & 2 & 0 \\
-\texttt{feature/daily-provider}      & 12 & 779  & 7 & 0 \\
-\texttt{feature/provider-validation} & 14 & 1024 & 8 & 0 \\
-\bottomrule
-\end{tabular}
-\caption{Endringsomfang per branch målt mot \texttt{develop}.
-\texttt{feature/provider-validation} har høyere tall fordi den samler
-begge tilleggsproviderne.}
-\label{tab:provider-validering}
-\end{table}
-
-Tabell~\ref{tab:provider-validering} viser at begge providerne kunne
-legges til uten endringer i controller-laget eller API-kontrakten.
+Tabell~\ref{tab:provider-validering} viser at ingen av de tre
+branchene berørte controller-laget eller API-kontrakten.
 \texttt{git diff --name-status} bekreftet at \texttt{RoomsController},
 \texttt{IVideoProvider} og de offentlige modellene var uendret i alle
-branchene.
+branchene. Tallene gjelder lokal branch-HEAD mot \texttt{develop} på
+måletidspunktet.
 
-Alle branchene ble bygget og testet lokalt med \texttt{dotnet build} og
-\texttt{dotnet test}.
-På valideringsgrenen \texttt{feature/provider-validation} ga \texttt{dotnet test}
-166 passerende automatiserte tester,
-mot 133 på leveransegrenen; økningen skyldtes tester for de to tilleggsproviderne,
-relatert konfigurasjon og DI-/factory-registrering --- ikke ytterligere krav fra HDO.
-Den samlede valideringsbranchen ble også kjørt på
-VM med Docker, der frontend bekreftet at de nye providerne kunne nås via
-det samme API-et.
+Alle branchene ble bygget og testet med \texttt{dotnet build} og
+\texttt{dotnet test}. På valideringsgrenen
+\texttt{feature/provider-validation} passerte 166 tester, mot 133 på
+leveransegrenen; økningen skyldtes tester for de to
+tilleggsproviderne og tilhørende DI-/factory-registrering.
 
-E2E-testskriptet ble ikke kjørt mot tilleggsproviderne, siden målet ikke
-var å dokumentere komplette Daily.co- eller mock-integrasjoner. Målet var
-å undersøke om en ny provider kunne legges til uten endringer i
-kjernelogikken. Resultatet gir støtte til forskningsspørsmålets andre
-dimensjon: backend-spesifikk logikk kunne isoleres i provider-laget,
-mens controller-laget og API-kontrakten forble uendret.
-
+E2E-skriptet ble ikke kjørt mot tilleggsproviderne. Målet var ikke å
+dokumentere fullstendige Daily.co- eller mock-integrasjoner, men å
+undersøke om kjernelogikken forble uendret ved innføring av en ny
+provider. Resultatet støtter arkitekturpåstanden: backend-spesifikk
+logikk kunne isoleres i provider-laget mens controller-laget og
+API-kontrakten forble uberørt.

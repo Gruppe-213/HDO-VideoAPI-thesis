@@ -1,92 +1,44 @@
 \section{Testresultater}
 \label{sec:testresultater}
 
-Den ordinære testsuiten på leveransegrenen besto av 133 automatiserte tester, og alle
-passerte ved kjøring av \texttt{dotnet test}.
-I den separate valideringsgrenen \texttt{feature/provider-validation} ble testsuiten
-utvidet til 166 tester.
-De ekstra testene dekker \texttt{MockVideoProvider}, \texttt{DailyProvider} og
-tilhørende DI-/factory-oppsett.
-Siden disse providerne ble brukt til arkitekturvalidering og ikke inngår i
-hovedleveransen, rapporteres 133 tester som hovedtallet for leveransen.
+Den ordinære testsuiten på leveransegrenen besto av 133 automatiserte
+tester, og alle passerte ved kjøring av \texttt{dotnet test}. På den
+separate valideringsgrenen \texttt{feature/provider-validation} ble
+testsuiten utvidet til 166 tester; de ekstra testene dekket
+\texttt{MockVideoProvider}, \texttt{DailyProvider} og tilhørende
+DI-/factory-oppsett. Siden disse providerne ble brukt til
+arkitekturvalidering og ikke inngår i hovedleveransen, rapporteres 133
+tester som hovedtallet for leveransen.
 
-\begin{table}[h]
-\centering
-\begin{tabular}{l r}
-\toprule
-\textbf{Gren / bruksområde} & \textbf{Passerende tester (\texttt{dotnet test})} \\
-\midrule
-Leveransegren (HDO-leveranse) & 133 \\
-Separat valideringsgren: arkitektur med mock-/daily-provider & 166 \\
-\bottomrule
-\end{tabular}
-\caption{Antall passerende tester ved \texttt{dotnet test} på leveransegrenen og på den separate valideringsgrenen brukt for arkitekturvalidering.}
-\label{tab:testtall-leveranse}
-\end{table}
+\input{figures/tab-testresultater}
 
-På leveransegrenen kjørte CI-pipeline \texttt{dotnet test}, og alle 133 tester
-passerte; pipeline samlet ikke inn
-coverage. Linje- og branch-dekning ble derfor målt lokalt med Coverlet
-(\texttt{--collect:"XPlat Code Coverage"}).
+CI-pipelinen kjørte \texttt{dotnet test} uten coverage-innsamling. Linje-
+og branch-dekning ble derfor målt lokalt med Coverlet
+(\texttt{--collect:"XPlat Code Coverage"}) på leveransegrenen.
+Ved siste måling før innlevering var samlet linjedekning 56\,\% og
+branch-dekning 37\,\%. Tallene påvirkes av autogenererte OpenAPI-filer
+under \texttt{obj/} som Coverlet teller med som udekket kode.
 
-Ved siste lokale måling før innlevering var samlet linjedekning om lag 66\,\%
-og branch-dekning om lag 38\,\%. Dekningstallene påvirkes noe av autogenererte
-OpenAPI-filer under \texttt{obj/}, som Coverlet teller med som udekket
-kode selv om de ikke inneholder forretningslogikk.
+Gruppen satte ingen konkrete dekningsmål ved prosjektstart. Det var en
+svakhet, særlig for controller-laget, provider-laget og feilhåndteringen,
+der lav dekning er vanskelig å oppdage uten et eksplisitt mål å måle mot.
 
-Dekningen vurderes som moderat. Den gir god støtte for at sentrale deler
-av proof-of-conceptet fungerer, men den er ikke høy nok til å dokumentere
-produksjonsmodenhet alene. Gruppen satte heller ikke konkrete dekningsmål
-ved prosjektstart. I ettertid vurderes dette som en svakhet, særlig for
-kritiske deler som controller-lag, provider-lag, autentisering og
-feilhåndtering.
+\input{figures/tab-testresultater}
 
-\begin{table}[h]
-\centering
-\begin{tabular}{llr}
-\toprule
-\textbf{Komponent} & \textbf{Testtype} & \textbf{Linjedekning} \\
-\midrule
-AuthController & Integrasjonstest & 100\% \\
-KeycloakService & Enhetstest & 100\% \\
-VideoProviderFactory & Enhetstest & 100\% \\
-AntMediaAuthHandler & Enhetstest & 98\% \\
-NHNAuthHandler & Enhetstest & 97,8\% \\
-RoomsController & Integrasjonstest & 97\% \\
-NHNVideoProvider & Enhetstest & 94,7\% \\
-ProviderExtensions & Enhetstest & 94,2\% \\
-ApplicationExtensions & Integrasjonstest & 93,7\% \\
-GlobalExceptionHandler & Enhetstest & 89,2\% \\
-AntMediaProvider & Enhetstest & 78,8\% \\
-\midrule
-VideoMetrics & Ingen & 0\%$^*$ \\
-NHNConference & Ingen & 0\%$^*$ \\
-Microsoft.AspNetCore.OpenApi.Generated & Ingen & 0\%$^\dagger$ \\
-System.Runtime.CompilerServices & Ingen & 0\%$^\dagger$ \\
-\bottomrule
-\end{tabular}
-\caption{Linjedekning per komponent ved lokal Coverlet-måling.
-Samlet linjedekning for løsningen var ca.\ 66\,\%. 
-$^*$~Ikke testet direkte. $^\dagger$~Autogenerert kode.}
-\label{tab:testresultater}
-\end{table}
+Tabellen viser høy dekning for autentisering, provider-factory og
+auth-handlere. Det betyr ikke at alle driftsscenarioer er testet.
+Dekningstall viser hvilke linjer som ble kjørt, ikke om alle kombinasjoner
+av input, nettverksfeil og sikkerhetsscenarioer er undersøkt.
 
-Tabell~\ref{tab:testresultater} viser høy dekning for flere sentrale
-komponenter, blant annet autentisering, provider-factory,
-\texttt{RoomsController} og provider-spesifikke auth-handlere. Dette betyr
-likevel ikke at alle mulige driftsscenarioer er testet. Dekningstall viser
-hvilke linjer som er kjørt, ikke om alle relevante kombinasjoner av input,
-nettverksfeil og sikkerhetsscenarioer er undersøkt.
-
-De svakest dekkede områdene er Prometheus-instrumentering,
-nettverksnære feil mot eksterne videomotorer, enkelte exception-grener og
-mer systematisk negativ input. \texttt{AntMediaProvider} har lavere dekning
-enn flere andre komponenter fordi noen grener krever spesifikke
+\texttt{AntMediaProvider} (78,8\,\%) og \texttt{RoomsController}
+(79\,\%) hadde lavere dekning enn de øvrige fordi noen grener krever
 nettverks- eller backend-tilstander som ikke er simulert i enhetstestene.
+\texttt{VideoMetrics} og \texttt{NHNConference} ble ikke enhetstestet
+direkte; \texttt{VideoMetrics} ble i stedet verifisert via E2E og manuell
+Grafana-sjekk (jf.\ avsnitt~\ref{sec:e2e-testing}).
 
 Manuell verifisering mot HDOs testmiljøer ble gjort med
-\texttt{HDO-VideoAPI.http}, utforskende kall og frontend-demoen. Dette
-inngår ikke i CI-testsuiten, men ble brukt til å kontrollere komplette
-flyter for begge backends, inkludert autentisering, romlivssyklus og
-forventede \texttt{501}-responser for NHN-operasjoner som ikke støttes.
-
+\texttt{HDO-VideoAPI.http}, utforskende kall og frontend-demoen.
+Dette dekket komplette flyter for begge backends, inkludert autentisering,
+romlivssyklus og forventede \texttt{501}-responser for NHN-operasjoner
+som ikke støttes.

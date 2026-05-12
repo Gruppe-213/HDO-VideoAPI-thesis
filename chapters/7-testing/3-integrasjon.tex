@@ -1,91 +1,42 @@
 \section{Integrasjonstester}
 \label{sec:integrasjonstester}
 
-Integrasjonstestene brukte \texttt{WebApplicationFactory<Program>} til å starte API-et in-memory uten å åpne en faktisk TCP-port. En \texttt{CustomWebApplicationFactory} erstattet alle eksterne avhengigheter med Moq-instanser og simulerte autentisering via en egen \texttt{TestAuthHandler} — en implementasjon av \texttt{AuthenticationHandler} — som returnerte en \texttt{ClaimsPrincipal} med en valgfri \texttt{api\_access}-claim styrt av factory-parameteret. Hver testklasse opprettet sin egen factory og \texttt{HttpClient}, slik at mock-oppsett og DI-registreringer ikke lekket mellom tester og ga ikke-deterministiske resultater.
+Integrasjonstestene brukte \texttt{WebApplicationFactory<Program>} til å
+starte API-et in-memory uten å åpne en faktisk TCP-port. En
+\texttt{CustomWebApplicationFactory} erstattet upstream-avhengighetene
+(AntMedia-, NHN- og Keycloak-klientene) med Moq-instanser og simulerte
+autentisering via en egen \texttt{TestAuthHandler} --- en implementasjon
+av \texttt{AuthenticationHandler} --- som returnerte en
+\texttt{ClaimsPrincipal} med en valgfri \texttt{api\_access}-claim styrt
+av factory-konfigurasjonen. Hver testklasse opprettet sin egen factory og
+\texttt{HttpClient}, slik at mock-oppsett og DI-registreringer ikke lekket
+mellom tester.
 
-% Integrasjonstestene brukte \texttt{WebApplicationFactory<Program>} til
-% å starte API-et in-memory uten å åpne en faktisk TCP-port. En
-% \texttt{CustomWebApplicationFactory} erstattet alle eksterne
-% avhengigheter med Moq-instanser og simulerte autentisering via en
-% \url{TestAuthHandler} \url{(AuthenticationHandler<AuthenticationSchemeOptions>)}
-% som returnerte en \texttt{ClaimsPrincipal} med en valgfri
-% \texttt{api\_access}-claim styrt av factory-parameteret. Hver
-% testklasse opprettet sin egen \texttt{CustomWebApplicationFactory} og
-% egen \texttt{HttpClient}, slik at mock-oppsett og keyed
-% DI-registreringer ikke lekket mellom tester og ga
-% ikke-deterministiske resultater.
+Over 30 tester i \texttt{RoomsControllerTests} og
+\texttt{SecurityBehaviorTests} dekket alle rom-relaterte endepunkter med
+en blanding av suksess-, validerings-, feilsti- og sikkerhetstester, og
+bidro til en linjedekning på 97\,\% på \texttt{RoomsController}
+(jf.\ tabell~\ref{tab:testresultater}).
 
-Suiten dekket samtlige rom-endepunkter på tvers av suksess, validering,
-feilstier og sikkerhet. Under følger tre representative kodelister fra
-\texttt{RoomsControllerTests} og \texttt{SecurityBehaviorTests}; omtrent
-25 tester samlet bidro til en linjedekning på 97\,\% på
-\texttt{RoomsController} (jf.\ tabell~\ref{tab:testresultater}), selv om
-dekningsbildet var skjevt mot feilstier som diskutert i
-avsnitt~\ref{sec:testresultater}.
+Tre representative tester illustrerer dekningsbredden. En success-test
+verifiserte 201 med \texttt{Location}-header:
 
-En success-test verifiserte at \texttt{POST /api/rooms} returnerte
-HTTP~201 med en \texttt{Location}-header:
-
-\begin{lstlisting}[language={[Sharp]C}, caption={RoomsControllerTests — CreateRoom returnerer 201}]
-[Fact]
-public async Task CreateRoom_Success_Returns201WithLocation()
-{
-    _factory.MockVideoProvider
-        .Setup(s => s.CreateRoomAsync(
-            It.IsAny<CreateRoomRequest>(), It.IsAny<CancellationToken>()))
-        .ReturnsAsync(new VideoRoom { Id = "room-1", Name = "test-room" });
-
-    var response = await _client.PostAsJsonAsync(
-        "/api/rooms", new CreateRoomRequest { Name = "test-room" });
-
-    Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-    Assert.NotNull(response.Headers.Location);
-}
+\begin{lstlisting}[language={[Sharp]C}, caption={201 med Location-header}]
+Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+Assert.NotNull(response.Headers.Location);
 \end{lstlisting}
 
-Feilscenarier ble testet like grundig. Følgende test verifiserte at
-en \texttt{ExternalServiceException} fra provider-laget ble mappet til
-HTTP~502 med RFC~7807 problem details og at den eksterne statuskoden
-ble bevart i \texttt{externalStatusCode}-feltet. \texttt{ReadBodyAsync}
-var en hjelpemetode som returnerte responsen som \texttt{JsonDocument}.
+En feiltest verifiserte at provider-unntak ble mappet til 502 med
+RFC~7807 problem details og \texttt{externalStatusCode} bevart:
 
-\begin{lstlisting}[language={[Sharp]C}, caption={RoomsControllerTests — provider-feil → 502 med \texttt{externalStatusCode}}]
-[Fact]
-public async Task CreateRoom_ServiceThrowsExternalServiceException_Returns502()
-{
-    _factory.MockVideoProvider
-        .Setup(s => s.CreateRoomAsync(
-            It.IsAny<CreateRoomRequest>(), It.IsAny<CancellationToken>()))
-        .ThrowsAsync(new ExternalServiceException("AntMedia", "Upstream error", 503));
-
-    var response = await _client.PostAsJsonAsync(
-        "/api/rooms", new CreateRoomRequest { Name = "test-room" });
-    using var body = await ReadBodyAsync(response);
-
-    Assert.Equal(HttpStatusCode.BadGateway, response.StatusCode);
-    Assert.Equal("application/problem+json",
-        response.Content.Headers.ContentType?.MediaType);
-    Assert.Equal(503,
-        body.RootElement.GetProperty("externalStatusCode").GetInt32());
-}
+\begin{lstlisting}[language={[Sharp]C}, caption={502 med externalStatusCode}]
+Assert.Equal(HttpStatusCode.BadGateway, response.StatusCode);
+Assert.Equal(503, extCode.GetInt32());
 \end{lstlisting}
 
-Sikkerhetskrav ble testet via \texttt{SecurityBehaviorTests}.
-\texttt{CustomWebApplicationFactory} tok et valgfritt
-\texttt{apiAccessClaimValue}-argument som styrte hvilke claims
-\texttt{TestAuthHandler} inkluderte. Følgende test verifiserte at et
-manglende \texttt{api\_access}-claim resulterte i HTTP~403:
+En sikkerhetstest verifiserte at manglende \texttt{api\_access}-claim
+ga 403:
 
-\begin{lstlisting}[language={[Sharp]C}, caption={SecurityBehaviorTests — manglende api\_access → 403}]
-[Fact]
-public async Task ProtectedEndpoint_WithoutApiAccessClaim_Returns403()
-{
-    using var factory = new CustomWebApplicationFactory(apiAccessClaimValue: null);
-    using var client = factory.CreateClient();
-
-    var response = await client.GetAsync("/api/rooms/mock:room-1");
-
-    Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
-}
+\begin{lstlisting}[language={[Sharp]C}, caption={Manglende claim gir 403}]
+Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
 \end{lstlisting}
-

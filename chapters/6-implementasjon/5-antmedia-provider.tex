@@ -1,46 +1,63 @@
 \section{AntMediaProvider}
 \label{sec:antmedia-provider}
 
-\texttt{AntMediaProvider} kommuniserer med AntMedias REST-API via en typet \texttt{HttpClient} der \texttt{AntMediaAuthHandler} er integrert i HTTP-pipelinen. Ved opprettelse sendes navn og den hardkodede typen \texttt{liveStream} til \texttt{broadcasts/create}. Responsen tilordnes til \texttt{VideoRoom} med strømspesifikke felter: \texttt{StreamUrl} for HLS-avspilling, \texttt{RtmpUrl} for RTMP-ingest og tre seertellere per protokoll. Start og stopp utføres som \texttt{POST}-kall uten body mot \texttt{broadcasts/{id}/start} og \texttt{broadcasts/{id}/stop}.
+% \texttt{AntMediaProvider} kommuniserer med AntMedias REST-API via en typet \texttt{HttpClient} der \texttt{AntMediaAuthHandler} er integrert i HTTP-pipelinen. Ved opprettelse sendes navn og den hardkodede typen \texttt{liveStream} til \texttt{broadcasts/create}. Responsen tilordnes til \texttt{VideoRoom} med strømspesifikke felter: \texttt{StreamUrl} for HLS-avspilling, \texttt{RtmpUrl} for RTMP-ingest og tre seertellere per protokoll. Start og stopp utføres som \texttt{POST}-kall uten body mot \texttt{broadcasts/{id}/start} og \texttt{broadcasts/{id}/stop}.
+
+\texttt{AntMediaProvider} kommuniserer med AntMedias REST-API via en typet \texttt{HttpClient} med \texttt{AntMediaAuthHandler} integrert i HTTP-pipelinen. Ved opprettelse sendes navn og typen \texttt{liveStream} til \texttt{broadcasts/create} — typen er hardkodet fordi HDOs brukstilfelle utelukkende er sanntids WebRTC-strømming, og AntMedias øvrige broadcast-typer ikke er relevante. Responsen mappes til \texttt{VideoRoom} med strømspesifikke felter som \texttt{StreamUrl} for HLS-avspilling og \texttt{RtmpUrl} for RTMP-ingest. Start og stopp utføres som \texttt{POST}-kall uten body mot henholdsvis \texttt{broadcasts/\{id\}/start} og \texttt{broadcasts/\{id\}/stop}.
 
 WebRTC-tokens hentes i to steg: først verifiseres at rommet eksisterer, deretter genereres et token med 90 sekunders levetid via \texttt{broadcasts/{id}/token?expireDate={ts}\&type={type}}. Ettersom AntMedia ikke tilbyr et dedikert endepunkt for lagring av token, lagres det i \texttt{metaData}-feltet via en \texttt{PUT}-forespørsel mot \texttt{broadcasts/{id}}.
 
 \texttt{AntMediaAuthHandler} signerer JWT-tokens lokalt med HMAC-SHA256 og cacher dem i fem minutter. Token-genereringen bruker double-check locking for å unngå at samtidige forespørsler genererer hvert sitt token når cachen utløper, som vist i kodeliste~\ref{lst:antmedia-auth}.
 
 \begin{lstlisting}[language={[Sharp]C}, label=lst:antmedia-auth,
-  caption={Double-check locking i AntMediaAuthHandler.}]
-var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-
-if (!string.IsNullOrEmpty(_cachedToken)
-        && _tokenExpiry > now + TokenRefreshBufferSeconds)
-    return _cachedToken;
-
-await _semaphore.WaitAsync(cancellationToken);
-try
+  caption={Double-check locking i \texttt{AntMediaAuthHandler}.}]
+// HDO-VideoAPI/Providers/AntMedia/AntMediaAuthHandler.cs
+private async Task<string?> GenerateAuthTokenAsync(CancellationToken cancellationToken)
 {
-    if (!string.IsNullOrEmpty(_cachedToken)
-            && _tokenExpiry > now + TokenRefreshBufferSeconds)
+    // ...
+
+    // Første sjekk - uten lås for ytelse
+    if (!string.IsNullOrEmpty(_cachedToken) && _tokenExpiry > now + TokenRefreshBufferSeconds)
         return _cachedToken;
 
-    var expiry = now + TokenLifetimeSeconds;
-    var key = new SymmetricSecurityKey(
-        Encoding.UTF8.GetBytes(_config.JwtSecret));
-    var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-    var descriptor = new SecurityTokenDescriptor
+    // Vent på eksklusiv tilgang
+    await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+    try
     {
-        Claims = new Dictionary<string, object>
-            { { "exp", expiry }, { "iat", now } },
-        SigningCredentials = creds
-    };
-    var handler = new JwtSecurityTokenHandler();
-    _cachedToken = handler.WriteToken(handler.CreateToken(descriptor));
-    return _cachedToken;
+        // Andre sjekk - inne i lås for korrekthet
+        if (!string.IsNullOrEmpty(_cachedToken) && _tokenExpiry > now + TokenRefreshBufferSeconds)
+            return _cachedToken;
+
+        // Generer nytt token
+        var expiry = now + TokenLifetimeSeconds;
+        _tokenExpiry = expiry;
+        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret));
+        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Claims = new Dictionary<string, object>
+            {
+                { "exp", expiry },
+                { "iat", now }
+            },
+            SigningCredentials = credentials
+        };
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var token = tokenHandler.CreateToken(tokenDescriptor);
+        _cachedToken = tokenHandler.WriteToken(token);
+        
+        return _cachedToken;
+    }
+    finally { _semaphore.Release(); }   // Låser opp
 }
-finally { _semaphore.Release(); }
 \end{lstlisting}
 
-Tokenet inneholder kun \texttt{iat} og \texttt{exp} — AntMedia krever
-ikke subject- eller audience-claims for server-til-server-autentisering.
-Manglende \texttt{JwtSecret} i konfigurasjonen kaster
-\texttt{ConfigurationException}, som \texttt{GlobalExceptionHandler}
-oversetter til HTTP-status \texttt{503 Service Unavailable}. Feil fra AntMedia-API-et håndteres av den private hjelpefunksjonen \texttt{EnsureSuccessOrThrowAsync}: HTTP-statuskoden \texttt{404 Not Found} kaster \texttt{NotFoundException}, mens øvrige feil kaster \texttt{ExternalServiceException} med original statuskode bevart.
+% Tokenet inneholder kun \texttt{iat} og \texttt{exp} — AntMedia krever
+% ikke subject- eller audience-claims for server-til-server-autentisering.
+% Manglende \texttt{JwtSecret} i konfigurasjonen kaster
+% \texttt{ConfigurationException}, som \texttt{GlobalExceptionHandler}
+% oversetter til HTTP-status \texttt{503 Service Unavailable}. Feil fra AntMedia-API-et håndteres av den private hjelpefunksjonen \texttt{EnsureSuccessOrThrowAsync}: HTTP-statuskoden \texttt{404 Not Found} kaster \texttt{NotFoundException}, mens øvrige feil kaster \texttt{ExternalServiceException} med original statuskode bevart.
+
+Tokenet inneholder kun \texttt{iat} og \texttt{exp} — AntMedia krever ikke subject- eller audience-claims for server-til-server-autentisering.
+
+Feilhåndtering er delt i to lag. Manglende \texttt{JwtSecret} i konfigurasjonen oppdages ved oppstart og kaster \texttt{ConfigurationException}, som \texttt{GlobalExceptionHandler} oversetter til HTTP~\texttt{503 Service Unavailable}. Feil fra AntMedia-API-et håndteres av \texttt{EnsureSuccessOrThrowAsync}: \texttt{404 Not Found} kaster \texttt{NotFoundException}, mens øvrige feil kaster \texttt{ExternalServiceException} med original statuskode bevart.

@@ -1,1 +1,51 @@
-"
+% Tabeller/gantt.tex  (kun diagram)
+\begin{ganttchart}[
+    hgrid,
+    vgrid,
+    x unit=0.5cm,
+    y unit chart=0.75cm,
+    bar height=0.6,
+    milestone height=0.8
+]{1}{19}
+
+\ganttset{
+  bar/.append style={fill=gray!35},
+  milestone/.append style={fill=black}
+}
+
+\gantttitle{2026 (12. jan -- 20. mai)}{19} \\
+\gantttitlelist{1,...,19}{1} \\
+
+\ganttgroup{Oppstart og planlegging}{1}{3} \\
+\ganttbar[bar/.append style={fill=blue!30}]{Prosjektplan}{1}{3} \\
+\ganttbar[bar/.append style={fill=blue!30}, name=analyse]{Analyse og krav}{1}{4} \\
+\ganttmilestone{M1: Plan godkjent}{4} \\
+
+\ganttbar[bar/.append style={fill=red!40, thick}, name=arkitektur]{Arkitektur og design}{4}{6} \\
+\ganttbar[bar/.append style={fill=red!40, thick}, name=kjerne]{Kjerne-API + infrastruktur + sikkerhet}{6}{8} \\
+\ganttmilestone{M2: Første fungerende API}{8} \\
+\ganttbar[bar/.append style={fill=red!40, thick}, name=antmedia]{AntMedia-integrasjon}{8}{10} \\
+\ganttbar[bar/.append style={fill=red!40, thick}, name=nhn]{NHN-integrasjon}{10}{12} \\
+\ganttmilestone{M3: Begge videomotorer}{12} \\
+\ganttbar[bar/.append style={fill=green!30}, name=demo]{Demo + observability}{12}{14} \\
+\ganttmilestone{M4: Demo ferdig}{14} \\
+
+\ganttbar[bar/.append style={fill=orange!30}]{Testing (kontinuerlig)}{6}{16} \\
+\ganttbar[bar/.append style={fill=orange!30}]{Stabilisering}{15}{17} \\
+
+\ganttbar[bar/.append style={fill=purple!30}]{Rapport (løpende)}{1}{18} \\
+\ganttmilestone{M6: Rapport ferdig (soft)}{18} \\
+
+\ganttmilestone{M5: Produktleveranse}{16} \\
+\ganttbar[bar/.append style={fill=yellow!30}]{Buffer og korrektur}{18}{19} \\
+\ganttmilestone{M7: Innlevering}{19} \\
+
+% Kritisk sti (lenker)
+\ganttlink{analyse}{arkitektur}
+\ganttlink{arkitektur}{kjerne}
+\ganttlink{kjerne}{antmedia}
+\ganttlink{kjerne}{nhn}
+\ganttlink{antmedia}{demo}
+\ganttlink{nhn}{demo}
+
+\end{ganttchart}

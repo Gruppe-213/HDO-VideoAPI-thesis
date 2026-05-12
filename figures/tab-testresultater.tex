@@ -1,0 +1,29 @@
+\begin{table}[h]
+\centering
+\begin{tabular}{llr}
+\toprule
+\textbf{Komponent} & \textbf{Testtype} & \textbf{Linjedekning} \\
+\midrule
+AuthController         & Integrasjonstest & 100\% \\
+KeycloakService        & Enhetstest       & 100\% \\
+VideoProviderFactory   & Enhetstest       & 100\% \\
+AntMediaAuthHandler    & Enhetstest       &  98\% \\
+NHNAuthHandler         & Enhetstest       & 97,8\% \\
+NHNVideoProvider       & Enhetstest       & 94,7\% \\
+ProviderExtensions     & Enhetstest       & 94,2\% \\
+ApplicationExtensions  & Integrasjonstest & 93,7\% \\
+GlobalExceptionHandler & Enhetstest       & 89,2\% \\
+AntMediaProvider       & Enhetstest       & 78,8\% \\
+RoomsController        & Integrasjonstest & 79\% \\
+\midrule
+VideoMetrics           & Ingen & 0\%$^*$ \\
+NHNConference          & Ingen & 0\%$^*$ \\
+Microsoft.AspNetCore.OpenApi.Generated & Ingen & 0\%$^\dagger$ \\
+System.Runtime.CompilerServices        & Ingen & 0\%$^\dagger$ \\
+\bottomrule
+\end{tabular}
+\caption{Linjedekning per komponent ved lokal Coverlet-måling på
+leveransegrenen. Samlet linjedekning var 56\,\%.
+$^*$~Ikke testet direkte. $^\dagger$~Autogenerert kode.}
+\label{tab:testresultater}
+\end{table}

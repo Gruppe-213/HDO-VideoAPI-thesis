@@ -1,7 +1,9 @@
 \subsection{Infrastrukturkrav (I1.1--I1.2)}
 \label{sec:eval-infrastruktur}
 
-Krav I1.1 og I1.2 ble oppfylt. Selve implementasjonen var blant de mer rett frem delene av prosjektet, men flere av valgene som ble tatt har konsekvenser for hvordan HDO kan videreføre løsningen i drift.
+% Krav I1.1 og I1.2 ble oppfylt. Selve implementasjonen var blant de mer rett frem delene av prosjektet, men flere av valgene som ble tatt har konsekvenser for hvordan HDO kan videreføre løsningen i drift.
+
+Krav I1.1 og I1.2 ble oppfylt. Implementasjonen var blant de mer ukompliserte delene av prosjektet, men flere av de arkitektoniske valgene som ble tatt har konsekvenser for hvordan HDO kan videreføre løsningen i drift.
 
 For I1.1 ble VideoAPI bygget som et Docker-image med flertrinns-bygg, der applikasjonen kompileres i et separat SDK-image før kun den publiserte utdataen kopieres til runtime-imaget. Dette reduserer både imagestørrelse og angrepsflate ved at kompilator og byggeavhengigheter ikke inkluderes i produksjonsimaget. Prosessen ble også konfigurert til å kjøre som en ikke-privilegert bruker (\texttt{USER \$APP\_UID}, tilsvarende UID 1654 i Microsofts offisielle \texttt{aspnet:10.0}-image). Dette anbefales i Microsofts dokumentasjon \cite{aspnet_rootless} og innebærer at en eventuell utnyttelse av containeren ikke gir root-privilegier. En konsekvens av dette var at TLS-sertifikater måtte monteres med riktige tilgangsrettigheter slik at prosessen kunne lese dem. I \texttt{compose.yaml} ble dette løst ved å mounte \texttt{./certs:/app/certs:ro}, men håndtering av filrettigheter introduserte samtidig ekstra friksjon ved sertifikatrotasjon.
 

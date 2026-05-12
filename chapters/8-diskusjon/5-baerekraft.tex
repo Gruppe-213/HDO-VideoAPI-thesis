@@ -1,21 +1,41 @@
 \section{Bærekraft}
 \label{sec:bærekraft}
 
-VideoAPI har først og fremst bærekraftsrelevans gjennom sosial og
-organisatorisk nytte. Løsningen inngår i akuttmedisinsk infrastruktur der
-video kan brukes som beslutningsstøtte for AMK- og legevaktoperatører.
-Dette knytter prosjektet til SDG~3, god helse og livskvalitet, men
-prosjektet har ikke målt klinisk effekt og bør derfor ikke overdrive denne
-koblingen.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.22\textwidth]{figures/goal-3.png}
+    \hspace{1cm}
+    \includegraphics[width=0.22\textwidth]{figures/goal-9.png}
+    \caption{De mest relevante bærekraftsmålene for VideoAPI er SDG~3 og SDG~9 \cite{fn_sdg3, fn_sdg9}.}
+    \label{fig:sdg-main}
+\end{figure}
 
-Plugin-arkitekturen kan også bidra til mer vedlikeholdbar digital
-infrastruktur. Ved å redusere direkte kobling mellom klienter og
-videoleverandører får HDO større fleksibilitet dersom leverandører eller
-teknologi endres. Dette er relevant for SDG~9, industri, innovasjon og
-infrastruktur.
+VideoAPI er særlig relevant for SDG~3, god helse og livskvalitet,
+og SDG~9, industri, innovasjon og infrastruktur. Den tydeligste
+koblingen til SDG~3 er delmål 3.D, som handler om beredskap og
+håndtering av helserisiko \cite{fn_sdg3}. For VideoAPI er denne
+koblingen indirekte, siden løsningen ikke måler kliniske effekter eller
+pasientutfall, men inngår i digital infrastruktur for akuttmedisinsk
+kommunikasjon.
 
-Samtidig introduserer løsningen et nytt driftspunkt som må sikres,
-overvåkes og vedlikeholdes. Videostrømming har også energi- og
-båndbreddekostnader som ligger utenfor mellomvarens kontroll. VideoAPI kan
-derfor ikke beskrives som en direkte miljøforbedring, men som et tiltak
-for mer robust og vedlikeholdbar digital infrastruktur.
+\begin{figure}[H]
+    \centering
+    \includesvg[width=0.35\textwidth]{figures/del-3D}
+    \hspace{0.6cm}
+    \includesvg[width=0.35\textwidth]{figures/del-9}
+    \caption{De mest relevante delmålene er SDG~3.D og SDG~9.1 \cite{globalgoals_sdg3_graphics, globalgoals_sdg9_graphics}.}
+    \label{fig:sdg-targets}
+\end{figure}
+
+For SDG~9 er delmål 9.1 mest relevant, fordi det handler om robust og
+pålitelig infrastruktur \cite{fn_sdg9}. Ved å samle flere videomotorer
+bak ett felles API peker løsningen mot en mer standardisert teknisk
+plattform. Dette samsvarer med HDOs oppdrag om interoperabilitet og økt
+standardisering av videoløsninger i den akuttmedisinske kjeden
+\cite{hdo_oppdrag2026}.
+
+Samtidig blir VideoAPI et nytt systemledd som må driftes, overvåkes og
+sikres. Videostrømming krever også nettverks- og serverressurser.
+Løsningen bør derfor ikke beskrives som et direkte miljøtiltak, men som
+et bidrag til mer robust digital infrastruktur i en samfunnskritisk
+tjeneste.

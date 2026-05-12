@@ -1,48 +1,60 @@
 \section{Ende-til-ende-testing}
 \label{sec:e2e-testing}
 
-Som supplement til enhets- og integrasjonstestene ble det laget et
-ende-til-ende-testskript som kjøres mot det deployede systemet på HDOs
-OpenStack-VM. Skriptet tester VideoAPI mot faktiske AntMedia- og
-NHN-testmiljøer, og ligger i prosjektets repositorium under
-\texttt{scripts/e2e-test.sh}.
+E2E-testsuiten besto av to Bash-skript under \texttt{scripts/}: en
+fullstendig testsuite (\texttt{e2e-test.sh}) og en chaos-demonstrasjon
+(\texttt{chaos.sh}). Begge lastet hemmeligheter fra et felles
+\texttt{env-bootstrap.sh}-skript som leste \texttt{.env} fra
+repo-roten, slik at ingen hemmeligheter var hardkodet i skriptene.
+Skriptene ble utviklet med KI-assistanse, men testgrunnlaget ble ikke
+akseptert ukritisk; hver fase ble gjennomgått og justert manuelt.
+Detaljert KI-bruk er dokumentert i avsnitt~\ref{sec:ki-bruk} og
+vedlegg~\ref{app:ki-deklarasjon}.
 
-Skriptet dekker autentisering, romlivssyklus for begge backends,
-feilhåndtering, rate limiting, samtidighet, vedvarende funksjonell last
-og Prometheus-metrikker. Hver fase bruker assertions på HTTP-statuskoder,
-utvalgte responsfelt og forventede metrikkendringer.
+\texttt{e2e-test.sh} kjørte mot det faktiske HDO-testmiljøet på
+OpenStack-VM via \texttt{https://localhost:443} og var organisert i ti
+faser:
 
-For AntMedia testes blant annet opprettelse av rom, generering av
-WebRTC-lenke, start og stopp av strøm, henting av rominformasjon og
-sletting av rom. For NHN testes opprettelse, henting og sletting av rom,
-samt at operasjoner som ikke støttes av NHN, for eksempel start, stopp og
-setting av romtoken, returnerer HTTP~501.
+\begin{enumerate}
+  \item Infrastruktur og tilgjengelighet --- helseendepunkter,
+        Swagger, Prometheus og HTTP-til-HTTPS-omdirigering.
+  \item Autentisering og autorisasjon --- gyldige og ugyldige
+        Keycloak-klienter, manglende token, misformet
+        \texttt{Authorization}-header og Content-Type-validering.
+  \item AntMedia-livssyklus --- oppretting, henting, start/stopp av
+        strøm, token-setting og WebRTC-lenkegenerering for publish-
+        og play-typer.
+  \item NHN-livssyklus --- oppretting med \texttt{guestUrl}/\texttt{hostUrl},
+        henting og verifisering av at start, stopp og token-setting
+        returnerte \texttt{501}.
+  \item Feilhåndtering og RFC~7807 --- 404-, 400- og 502-responser,
+        idempotent sletting og kontroll av at ingen intern informasjon
+        lekket i feilresponser.
+  \item Rate limiting --- burst på 70 forespørsler og verifisering av
+        429-respons og recovery etter vindu-reset.
+  \item Samtidighet --- 5 parallelle romopprettelser, 5 samtidige
+        GET-forespørsler mot samme rom og 3 samtidige token-forespørsler.
+  \item Vedvarende blandet last --- 8 minutter med veksling mellom
+        AntMedia- og NHN-operasjoner, periodiske feilinjeksjoner og
+        opprettelse/sletting av midlertidige rom.
+  \item Metrikk-integritet --- verifisering av at Prometheus-tellerne
+        \texttt{hdo\_active\_rooms\_total}, \texttt{hdo\_errors\_total}
+        og \texttt{hdo\_auth\_requests\_total} var ikke-null etter
+        belastningstesten.
+  \item Sluttverifisering og opprydding --- helsesjekk, sletting av
+        alle opprettede rom og kontroll av at rom-telleren
+        nullstilte seg.
+\end{enumerate}
 
-Skriptet ble utviklet med KI-assistanse, men testgrunnlaget ble ikke
-akseptert ukritisk. Teamet kontrollerte assertions mot faktiske
-HTTP-statuskoder og responsfelt observert i HDOs testmiljøer. Faser som
-ikke samsvarte med reell API-oppførsel ble endret eller forkastet før
-skriptet ble committet. Validiteten kommer derfor fra gjennomkjøring mot
-testmiljøene, ikke fra KI-genereringen alene.
+Ved siste kjøring før innlevering passerte 401 av 403 assertions;
+ingen feilet. To advarsler gjaldt rom-telleren etter opprydding, der
+to rom opprettet utenfor testen ikke inngikk i oppryddingsløkken.
+Kjøretiden var 31~minutter.
 
-Skriptet kjører i omtrent 40 minutter. Etter gjennomføring rydder det opp
-opprettede rom og kontrollerer at relevante Prometheus-gauger går tilbake
-til forventet verdi. Fasen med vedvarende last gir funksjonell validering
-over tid, men lagrer ikke p95, p99, gjennomstrømming eller maksimalt
-antall samtidige rom som egne resultater. Dette er derfor ikke en
-fullverdig lasttest, men en funksjonell stabilitetstest over tid.
-
-I tillegg ble API-et verifisert manuelt med \texttt{HDO-VideoAPI.http}
-og ved behov med Postman. Frontend-demoen ble også brukt som manuell
-ende-til-ende-verifisering: gjennom frontend ble det kontrollert at rom
-kunne opprettes, vises og slettes via samme API for begge backends, og at
-backend-spesifikke svar som NHN-lenker og AntMedia-status ble presentert
-riktig for brukeren. Prometheus og Grafana ble verifisert manuelt ved å sammenligne hendelsene
-fra E2E-kjøringen med metrikkendringer i dashboardene.
-
-Ende-til-ende-testingen viste at VideoAPI kunne kjøres mot begge
-testmiljøene og håndtere de viktigste romoperasjonene gjennom samme API.
-Den viste også at backend-spesifikke begrensninger, særlig NHNs manglende
-støtte for start, stopp og romtoken, ble håndtert med forventede
-HTTP~501-responser.
-
+\texttt{chaos.sh} var ikke en test i tradisjonell forstand, men en
+demonstrasjon av recovery-oppførsel. Skriptet opprettet tre rom,
+koblet deretter API-containeren fra Docker-nettverket slik at AntMedia
+og NHN ble utilgjengelige, ventet 20~sekunder og koblet til igjen.
+API-et gjenopprettet \texttt{Healthy}-status på begge providers innen
+10~sekunder etter reconnect. Sekvensen ble verifisert visuelt i
+Grafana og tok 44~sekunder totalt.

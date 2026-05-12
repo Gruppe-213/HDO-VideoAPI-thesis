@@ -1,194 +1,45 @@
 \section{Teststrategi}
 \label{sec:teststrategi}
 Testarbeidet var organisert i tre nivåer: enhetstester for isolerte
-komponenter, integrasjonstester for HTTP-laget, og manuell testing mot
+komponenter, integrasjonstester for HTTP-laget og manuell testing mot
 faktiske testmiljøer. Alle automatiserte tester kjørte via GitHub Actions
-ved push til \texttt{main}, \texttt{develop} og feature-brancher, samt ved
-pull requests.
-Den ordinære testsuiten på leveransegrenen omfattet 133 tester, og alle passerte ved
-hver kjøring.
-På den separate valideringsgrenen \texttt{feature/provider-validation} ble testsettet
-utvidet til 166 tester for arkitekturvalidering (se avsnitt~\ref{sec:provider-validering});
+ved push til \texttt{main}, \texttt{develop} og feature-brancher, samt
+ved pull requests.
+
+Den ordinære testsuiten på leveransegrenen omfattet 133 tester, og alle
+passerte ved hver kjøring. På den separate valideringsgrenen
+\texttt{feature/provider-validation} ble testsettet utvidet til 166
+tester for arkitekturvalidering (se avsnitt~\ref{sec:provider-validering});
 dette inngår ikke i hovedleveransen mot HDO.
 
-Testrammeverket var xUnit med Moq for mocking. Eksterne tjenester
-(AntMedia, NHN Video og Keycloak) var fullstendig mocket i alle
-automatiserte tester, slik at ingen tester krevde tilgang til ekte
-backend-miljøer. To hjemmelagde infrastrukturkomponenter dekket dette:
-\texttt{StubHttpMessageHandler} for enhetstesting av HTTP-klienter
-(jf.\ avsnitt~\ref{sec:enhetstester}) og \texttt{CustomWebApplicationFactory}
-for in-memory integrasjonstesting (jf.\ avsnitt~\ref{sec:integrasjonstester}).
+Testrammeverket var xUnit med Moq for mocking. AntMedia, NHN Video og
+Keycloak var fullstendig mocket i alle automatiserte tester, slik at ingen
+tester krevde tilgang til ekte backend-miljøer. To hjemmelagde
+testkomponenter dekket dette: en lokal
+\texttt{StubHttpMessageHandler}-implementasjon for enhetstesting av
+HTTP-klienter (jf.\ avsnitt~\ref{sec:enhetstester}) og
+\texttt{CustomWebApplicationFactory} for in-memory integrasjonstesting
+(jf.\ avsnitt~\ref{sec:integrasjonstester}).
 
-Målet med testingen var ikke å bevise produksjonsklarhet, men å verifisere
-at proof-of-conceptet oppfylte kravspesifikasjonen og at arkitekturen
-støttet utvidelse med nye videomotorer. Teststrategien hadde derfor fire
-konkrete mål: å verifisere kjerneoperasjonene i krav F1.1--F1.5, å teste
-sentrale feil- og sikkerhetsscenarier, å kontrollere integrasjon mot
-faktiske AntMedia- og NHN-testmiljøer, og å måle hvor mye kjernelogikk
-som måtte endres ved innføring av nye providere.
+Målet var ikke å bevise produksjonsklarhet, men å verifisere at
+proof-of-conceptet oppfylte kravspesifikasjonen og at arkitekturen støttet
+utvidelse med nye videomotorer. Teststrategien hadde fire konkrete mål:
+å verifisere kjerneoperasjonene i krav F1.1--F1.5, å teste sentrale feil-
+og sikkerhetsscenarier, å kontrollere integrasjon mot faktiske AntMedia-
+og NHN-testmiljøer, og å måle hvor mye kjernelogikk som måtte endres ved
+innføring av nye providere.
 
-Tabell~\ref{tab:rtm} viser sporbarhet mellom krav, implementasjon og
-tester. Tabellen lister navngitte representanter per krav; suiten
-inneholder flere tester per kategori enn det som er listet eksplisitt.
-Statuskolonnen angir hvordan kravet primært ble verifisert (jf.\
-forklaring under tabellen).
-
-% \begin{table}[h]
-% \centering
-% \small
-% \begin{threeparttable}
-% \begin{tabular}{l p{5cm} p{5.4cm} r}
-% \toprule
-% \textbf{Krav} & \textbf{Implementasjon} & \textbf{Test(er)} & \textbf{Status} \\
-% \midrule
-% F1.1 & \url{RoomsController.CreateRoom}, \newline \url{*.CreateRoomAsync}
-%      & Vellykket oppretting returnerer 201 med Location-header; \newline 
-%        provider-adapterne oppretter rom korrekt; E2E & Pass \\
-% \addlinespace
-% F1.2 & \url{RoomsController.DeleteRoom}, \newline \url{*.DeleteRoomAsync}
-%      & Controller håndterer feilstier korrekt; \newline 
-%        E2E og manuell verifisering av sletting & Pass (E2E) \\
-% \addlinespace
-% F1.3 & \url{RoomsController.GetRoom}, \newline \url{*.GetRoomAsync}
-%      & Validerings- og feilsti-tester; \newline E2E og manuell \texttt{200} & Pass (E2E) \\
-% \addlinespace
-% F1.4 & \texttt{RoomsController.StartStream}, \newline \texttt{AntMediaProvider.StartStreamAsync}, \newline \texttt{NHNVideoProvider} (\texttt{501})
-%      & Automatiserte feilstier og provider-tester; \newline E2E og manuell AntMedia-start & Delvis \\
-% \addlinespace
-% F1.5 & \texttt{RoomsController.StopStream}, \newline \texttt{AntMediaProvider.StopStreamAsync}, \newline \texttt{NHNVideoProvider} (\texttt{501})
-%      & Automatiserte feilstier og NHN-\texttt{501}; \newline E2E og manuell AntMedia-stopp & Delvis \\
-% \midrule
-% S1.1 & \texttt{KeycloakExtensions}, \newline \texttt{[Authorize]} på \texttt{RoomsController}
-%      & \texttt{ProtectedEndpoint\_WithoutApiAccessClaim\_Returns403}, \newline \texttt{SecurityBehaviorTests} & Pass \\
-% \addlinespace
-% S1.2 & \texttt{\{AntMedia,NHNVideo\}Provider.SetRoomTokenAsync}, \newline \texttt{GenerateWebRtcTokenAsync}
-%      & \texttt{SetRoomToken\_*}, \newline \texttt{GenerateWebRtcToken\_*} & Pass \\
-% \midrule
-% I1.1 & \texttt{Dockerfile}, \texttt{compose.yaml}
-%      & Manuell deploy-test på OpenStack-VM & Pass (manuell) \\
-% \addlinespace
-% I1.2 & \texttt{Program.cs}, env-vars, \newline \texttt{NHNTokenCache} (per prosess)
-%      & Dokumentert i kap.~\ref{sec:arkitektur} og~\ref{ch:implementasjon} & Verifisert ved gjennomgang \\
-% \midrule
-% O1.1 & \texttt{GlobalExceptionHandler}, \texttt{ILogger}
-%      & \texttt{GlobalExceptionHandlerTests} & Pass \\
-% \addlinespace
-% O1.2 & \texttt{HealthCheckExtensions}, \newline \texttt{\{AntMedia,NHNVideo\}Provider.HealthCheck}
-%      & \texttt{HealthCheck}-tester, E2E fase~1 & Pass (E2E) \\
-% \addlinespace
-% O1.3 & \texttt{VideoMetrics}, \texttt{prometheus-net}
-%      & E2E fase~9, manuell Grafana-verifisering & Pass (E2E + manuell) \\
-% \midrule
-% D1.1 & \texttt{Swashbuckle}, \texttt{README}, \texttt{docs/}
-%      & Dokumentasjonsgjennomgang & Verifisert ved gjennomgang \\
-% \bottomrule
-% \end{tabular}
-% \begin{tablenotes}
-% \small
-% \item Begge videomotor-providerne: \texttt{AntMediaProvider} og \texttt{NHNVideoProvider}.
-% \item \textbf{Pass} — i hovedsak automatiserte tester.
-% \item \textbf{Pass (E2E)} — suksessflyt eller full scenario verifisert med E2E og/eller manuelt, med supplement fra automatiserte feilstier der det er aktuelt.
-% \item \textbf{Pass (E2E + manuell)} — E2E kombinert med manuell Grafana-/metrikksjekk.
-% \item \textbf{Pass (manuell)} — deploy/manuell kjøring på VM, ikke isolert CI-test.
-% \item \textbf{Delvis} — kravet er oppfylt for AntMedia, mens NHN ikke har tilsvarende start-/stoppoperasjon og returnerer forventet \texttt{501}.
-% \item \textbf{Verifisert ved gjennomgang} — design og kodegjennomgang fremfor én automatisert testcase (I1.2, D1.1). Cache/statelessness diskuteres også i kap.~\ref{ch:diskusjon}.
-% \end{tablenotes}
-% \end{threeparttable}
-% \caption{Krav-sporbarhetstabell (Requirements Traceability Matrix).}
-% \label{tab:rtm}
-% \end{table}
-
-\begin{table}[h]
-\centering
-\small
-\begin{threeparttable}
-\begin{tabular}{l p{5cm} p{5.5cm} r}
-\toprule
-\textbf{Krav} & \textbf{Implementasjon} & \textbf{Test(er)} & \textbf{Status} \\
-\midrule
-F1.1 & \texttt{RoomsController.CreateRoom}, \newline \texttt{\_.CreateRoomAsync}\tnote{*}
-     & Oppretting returnerer 201 med Location-header; E2E verifisert. & \pass \\
-\addlinespace
-F1.2 & \texttt{RoomsController.DeleteRoom}, \newline \texttt{\_.DeleteRoomAsync}\tnote{*}
-     & Feilstier og sletting verifisert via E2E og manuell test. & \pass \\
-\addlinespace
-F1.3 & \texttt{RoomsController.GetRoom}, \newline \texttt{\_.GetRoomAsync}\tnote{*}
-     & Romsøk, validering og feilstier dekket; E2E verifisert. & \pass \\
-\addlinespace
-F1.4 & \texttt{RoomsController.StartStream}, \newline \texttt{\_.StartStreamAsync}\tnote{*}
-     & Strømstart delegeres korrekt; NHN returnerer \texttt{501}; AntMedia manuelt verifisert. & \delvis \\
-\addlinespace
-F1.5 & \texttt{RoomsController.StopStream}, \newline \texttt{\_.StopStreamAsync}\tnote{*}
-     & Strømstopp delegeres korrekt; NHN returnerer \texttt{501}; AntMedia manuelt verifisert. & \delvis \\
-\midrule
-S1.1 & \texttt{KeycloakExtensions}, \newline \texttt{[Authorize]} på \texttt{RoomsController}
-     & Endepunkter krever gyldig claim; \texttt{403} returneres ved manglende tilgang. & \pass \\
-\addlinespace
-S1.2 & \texttt{RoomsController.SetRoomToken}, \newline \texttt{\_.GenerateWebRtcTokenAsync}\tnote{*}
-     & Token genereres og valideres korrekt for begge providers. & \pass \\
-\midrule
-I1.1 & \texttt{Dockerfile}, \texttt{compose.yaml}
-     & Tjenesten starter og svarer korrekt etter deploy på OpenStack-VM. & \pass \\
-\addlinespace
-I1.2 & \texttt{Program.cs}, env-vars, \newline \texttt{NHNTokenCache}
-     & Konfigurasjon og cache verifisert ved kodegjennomgang. & \verifisert \\
-\midrule
-O1.1 & \texttt{GlobalExceptionHandler}, \newline \texttt{ILogger}
-     & Uventede feil fanges og returnerer strukturert feilrespons. & \pass \\
-\addlinespace
-O1.2 & \texttt{HealthCheckExtensions}, \newline \texttt{\_.HealthCheck}\tnote{*}
-     & Helsesjekk mot begge providers returnerer korrekt status; E2E verifisert. & \pass \\
-\addlinespace
-O1.3 & \texttt{VideoMetrics}, \texttt{prometheus-net}
-     & Metrikker eksponeres på \texttt{/metrics} og verifisert i Grafana. & \pass \\
-\midrule
-D1.1 & \texttt{Swashbuckle}, \texttt{README}, \texttt{docs/}
-     & API-dokumentasjon og oppsettsveiledning verifisert ved gjennomgang. & \verifisert \\
-\bottomrule
-\end{tabular}
-\begin{tablenotes}
-  \small
-  \centering
-  \item[$*$] \texttt{\_} erstattes av \texttt{AntMediaProvider} og/ eller \texttt{NHNVideoProvider}
-  \smallskip
-  \item \pass: Kravet er oppfylt og verifisert gjennom automatiserte tester, E2E eller manuell test.
-  \item \delvis: Kravet er oppfylt for AntMedia; NHN mangler tilsvarende operasjon.
-  \item \verifisert: Kravet er bekreftet gjennom kode- og dokumentasjonsgjennomgang.
-\end{tablenotes}
-\end{threeparttable}
-\caption{Krav-sporbarhetstabell (Requirements Traceability Matrix).}
-\label{tab:rtm}
-\end{table}
+En \textit{krav-sporbarhetstabell} (Requirements Traceability Matrix)
+kobler hvert krav til den konkrete implementasjonen og testene som
+verifiserer det~\cite{rtm_geeksforgeeks}. Tabell~\ref{tab:rtm} viser
+sporbarhet mellom krav, implementasjon og tester; statuskolonnen angir
+hvordan kravet primært ble verifisert.
+\newpage
+\input{figures/tab-rtm}
 
 \subsection{Reprodusere testresultatene}
 \label{subsec:reprodusere-tester}
-Testene kunne kjøres lokalt med følgende kommandoer. Coverage-rapporten
-krever \texttt{dotnet-reportgenerator-globaltool}, som installeres første
-gang.
-
-\begin{lstlisting}[language=bash, caption={Kjøre testsuiten med coverage}]
-# Klon repoet
-git clone https://github.com/Gruppe-213/HDO-VideoAPI.git
-cd HDO-VideoAPI
-
-# Kjør alle tester
-dotnet test
-
-# Installer reportgenerator (ignorer feil hvis allerede installert)
-dotnet tool install -g dotnet-reportgenerator-globaltool || true
-
-# Kjør med coverage-innsamling
-dotnet test --collect:"XPlat Code Coverage" \
-  --results-directory ./coverage
-
-# Generer lesbar rapport
-reportgenerator \
-  "-reports:./coverage/**/coverage.cobertura.xml" \
-  "-targetdir:./coverage/report" \
-  "-reporttypes:TextSummary"
-cat ./coverage/report/Summary.txt
-\end{lstlisting}
-
-Testene krevde .NET~10 SDK. Ingen eksterne tjenester var nødvendige siden
-alle avhengigheter var mocket i testmiljøet.
-
+For å reprodusere testresultatene, se \texttt{README} i prosjektets
+GitHub-repositorium (vedlegg~\ref{app:kildekode}). Testene krevde
+.NET~10 SDK; ingen eksterne tjenester var nødvendige siden alle
+avhengigheter var mocket i testmiljøet.

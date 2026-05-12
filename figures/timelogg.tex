@@ -1,0 +1,42 @@
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{lrrrr}
+\toprule
+Kategori & Nahom & Tim & Fredrik & Totalt \\
+\midrule
+Development & 132 & 126 & 129 & 387 \\
+Writing & 128 & 125 & 128 & 381 \\
+Meeting & 48 & 46 & 48 & 142 \\
+Testing & 46 & 44 & 48 & 138 \\
+Research & 31 & 40 & 40 & 111 \\
+Admin & 25 & 19 & 19 & 63 \\
+Design & 20 & 15 & 19 & 54 \\
+\midrule
+Totalt & 430 & 415 & 431 & 1276 \\
+\bottomrule
+\end{tabular}
+\caption{Omtrentlig fordeling av dokumentert arbeidstid per kategori og gruppemedlem.}
+\label{tab:timekategori}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\pie[
+    text=legend,
+    radius=2.8,
+    sum=auto
+]{
+    387/Development,
+    381/Writing,
+    142/Meeting,
+    138/Testing,
+    111/Research,
+    63/Admin,
+    54/Design
+}
+\end{tikzpicture}
+\caption{Omtrentlig prosentvis fordeling av dokumentert arbeidstid.}
+\label{fig:timefordeling-pie}
+\end{figure}

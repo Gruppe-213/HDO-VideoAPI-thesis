@@ -1,20 +1,26 @@
-\section{Testavgrensninger og åpne hull}
+\section{Testavgrensninger}
 \label{sec:testavgrensninger}
 
-Testene dekker funksjonelle krav, sentrale sikkerhetskrav og validering av
-provider-arkitekturen, men de dokumenterer ikke produksjonsklarhet.
+Testene dekket funksjonelle krav, sentrale sikkerhetskrav og validering
+av provider-arkitekturen, men dokumenterte ikke produksjonsklarhet.
 
-Det ble ikke gjennomført automatisk sikkerhetsskanning i CI, lasttesting med
-dedikerte verktøy, systematisk fuzz-testing, kontraktstesting mot flere versjoner
-av AntMedia/NHN/Pexip eller automatiserte recovery-tester for container-restart
-og nettverksfeil. TLS-konfigurasjon er støttet, men testsuiten verifiserer ikke
-sertifikatkjede, TLS-handshake eller sertifikatrotasjon.
+CI-pipelinen kjørte ingen automatisk sikkerhetsskanning. Det ble heller
+ikke gjennomført lasttesting med dedikerte verktøy, systematisk
+fuzz-testing eller kontraktstesting mot flere versjoner av AntMedia,
+NHN eller Pexip. TLS er konfigurert via sertifikatmontering i
+\texttt{compose.yaml}, men testsuiten verifiserte ikke sertifikatkjede,
+TLS-handshake eller sertifikatrotasjon. Automatiserte recovery-tester
+for container-restart og nettverksfeil ble ikke implementert;
+\texttt{chaos.sh} dekket nettverksdiskobling manuelt.
 
-E2E-skriptet gir funksjonell validering over tid, men lagrer ikke p95/p99,
-gjennomstrømming eller maksimalt antall samtidige rom som målbare resultater.
-Derfor kan testene brukes som bevis for at proof-of-concept-løsningen fungerer i
-testmiljøet, men ikke som bevis for produksjonsmessig robusthet.
+E2E-skriptet ga funksjonell validering over tid, men lagret ikke
+p95/p99-latens, gjennomstrømming eller maksimalt antall samtidige rom
+som målbare resultater. Latenstall var tilgjengelige i Grafana under
+kjøring, men ble ikke fanget automatisk av skriptet.
 
-Avgrensningene svekker ikke proof-of-conceptets verdi, men markerer hva
-som må adresseres før en eventuell produksjonssetting med reelle
+Demo-frontenden ble ikke formelt brukertestet; den ble brukt til
+manuell verifisering av komplette flyter mot begge backends.
+
+Avgrensningene svekker ikke proof-of-conceptets verdi, men markerer
+hva som må adresseres før en eventuell produksjonssetting med reelle
 pasientdata og strengere driftskrav.

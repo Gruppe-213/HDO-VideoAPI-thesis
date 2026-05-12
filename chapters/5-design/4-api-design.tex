@@ -1,11 +1,13 @@
 \section{API-design}
 \label{sec:api-design}
 
-API-et er designet som et REST-basert grensesnitt der videorom er hovedressursen.
-Dette passer med kravspesifikasjonen, som beskriver operasjoner for å opprette,
-slette, hente informasjon om, starte og stoppe videorom~\cite{hdo_kravspec}.
-Operasjonene er derfor samlet under \texttt{/api/rooms}, slik at klienten får ett
-felles grensesnitt uavhengig av hvilken videomotor som brukes.
+API-et er designet som et REST-basert grensesnitt der videorom er hovedressursen, i tråd med kravspesifikasjonens beskrivelse av operasjoner for oppretting, sletting, henting, start og stopp av videorom \cite{hdo_kravspec}. Alle operasjoner er samlet under \texttt{/api/rooms}, slik at klienten forholder seg til én enhetlig kontrakt uavhengig av underliggende videomotor.
+
+% API-et er designet som et REST-basert grensesnitt der videorom er hovedressursen.
+% Dette passer med kravspesifikasjonen, som beskriver operasjoner for å opprette,
+% slette, hente informasjon om, starte og stoppe videorom~\cite{hdo_kravspec}.
+% Operasjonene er derfor samlet under \texttt{/api/rooms}, slik at klienten får ett
+% felles grensesnitt uavhengig av hvilken videomotor som brukes.
 
 ASP.NET Core støtter både Minimal APIs og controller-baserte API-er. Minimal APIs
 er anbefalt for nye prosjekter der målet er raske HTTP-endepunkter med lite
@@ -20,51 +22,47 @@ for en mindre prototype, men controller-modellen ga en tydeligere struktur for
 operasjoner som oppretting, sletting, start, stopp, tokenhåndtering og
 WebRTC-lenker for videorom.
 
-Et sentralt designvalg var hvordan API-et skulle bevare informasjon om hvilken
-backend et rom tilhører. Løsningen ble å returnere rom-ID-er på formatet
-\texttt{\{provider\}:\{backendId\}}, for eksempel \texttt{antmedia:abc123} eller
-\texttt{nhn:24484}. Provider-prefikset fungerer som rutinginformasjon i senere
-forespørsler, slik at klienten kun trenger å lagre én ID.
+Et sentralt designvalg var hvordan API-et skulle bevare informasjon om hvilken backend et rom tilhører. Løsningen ble å returnere rom-ID-er på formatet \texttt{\{provider\}:\{backendId\}}, for eksempel \texttt{antmedia:abc123} eller \texttt{nhn:24484}. Provider-prefikset fungerer som rutinginformasjon i senere forespørsler, slik at klienten kun trenger å lagre én ID. Kodeliste~\ref{lst:create-room} viser at controlleren holdes tynn: den binder forespørselen, velger provider, delegerer romopprettelsen og prefikser rom-ID-en før svaret returneres.
 
-\begin{lstlisting}[language=CSharp, caption={Opprettelse av rom via provider-factory}, label={lst:create-room}]
+\begin{lstlisting}[language=CSharp, caption={Opprettelse av rom — controlleren delegerer til provider-laget.}, label={lst:create-room}]
+// HDO-VideoAPI/Controllers/RoomsController.cs
 [HttpPost]
 public async Task<IActionResult> CreateRoom([FromBody] CreateRoomRequest request)
 {
     if (string.IsNullOrWhiteSpace(request.Name))
-        request.Name = Guid.NewGuid().ToString();
+        request.Name = Guid.NewGuid().ToString();   // Generer navn om ikke oppgitt
 
+    // Velg provider basert på forespørsel, standardverdi er antmedia
     var providerKey = (request.Provider != null ? request.Provider : "antmedia").ToLowerInvariant();
     var provider = factory.GetProvider(providerKey);
-    var room = await provider.CreateRoomAsync(request, HttpContext.RequestAborted);
 
-    room.Id = $"{providerKey}:{room.Id}";
-    metrics.RoomCreated(providerKey);
+    var room = await provider.CreateRoomAsync(request, HttpContext.RequestAborted);
+    room.Id = $"{providerKey}:{room.Id}";   // Prefiks ID med provider-nøkkel
+
+    // ...
 
     return CreatedAtAction(nameof(GetRoom), new { roomId = room.Id }, room);
 }
 \end{lstlisting}
 
-Listing~\ref{lst:create-room} viser at controlleren holdes tynn: den binder
-forespørselen, velger provider, delegerer romopprettelsen og prefikser rom-ID-en
-før svaret returneres. Selve backend-logikken ligger i provider-laget.
+Ved senere kall — henting, sletting, start og stopp — må controlleren gjenkjenne hvilken provider rom-ID-en tilhører. Kodeliste~\ref{lst:parse-room-id} viser hvordan provider-prefikset parses ut av ID-en, slik at provider-valget ikke trenger å sendes som et eget felt eller query-parameter.
 
 \begin{lstlisting}[language=CSharp, caption={Parsing av provider-prefiks fra rom-ID}, label={lst:parse-room-id}]
+// HDO-VideoAPI/Controllers/RoomsController.cs
 private (IVideoProvider Provider, string ProviderKey, string RawId) ParseRoomId(string roomId)
 {
     var colon = roomId.IndexOf(':');
-    if (colon < 1 || colon != roomId.LastIndexOf(':') || colon == roomId.Length - 1)
-        throw new ArgumentException($"Invalid room ID '{roomId}'. Expected format: 'provider:id'.");
 
-    var providerKey = roomId[..colon];
-    var rawId = roomId[(colon + 1)..];
+    // ...
+
+    var providerKey = roomId[..colon];  // f.eks. "antmedia"
+    var rawId = roomId[(colon + 1)..];  // f.eks. "abc123"
+
+    // ...
 
     return (factory.GetProvider(providerKey), providerKey, rawId);
 }
 \end{lstlisting}
-
-Listing~\ref{lst:parse-room-id} viser hvordan provider-prefikset hentes ut og
-brukes til å velge riktig provider ved senere kall. Dette gjør at provider-valget
-ikke må sendes som et eget felt eller query-parameter.
 
 Start og stopp av videostrøm er modellert som handlinger på romressursen, for
 eksempel \texttt{POST /api/rooms/\{roomId\}/start} og
