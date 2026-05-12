@@ -7,7 +7,8 @@
 public async Task<VideoRoom> CreateRoomAsync(CreateRoomRequest request, CancellationToken ct = default)
 {
     // ...
-    
+
+    // Bygg booking-objekt med tidspunkt og møtemal
     var now = DateTime.UtcNow;
     var body = new CreateNHNBookingRequest
     {
@@ -19,8 +20,11 @@ public async Task<VideoRoom> CreateRoomAsync(CreateRoomRequest request, Cancella
 
     // ...
 
+    // Send booking til NHN og deserialiser respons
     var response = await httpClient.PostAsJsonAsync("api/client/v1/booking/", body, ct);
     var booking = await response.Content.ReadFromJsonAsync<NHNBooking>(cancellationToken: ct);
+
+    // Returnerer booking konvertert til internt format
     return MapToVideoRoom(booking);
 }
 \end{lstlisting}
@@ -33,10 +37,15 @@ WebRTC-lenker håndteres enklere enn hos AntMedia. \texttt{GenerateWebRtcTokenAs
 // HDO-VideoAPI/Providers/NHN/NHNVideoProvider.cs
 public async Task<WebRtcLinkResponse> GenerateWebRtcTokenAsync(string roomId, string type, CancellationToken ct = default)
 {
-    var room = await GetRoomAsync(roomId, ct); // Hent booking fra NHN
+    // Hent booking fra NHN
+    var room = await GetRoomAsync(roomId, ct);
+
+    // Velg URL basert på rolle
     var tokenId = type == "play" 
-        ? (room.GuestUrl ?? string.Empty)                   // Gjest-URL for avspilling
-        : (room.HostUrl ?? room.GuestUrl ?? string.Empty);  // Vert-URL, fallback til GuestUrl
+        ? (room.GuestUrl ?? string.Empty)
+        : (room.HostUrl ?? room.GuestUrl ?? string.Empty);
+
+    // Returner lenke uten utløpstid (NHN håndterer dette selv)
     return new WebRtcLinkResponse(tokenId, roomId, type, NoExpiry);
 }
 \end{lstlisting}
@@ -77,12 +86,14 @@ private async Task<string> GetTokenAsync(CancellationToken cancellationToken)
     var result = await response.Content.ReadFromJsonAsync<NHNTokenResponse>
         (cancellationToken: cancellationToken).ConfigureAwait(false);
 
+    // Lagre token og beregn utløpstidspunkt
     cache.Token = result!.AccessToken;
     var serverExpiry = DateTime.UtcNow.AddSeconds(result.ExpiresIn - TokenExpiryBufferSeconds);
     cache.Expiry = serverExpiry < DateTime.UtcNow.AddDays(NHNTokenMaxAgeDays)
         ? serverExpiry
         : DateTime.UtcNow.AddDays(NHNTokenMaxAgeDays);
 
+    // Returner det oppdaterte tokenet
     return cache.Token;
 }
 \end{lstlisting}
