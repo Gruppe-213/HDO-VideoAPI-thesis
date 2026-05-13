@@ -9,7 +9,15 @@ repo-roten, slik at ingen hemmeligheter var hardkodet i skriptene.
 Skriptene ble utviklet med KI-assistanse, men testgrunnlaget ble ikke
 akseptert ukritisk; hver fase ble gjennomgått og justert manuelt.
 Detaljert KI-bruk er dokumentert i avsnitt~\ref{sec:ai-bruk} og
-vedlegg~\ref{app:ki-deklarasjon}.
+vedlegg~\ref{app:ki-deklarasjon}. Figur~\ref{fig:e2e-script-output}
+viser et representativt utdrag av konsollutskriften under en kjøring.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.65\textwidth]{figures/scriptPreview.png}
+    \caption{Konsollutskrift fra \texttt{e2e-test.sh}; hver assertion logges som \texttt{PASS} eller \texttt{FAIL} med tilhørende HTTP-statuskode.}
+    \label{fig:e2e-script-output}
+\end{figure}
 
 \texttt{e2e-test.sh} kjørte mot det faktiske HDO-testmiljøet på
 OpenStack-VM via \texttt{https://localhost:443} og var organisert i ti
@@ -50,6 +58,29 @@ Ved siste kjøring før innlevering passerte 401 av 403 assertions;
 ingen feilet. To advarsler gjaldt rom-telleren etter opprydding, der
 to rom opprettet utenfor testen ikke inngikk i oppryddingsløkken.
 Kjøretiden var 31~minutter.
+Figur~\ref{fig:e2e-ratelimit-concurrency} viser utskriften fra
+rate limiting- og samtidighetsfasene, der recovery etter rate-limit-vinduet
+og fem parallelle romopprettelser begge ga \texttt{PASS}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{figures/randome2e.png}
+    \caption{Utskrift fra fasene rate limiting og samtidighet, med recovery etter 429 og fem parallelle romopprettelser.}
+    \label{fig:e2e-ratelimit-concurrency}
+\end{figure}
+
+Parallelt ble Prometheus-tellerne fra fase~9 visualisert i Grafana,
+slik at metrikk-integriteten kunne verifiseres mot den faktiske
+testlasten. Figur~\ref{fig:e2e-grafana-live} viser
+oversiktsdashboardet midt i kjøringen, med begge providers i
+\texttt{UP}-tilstand og aktive rom fordelt på AntMedia og NHN.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{figures/e2e-test.png}
+    \caption{Grafana-oversiktsdashboardet under e2e-kjøringen, med begge providers i \texttt{UP}-tilstand og aktive rom mot AntMedia og NHN.}
+    \label{fig:e2e-grafana-live}
+\end{figure}
 
 \texttt{chaos.sh} var ikke en test i tradisjonell forstand, men en
 demonstrasjon av recovery-oppførsel. Skriptet opprettet tre rom,

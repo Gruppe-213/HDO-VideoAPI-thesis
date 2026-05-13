@@ -1,29 +1,58 @@
+% =============================================================================
+% HDO VideoAPI - Bacheloroppgave NTNU
+% =============================================================================
+
 \documentclass[norsk,titlepage]{ntnuthesis}
-\usepackage{dirtree}
-\usepackage{longtable}
-\usepackage{adjustbox}
-\usepackage{pgfplots}
-\usepackage{tikz}  
-\usetikzlibrary{positioning,arrows.meta,calc}
+
+% -----------------------------------------------------------------------------
+% PAKKER
+% -----------------------------------------------------------------------------
+
+% Layout og sidehåndtering
+\usepackage{float}
 \usepackage{pdflscape}
-\title{HDO VideoAPI}
+\usepackage{rotating}
+\usepackage{adjustbox}
+
+% Tabeller
+\usepackage{longtable}
+\usepackage{threeparttable}
+
+% Figurer, diagrammer og farger
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,calc}
+\usepackage{pgfplots}
+\usepackage{pgfgantt}
+\usepackage{pgf-pie}
+\usepackage{svg}
+
+% Strukturvisning og kodelistinger
+\usepackage{dirtree}
+\usepackage{listings}
+
+% -----------------------------------------------------------------------------
+% TITTEL OG METADATA
+% -----------------------------------------------------------------------------
+
+\title{HDO VideoAPI: En provider-basert mellomvare for enhetlig tilgang til flere videomotorer i norsk akuttmedisin}
 \shorttitle{HDO VideoAPI}
 \author{}
 \shortauthor{}
 \date{Mai 2026}
-\usepackage{xcolor}
-\usepackage{listings}
-\usepackage{pgfgantt}
-\usepackage{float}
-\usepackage{threeparttable}
-\usepackage{rotating}
-\usepackage{adjustbox}
-\usepackage{pgf-pie}
-\usepackage{svg}
 
+% -----------------------------------------------------------------------------
+% EGENDEFINERTE KOMMANDOER
+% -----------------------------------------------------------------------------
+
+% Status-merker brukt i testkapitler og krav-sporing
 \newcommand{\pass}{\textcolor{green!60!black}{\textbf{Pass}}}
 \newcommand{\delvis}{\textcolor{orange!60!black}{\textbf{Delvis}}}
 \newcommand{\verifisert}{\textcolor{blue!30!black}{\textbf{Verifisert}}}
+
+% -----------------------------------------------------------------------------
+% SPRÅKDEFINISJONER FOR KODELISTINGER (listings)
+% -----------------------------------------------------------------------------
 
 \lstdefinelanguage{CSharp}{
   language=[Sharp]C,
@@ -47,66 +76,89 @@
   morestring=[b]"
 }
 
-% \lstset{
-%   basicstyle=\ttfamily\small,
-%   breaklines=true,
-%   columns=fullflexible,
-%   frame=single,
-%   numbers=left,
-%   numberstyle=\tiny,
-%   captionpos=b,
-%   tabsize=2,
-%   showstringspaces=false
-% }
+% -----------------------------------------------------------------------------
+% BIBLIOGRAFI OG ORDLISTE
+% -----------------------------------------------------------------------------
+
 \addbibresource{thesis.bib}
 
 \makeglossaries
-\input{glossary.tex} % add glossary and acronym lists before document
+\input{glossary.tex}
+
+% -----------------------------------------------------------------------------
+% DOKUMENTINNSTILLINGER
+% -----------------------------------------------------------------------------
 
 \setcounter{tocdepth}{1}
 
+% =============================================================================
+% DOKUMENT
+% =============================================================================
+
 \begin{document}
+
+% -----------------------------------------------------------------------------
+% FORORDSDEL - sammendrag, abstract, forord
+% -----------------------------------------------------------------------------
 
 \input{chapters/0a-abstract.tex}
 \input{chapters/0b-sammendrag.tex}
-\input{chapters/0c-forord}
+\input{chapters/0c-forord.tex}
 
+% -----------------------------------------------------------------------------
+% INNHOLDSFORTEGNELSER
+% -----------------------------------------------------------------------------
 
 \tableofcontents
 \listoffigures
 \listoftables
 \lstlistoflistings
 
-% \glsaddall
-\chapter*{\acronymname}           % Create an unnumbered chapter for the acronyms
-\printglossary[type=\acronymtype] % Print acronyms
+% -----------------------------------------------------------------------------
+% AKRONYMER OG ORDLISTE
+% -----------------------------------------------------------------------------
 
-\chapter*{\glossaryname}          % Create an unnumbered chapter for the glossary
-\printglossary                    % Print glossary
+\chapter*{\acronymname}
+\printglossary[type=\acronymtype]
 
-\include{chapters/1-introduction/_main}
-\include{chapters/2-bakgrunn/_main}
-\include{chapters/3-krav/_main}
-\include{chapters/4-utvikling/_main}
-\include{chapters/5-design/_main}
-\include{chapters/6-implementasjon/_main}
-\include{chapters/7-testing/_main}
-\include{chapters/8-diskusjon/_main}
-% \include{chapters/9-konklusjon}
+\chapter*{\glossaryname}
+\printglossary
+
+% -----------------------------------------------------------------------------
+% HOVEDKAPITLER
+% -----------------------------------------------------------------------------
+
+\include{chapters/1-introduction/_main}     % Innledning
+\include{chapters/2-bakgrunn/_main}         % Bakgrunn og teori
+\include{chapters/3-krav/_main}             % Kravspesifikasjon
+\include{chapters/4-utvikling/_main}        % Utviklingsprosess
+\include{chapters/5-design/_main}           % Design og arkitektur
+\include{chapters/6-implementasjon/_main}   % Implementasjon
+\include{chapters/7-testing/_main}          % Testing
+\include{chapters/8-diskusjon/_main}        % Diskusjon og konklusjon
+
+% -----------------------------------------------------------------------------
+% BIBLIOGRAFI
+% -----------------------------------------------------------------------------
 
 \chapter*{\bibname}
 \printbibliography[heading=none]
 
+% -----------------------------------------------------------------------------
+% VEDLEGG
+% -----------------------------------------------------------------------------
+
 \appendix
-\input{appendices/a-api-dokumentasjon.tex}
-\input{appendices/b-kildekode.tex}
-\input{appendices/c-motereferater.tex}
-\input{appendices/d-brukerveiledning.tex}
-\input{appendices/i-hdo_evaluering.tex}
-\input{appendices/j-gantt.tex}
-\input{appendices/k-Timelogg.tex}
-\input{appendices/f-samarbeidsavtale}
-\input{appendices/h-ai-deklarasjon}
-\input{appendices/g-kravspec}
-\input{appendices/e-prosjektplan}
+\input{appendices/a-api-dokumentasjon.tex}    % A: API-dokumentasjon
+\input{appendices/b-kildekode.tex}            % B: Kildekode
+\input{appendices/c-motereferater.tex}        % C: Møtereferater
+\input{appendices/d-brukerveiledning.tex}     % D: Brukerveiledning
+\input{appendices/e-hdo-evaluering.tex}       % E: HDO-evaluering
+\input{appendices/f-gantt.tex}                % F: Gantt-diagram
+\input{appendices/g-timelogg.tex}             % G: Timelogg
+\input{appendices/h-samarbeidsavtale.tex}     % H: Samarbeidsavtale
+\input{appendices/i-ai-deklarasjon.tex}       % I: AI-deklarasjon
+\input{appendices/j-kravspec.tex}             % J: Kravspesifikasjon
+\input{appendices/k-prosjektplan.tex}         % K: Prosjektplan
+
 \end{document}
