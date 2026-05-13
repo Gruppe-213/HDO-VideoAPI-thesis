@@ -60,40 +60,47 @@ Autorisasjonspolicyen er flat, uten rollebasert tilgangsstyring. Alle klienter m
 public static IServiceCollection AddVideoKeycloak(this IServiceCollection services, IConfiguration configuration)
 {
     // ...
+    
+    // Konfigurer JWT-validering mot Keycloak
     services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         .AddJwtBearer(options =>
         {
+            var baseUrl = configuration["Keycloak:BaseUrl"];
+            var realm = configuration["Keycloak:Realm"];
             options.Authority = $"{baseUrl}/realms/{realm}";
-            options.RequireHttpsMetadata = false;
+            options.RequireHttpsMetadata = false; // Kun for internt testmiljø
             options.TokenValidationParameters = new()
             {
-                ValidateAudience = false,
-                ValidateIssuer = false
+                ValidateAudience = false,   // Kun for internt testmiljø
+                ValidateIssuer = false      // Kun for internt testmiljø
             };
         });
     
+    // Krev gyldig token med api_access-claim på alle beskyttede endepunkter
     services.AddAuthorization(options =>
     {
-        options.DefaultPolicy = new AuthorizationPolicyBuilder()
+        options.DefaultPolicy = newAuthorizationPolicyBuilder()
             .RequireAuthenticatedUser()
             .RequireClaim("api_access", "true")
             .Build();
     });
+
+    return services;
 }
 \end{lstlisting}
 
-Alle \texttt{/api/rooms/*}-endepunkter er beskyttet med
-\texttt{[Authorize]} på kontrollernivå.
+Alle \texttt{/api/rooms/*}-endepunkter er beskyttet med \texttt{[Authorize]} på kontrollernivå, som vist i kodeliste~\ref{lst:rooms-controller}.
 
-\begin{lstlisting}[language={[Sharp]C}, caption={RoomsController.cs – beskyttede endepunkter}]
+\begin{lstlisting}[language={[Sharp]C}, label=lst:rooms-controller, caption={RoomsController.cs – beskyttede endepunkter}]
+// HDO-VideoAPI/Controllers/RoomsController.cs
+// Alle endepunkter krever gyldig JWT med api_access-claim
 [Authorize]
 [ApiController]
 [Route("api/rooms")]
 public class RoomsController(IVideoProviderFactory factory) : ControllerBase
 {
     [HttpPost]
-    public async Task<IActionResult> CreateRoom(
-        [FromBody] CreateRoomRequest request) { ... }
+    public async Task<IActionResult> CreateRoom([FromBody] CreateRoomRequest request) { ... }
 
     [HttpGet("{roomId}")]
     public async Task<IActionResult> GetRoom(string roomId) { ... }
@@ -101,8 +108,7 @@ public class RoomsController(IVideoProviderFactory factory) : ControllerBase
     [HttpDelete("{roomId}")]
     public async Task<IActionResult> DeleteRoom(string roomId) { ... }
 
-    [HttpPost("{roomId}/start")]
-    public async Task<IActionResult> StartStream(string roomId) { ... }
+    // ...
 }
 \end{lstlisting}
 

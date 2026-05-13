@@ -138,7 +138,7 @@ else
     logger.LogWarning(exception, "A handled exception occurred");
 \end{lstlisting}
 
-I tråd med krav O1.1 \cite{hdo_kravspec} logges aldri API-nøkler, JWT-tokens eller pasientinformasjon. Exception-typene er bevisst utformet slik at meldingsfeltet kun inneholder ressurs-ID-er og tjenestenavn, og ikke potensielt sensitive verdier.
+I tråd med krav O1.1 \cite{hdo_kravspec} logges aldri API-nøkler, JWT-tokens eller annen hemmelig informasjon. Exception-typene er bevisst utformet slik at meldingsfeltet kun inneholder ressurs-ID-er og tjenestenavn, og ikke potensielt sensitive verdier.
 
 \subsection{Klientsidens behandling av Problem Details}
 \label{subsec:errors-client}
