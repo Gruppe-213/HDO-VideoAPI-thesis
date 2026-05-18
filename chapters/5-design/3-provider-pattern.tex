@@ -34,22 +34,23 @@ Provider-arkitekturen betyr likevel ikke at alle backendene behandles som identi
 
 \begin{lstlisting}[language=CSharp, caption={Felles provider-kontrakt}, label={lst:ivideoprovider}]
 // HDO-VideoAPI/Providers/IVideoProvider.cs
+
 public interface IVideoProvider
 {
     // Romstyring
-    Task<VideoRoom> CreateRoomAsync(CreateRoomRequest request, CancellationToken ct = default);
-    Task<VideoRoom> GetRoomAsync(string roomId, CancellationToken ct = default);
+    Task<VideoRoom> CreateRoomAsync( ... );
+    Task<VideoRoom> GetRoomAsync( ... );
 
     // Strømstyring
-    Task DeleteRoomAsync(string roomId, CancellationToken ct = default);
-    Task StartStreamAsync(string roomId, CancellationToken ct = default);
-    Task StopStreamAsync(string roomId, CancellationToken ct = default);
+    Task DeleteRoomAsync( ... );
+    Task StartStreamAsync( ... );
+    Task StopStreamAsync( ... );
 
     // Tilgangsstyring
-    Task SetRoomTokenAsync(string roomId, string token, CancellationToken ct = default);
-    Task<WebRtcLinkResponse> GenerateWebRtcTokenAsync(string roomId, string type, CancellationToken ct = default);
+    Task SetRoomTokenAsync( ... );
+    Task<WebRtcLinkResponse> GenerateWebRtcTokenAsync( ... );
 
     // Tilgjengelighet
-    Task<bool> IsAvailableAsync(CancellationToken ct = default);
+    Task<bool> IsAvailableAsync( ... );
 }
 \end{lstlisting}

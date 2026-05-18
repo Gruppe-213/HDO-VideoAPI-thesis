@@ -15,30 +15,27 @@ For at \texttt{VideoProviderFactory} skal kunne løse riktig provider ved kjøre
 \begin{lstlisting}[language={[Sharp]C}, label=lst:providerregistrering,
   caption={Registrering av providers som keyed services.}]
 // HDO-VideoAPI/Extensions/ProviderExtensions.cs
-public static IServiceCollection AddVideoProviders(...)
-{
-    // ...
 
-    // AntMedia Server
+public static IServiceCollection AddVideoProviders( ... )
+{
+    // AntMedia: Konfigurer og registrer provider med autentiseringshandler
     services.AddOptions<AntMediaConfig>()
+        .Bind(config.GetSection("AntMedia"))
         // ...
     services.AddTransient<AntMediaAuthHandler>();
-    services.AddHttpClient<AntMediaProvider>(client =>
-    {
-        // ...
-    }).AddHttpMessageHandler<AntMediaAuthHandler>();
+    services.AddHttpClient<AntMediaProvider>(client => { ... })
+        .AddHttpMessageHandler<AntMediaAuthHandler>();
     // Registreres under nøkkel "antmedia" - muliggjør provider-valg i factory
     services.AddKeyedTransient<IVideoProvider>("antmedia", (sp, _) => sp.GetRequiredService<AntMediaProvider>());
 
-    // NHN Video
+    // NHN: Konfigurer og registrer provider med token-cache og autentiseringshandler
     services.AddOptions<NHNConfig>()
+        .Bind(config.GetSection("NHN"))
         // ...
     services.AddSingleton<NHNTokenCache>();
     services.AddTransient<NHNAuthHandler>();
-    services.AddHttpClient<NHNVideoProvider>(client =>
-    {
-        // ...
-    }).AddHttpMessageHandler<NHNAuthHandler>();
+    services.AddHttpClient<NHNVideoProvider>(client => { ... })
+        .AddHttpMessageHandler<NHNAuthHandler>();
     // Registreres under nøkkel "nhn" - muliggjør provider-valg i factory
     services.AddKeyedTransient<IVideoProvider>("nhn", (sp, _) => sp.GetRequiredService<NHNVideoProvider>());
 
@@ -65,13 +62,14 @@ Siden NHN Video er møteorientert (jf. delkapittel~\ref{sec:nhn}), modelleres et
 \begin{lstlisting}[language={[Sharp]C}, label=lst:nhnsupported,
   caption={Operasjoner uten semantisk ekvivalent i NHN Video.}]
 // HDO-VideoAPI/Providers/NHN/NHNVideoProvider.cs
-public Task StartStreamAsync(string roomId, CancellationToken ct = default) =>
+
+public Task StartStreamAsync( ... ) =>
         throw new NotSupportedException("Start stream is not supported for NHN-rom.");
 
-public Task StopStreamAsync(string roomId, CancellationToken ct = default) =>
+public Task StopStreamAsync( ... ) =>
         throw new NotSupportedException("Stop stream is not supported for NHN-rom.");
 
-public Task SetRoomTokenAsync(string roomId, string token, CancellationToken ct = default) =>
+public Task SetRoomTokenAsync( ... ) =>
         throw new NotSupportedException("Set token is not supported for NHN-rom.");
 \end{lstlisting}
 

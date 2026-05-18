@@ -5,7 +5,7 @@ For å undersøke om provider-arkitekturen faktisk var utvidbar,
 implementerte vi to tillegsprovidere etter at AntMedia- og
 NHN-integrasjonene var ferdige. \texttt{MockVideoProvider} var en enkel
 stub uten eksterne avhengigheter, mens \texttt{DailyProvider} var en
-reell integrasjon mot Daily.cos REST-API. Ingen av dem inngikk i HDOs
+reell integrasjon mot Daily.co sitt REST-API. Ingen av dem inngikk i HDOs
 kravspesifikasjon; de ble kun brukt til arkitekturvalidering.
 
 Endringsomfanget ble målt med \texttt{git diff --shortstat} mot
@@ -24,17 +24,29 @@ branchene berørte controller-laget eller API-kontrakten.
 \texttt{git diff --name-status} bekreftet at \texttt{RoomsController},
 \texttt{IVideoProvider} og de offentlige modellene var uendret i alle
 branchene. Tallene gjelder lokal branch-HEAD mot \texttt{develop} på
-måletidspunktet.
+måletidspunktet. E2E-skriptet ble heller ikke kjørt mot tilleggsproviderne.
 
-Alle branchene ble bygget og testet med \texttt{dotnet build} og
-\texttt{dotnet test}. På valideringsgrenen
-\texttt{feature/provider-validation} passerte 166 tester, mot 133 på
-leveransegrenen; økningen skyldtes tester for de to
-tilleggsproviderne og tilhørende DI-/factory-registrering.
+% Alle branchene ble bygget og testet med \texttt{dotnet build} og
+% \texttt{dotnet test}. På valideringsgrenen
+% \texttt{feature/provider-validation} passerte 166 tester, mot 133 på
+% leveransegrenen; økningen skyldtes tester for de to
+% tilleggsproviderne og tilhørende DI-/factory-registrering.
 
-E2E-skriptet ble ikke kjørt mot tilleggsproviderne. Målet var ikke å
-dokumentere fullstendige Daily.co- eller mock-integrasjoner, men å
-undersøke om kjernelogikken forble uendret ved innføring av en ny
-provider. Resultatet støtter arkitekturpåstanden: backend-spesifikk
+% E2E-skriptet ble ikke kjørt mot tilleggsproviderne. Målet var ikke å
+% dokumentere fullstendige Daily.co- eller mock-integrasjoner, men å
+% undersøke om kjernelogikken forble uendret ved innføring av en ny
+% provider. Resultatet støtter arkitekturpåstanden: backend-spesifikk
+% logikk kunne isoleres i provider-laget mens controller-laget og
+% API-kontrakten forble uberørt.
+
+Målet var ikke å dokumentere fullstendige Daily.co- eller
+mock-integrasjoner, men å undersøke om kjernelogikken forble uendret
+ved innføring av en ny provider. Det er verdt å merke seg at
+\texttt{MockVideoProvider} er en triviell stub, og at \texttt{DailyProvider}
+representerer én reell REST-basert integrasjon. Funnene er dermed et
+indisium på at isolasjonen fungerer i praksis, men utvalget er for lite
+til å trekke generelle konklusjoner om arkitekturens skalerbarhet på
+tvers av alle mulige provider-typer. Resultatet støtter likevel
+arkitekturpåstanden for de implementerte tilfellene: backend-spesifikk
 logikk kunne isoleres i provider-laget mens controller-laget og
 API-kontrakten forble uberørt.

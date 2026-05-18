@@ -19,15 +19,16 @@ VideoAPI er organisert som en lagdelt arkitektur, vist i figur~\ref{fig:lagarkit
 
 \begin{lstlisting}[language=CSharp, caption={Oppstartskonfigurasjon delegert til navngitte extension-metoder}, label={lst:program-startup}]
 // HDO-VideoAPI/Program.cs
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Konfigurasjon
-builder.Configuration.AddEnvironmentVariables();    // Miljøvariabler
-builder.ConfigureVideoHosting();                    // Kestrel og HTTPS
+builder.Configuration.AddEnvironmentVariables();            // Miljøvariabler
+builder.ConfigureVideoHosting();                            // Kestrel og HTTPS
 
 // Tjenester registreres per ansvarsdomene
-builder.Services.AddVideoRateLimiting();    // Hastighetsbegrensning
-builder.Services.AddVideoApiCore();         // Controllers, JSON, OpenAPI
+builder.Services.AddVideoRateLimiting();                    // Hastighetsbegrensning
+builder.Services.AddVideoApiCore();                         // Controllers, JSON, OpenAPI
 builder.Services.AddVideoCors(builder.Configuration);       // CORS-policy
 builder.Services.AddVideoProviders(builder.Configuration);  // Plugin-arkitektur
 builder.Services.AddVideoHealthChecks(builder.Environment); // Helsesjekker 
@@ -35,7 +36,7 @@ builder.Services.AddVideoKeycloak(builder.Configuration);   // OAuth2/JWT
 
 // Bygg og start applikasjonen
 var app = builder.Build();
-app.UseVideoApi();  // Middleware-kjeden i riktig rekkefølge
+app.UseVideoApi();
 app.Run();
 \end{lstlisting}
 Kodeliste~\ref{lst:program-startup} viser hvordan oppstarten er holdt kompakt ved å delegere konfigurasjon til navngitte extension-metoder. Dette gjør \texttt{Program.cs} til en oversikt over systemets hovedmoduler, i stedet for å samle all konfigurasjon i én fil.

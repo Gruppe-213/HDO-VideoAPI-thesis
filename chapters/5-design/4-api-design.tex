@@ -26,21 +26,25 @@ Et sentralt designvalg var hvordan API-et skulle bevare informasjon om hvilken b
 
 \begin{lstlisting}[language=CSharp, caption={Opprettelse av rom — controlleren delegerer til provider-laget.}, label={lst:create-room}]
 // HDO-VideoAPI/Controllers/RoomsController.cs
+
 [HttpPost]
 public async Task<IActionResult> CreateRoom([FromBody] CreateRoomRequest request)
 {
-    if (string.IsNullOrWhiteSpace(request.Name))
-        request.Name = Guid.NewGuid().ToString();   // Generer navn om ikke oppgitt
+    // ... (genere navn om ikke oppgitt)
 
     // Velg provider basert på forespørsel, standardverdi er antmedia
-    var providerKey = (request.Provider != null ? request.Provider : "antmedia").ToLowerInvariant();
+    var providerKey = (request.Provider ?? "antmedia").ToLowerInvariant();
     var provider = factory.GetProvider(providerKey);
 
+    // Deleger romoppretting til provider-laget
     var room = await provider.CreateRoomAsync(request, HttpContext.RequestAborted);
-    room.Id = $"{providerKey}:{room.Id}";   // Prefiks ID med provider-nøkkel
 
-    // ...
+    // Prefiks ID med provider-nøkkel
+    room.Id = $"{providerKey}:{room.Id}";
 
+    // ... (logging)
+
+    // Returnere 201 Created med Location-header
     return CreatedAtAction(nameof(GetRoom), new { roomId = room.Id }, room);
 }
 \end{lstlisting}
@@ -49,17 +53,20 @@ Ved senere kall — henting, sletting, start og stopp — må controlleren gjenk
 
 \begin{lstlisting}[language=CSharp, caption={Parsing av provider-prefiks fra rom-ID}, label={lst:parse-room-id}]
 // HDO-VideoAPI/Controllers/RoomsController.cs
+
 private (IVideoProvider Provider, string ProviderKey, string RawId) ParseRoomId(string roomId)
 {
+    // Finn skilletegnet mellom provider og backend-ID
     var colon = roomId.IndexOf(':');
 
-    // ...
+    // ... (valider at kolon finnes)
 
     var providerKey = roomId[..colon];  // f.eks. "antmedia"
     var rawId = roomId[(colon + 1)..];  // f.eks. "abc123"
 
-    // ...
+    // ... (valider at rawId ikke er tom)
 
+    // Slå opp provider og returner alle tre delene
     return (factory.GetProvider(providerKey), providerKey, rawId);
 }
 \end{lstlisting}

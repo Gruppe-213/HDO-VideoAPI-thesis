@@ -54,20 +54,39 @@ faser:
         nullstilte seg.
 \end{enumerate}
 
-Ved siste kjøring før innlevering passerte 401 av 403 assertions;
-ingen feilet. To advarsler gjaldt rom-telleren etter opprydding, der
-to rom opprettet utenfor testen ikke inngikk i oppryddingsløkken.
-Kjøretiden var 31~minutter.
-Figur~\ref{fig:e2e-ratelimit-concurrency} viser utskriften fra
-rate limiting- og samtidighetsfasene, der recovery etter rate-limit-vinduet
-og fem parallelle romopprettelser begge ga \texttt{PASS}.
+% Ved siste kjøring før innlevering passerte 401 av 403 assertions;
+% ingen feilet. To advarsler gjaldt rom-telleren etter opprydding, der
+% to rom opprettet utenfor testen ikke inngikk i oppryddingsløkken.
+% Kjøretiden var 31~minutter.
+% Figur~\ref{fig:e2e-ratelimit-concurrency} viser utskriften fra
+% rate limiting- og samtidighetsfasene, der recovery etter rate-limit-vinduet
+% og fem parallelle romopprettelser begge ga \texttt{PASS}.
 
-\begin{figure}[H]
+Ved siste kjøring før innlevering passerte 401 av 403 assertions.
+De to gjenværende ga advarsler, ikke feil: rom-telleren etter
+oppryddingsfasen inkluderte to rom som var opprettet manuelt under
+tidligere testkjøringer og ikke inngikk i testens oppryddingsløkke.
+Avviket skyldtes dermed testmiljøets tilstand, ikke funksjonell svikt
+i API-et. Kjøretiden var 31~minutter.
+
+Figur~\ref{fig:e2e-ratelimit-concurrency} viser terminalutskriften fra
+rate limiting- og samtidighetsfasene. Rate limiting-fasen verifiserer
+at API-et returnerer \texttt{429 Too Many Requests} ved overskridelse
+og gjenoppretter normal drift etter at vinduet er utløpt. Samtidighetsfasen
+sender fem parallelle \texttt{POST /api/rooms}-kall og kontrollerer at
+alle opprettes uten race conditions. Begge fasene er markert
+\texttt{PASS} i utskriften.
+
+\newpage
+
+\begin{figure}[h]
     \centering
     \includegraphics[width=0.6\textwidth]{figures/randome2e.png}
     \caption{Utskrift fra fasene rate limiting og samtidighet, med recovery etter 429 og fem parallelle romopprettelser.}
     \label{fig:e2e-ratelimit-concurrency}
 \end{figure}
+
+
 
 Parallelt ble Prometheus-tellerne fra fase~9 visualisert i Grafana,
 slik at metrikk-integriteten kunne verifiseres mot den faktiske
@@ -75,7 +94,9 @@ testlasten. Figur~\ref{fig:e2e-grafana-live} viser
 oversiktsdashboardet midt i kjøringen, med begge providers i
 \texttt{UP}-tilstand og aktive rom fordelt på AntMedia og NHN.
 
-\begin{figure}[H]
+\newpage
+
+\begin{figure}[h]
     \centering
     \includegraphics[width=\textwidth]{figures/e2e-test.png}
     \caption{Grafana-oversiktsdashboardet under e2e-kjøringen, med begge providers i \texttt{UP}-tilstand og aktive rom mot AntMedia og NHN.}

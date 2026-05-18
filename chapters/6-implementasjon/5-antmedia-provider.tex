@@ -12,20 +12,23 @@ WebRTC-tokens hentes i to steg: først verifiseres at rommet eksisterer, derette
 \begin{lstlisting}[language={[Sharp]C}, label=lst:antmedia-auth,
   caption={Double-check locking i \texttt{AntMediaAuthHandler}.}]
 // HDO-VideoAPI/Providers/AntMedia/AntMediaAuthHandler.cs
+
 private async Task<string?> GenerateAuthTokenAsync(CancellationToken cancellationToken)
 {
-    // ...
+    // ... (valider at JwtSecret er konfigurert)
+    var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
-    // Første sjekk - uten lås for ytelse
+    // Første sjekk uten lås - rask vei ut for gyldige tokens
     if (!string.IsNullOrEmpty(_cachedToken) && _tokenExpiry > now + TokenRefreshBufferSeconds)
         return _cachedToken;
 
-    // Vent på eksklusiv tilgang
+    // Vent på eksklusiv tilgang før fornyelse
     await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
     try
     {
-        // Andre sjekk - inne i lås for korrekthet
-        if (!string.IsNullOrEmpty(_cachedToken) && _tokenExpiry > now + TokenRefreshBufferSeconds)
+        // Andre sjekk inne i lås - hindrer parallelle fornyelser
+        if (!string.IsNullOrEmpty(_cachedToken) 
+            && _tokenExpiry > now + TokenRefreshBufferSeconds)
             return _cachedToken;
 
         // Bygg og signer token (JWT)
@@ -45,7 +48,7 @@ private async Task<string?> GenerateAuthTokenAsync(CancellationToken cancellatio
         var tokenHandler = new JwtSecurityTokenHandler();
         var token = tokenHandler.CreateToken(tokenDescriptor);
 
-        // Lagre og returner token
+        // Lagre og returner oppdatert token
         _cachedToken = tokenHandler.WriteToken(token);
         return _cachedToken;
     }

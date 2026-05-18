@@ -1,44 +1,105 @@
 \section{Adapter-mønsteret}
 \label{sec:adapter-monsteret}
 
-% Adapter-mønsteret er ett av de klassiske strukturelle designmønstrene beskrevet av Gamma et al. Det løser problemet der to grensesnitt er inkompatible ved å innføre et mellomliggende adapter-lag som oversetter kall fra klienten til det formatet mottakeren forventer \cite{wiki_adapter}. I VideoAPI realiseres dette gjennom \texttt{IVideoProvider}-grensesnittet, der hver provider-implementasjon fungerer som en adapter mot sin respektive videomotor.
+Adapter-mønsteret \cite{gamma1994} løser problemet der to grensesnitt er inkompatible ved å innføre et mellomliggende adapter-lag som oversetter kall fra klienten til det formatet mottakeren forventer.
 
-Adapter-mønsteret er ett av de klassiske strukturelle designmønstrene beskrevet av Gamma et al.\ \cite{gamma1994}. Det løser problemet der to grensesnitt er inkompatible ved å innføre et mellomliggende adapter-lag som oversetter kall fra klienten til det formatet mottakeren forventer.
+Figur~\ref{fig:adapter-general} viser den generelle strukturen: en klient forholder seg til et målgrensesnitt, mens adapteren implementerer dette grensesnittet og delegerer kall videre til en eksisterende klasse med et annet grensesnitt.
 
-I VideoAPI realiseres dette gjennom \texttt{IVideoProvider}-grensesnittet, som definerer operasjoner som \texttt{CreateRoom}, \texttt{GetRoom} og \texttt{GetWebRtcLink}. \texttt{AntMediaProvider} og \texttt{NhnVideoProvider} implementerer dette grensesnittet og oversetter hver operasjon til motorenes respektive API-kall — uten at controller-laget trenger å kjenne til forskjellene mellom dem. Figur~\ref{fig:adapter} illustrerer forholdet.
-
-\begin{figure}[h]
+\begin{figure}[H]
 \centering
 \begin{tikzpicture}[
     box/.style={
         rectangle, draw=black, thick,
         rounded corners=3pt,
-        minimum width=3.8cm, minimum height=1.1cm,
+        minimum width=3.5cm, minimum height=1.1cm,
         align=center, font=\small\ttfamily
     },
-    interface/.style={
-        box, fill=gray!15
-    },
+    interface/.style={box, fill=gray!15},
     arr/.style={-{Stealth[length=5pt]}, thick},
-    impl/.style={-{Stealth[length=5pt, open]}, thick, dashed}
+    impl/.style={-{Stealth[length=5pt, open]}, thick, dashed},
+    lbl/.style={font=\footnotesize\rmfamily\itshape}
 ]
 
-\node[box] (ctrl)      at (0,0)    {RoomsController};
-\node[interface] (iface) at (5,0)  {IVideoProvider};
-\node[box] (ant)       at (10, 1.2) {AntMediaProvider};
-\node[box] (nhn)       at (10,-1.2) {NhnVideoProvider};
+\node[box]       (client)  at (0, 0)    {Client};
+\node[interface] (target)  at (6, 0)    {«interface»\\Target};
+\node[box]       (adapter) at (6,-2.5)  {Adapter};
+\node[box]       (adaptee) at (12,-2.5) {Adaptee};
 
-\draw[arr]  (ctrl) -- (iface)
-    node[midway, above, font=\footnotesize\rmfamily] {bruker};
-\draw[impl] (ant)  -- (iface);
-\draw[impl] (nhn)  -- (iface);
-
-\node[font=\footnotesize\itshape] at (5,-2.2)
-    {Stiplet pil = implementerer};
+\draw[arr]  (client.east)   -- (target.west)
+    node[midway, above, lbl] {uses};
+\draw[impl] (adapter.north) -- (target.south)
+    node[midway, right=6pt, lbl] {implements};
+\draw[arr]  (adapter.east)  -- (adaptee.west)
+    node[midway, above=4pt, lbl] {delegates to};
 
 \end{tikzpicture}
-\caption{Adapter-mønsteret i VideoAPI: \texttt{RoomsController} forholder
-seg utelukkende til \texttt{IVideoProvider}, mens \texttt{AntMediaProvider} og
-\texttt{NhnVideoProvider} oversetter til motorenes respektive API-er.}
-\label{fig:adapter}
+\caption{Adapter-mønsterets generelle struktur.}
+\label{fig:adapter-general}
 \end{figure}
+
+I VideoAPI tilsvarer \texttt{RoomsController} klient-rollen,
+\texttt{IVideoProvider} målgrensesnittet, \texttt{AntMediaProvider} og
+\texttt{NhnVideoProvider} adapter-rollen, og de eksterne API-ene
+adaptee-rollen, som vist i figur~\ref{fig:adapter}.
+
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    box/.style={
+        rectangle, draw=black, thick,
+        rounded corners=3pt,
+        minimum width=3.7cm, minimum height=1.05cm,
+        align=center, font=\small\ttfamily
+    },
+    interface/.style={box, fill=gray!15},
+    provider/.style={box, fill=green!10},
+    ext/.style={box, fill=orange!12, draw=black!60},
+    arr/.style={-{Stealth[length=5pt]}, thick},
+    impl/.style={-{Stealth[length=5pt, open]}, thick, dashed},
+    role/.style={font=\footnotesize\rmfamily\color{gray}},
+    note/.style={font=\footnotesize\rmfamily}
+]
+
+% Role labels
+\node[role] at (0, 1.0) {Client};
+\node[role] at (5.2, 1.0) {Target};
+\node[role] at (2.6,-1.55) {Adapter};
+\node[role] at (7.8,-1.55) {Adapter};
+\node[role] at (2.6,-4.25) {Adaptee};
+\node[role] at (7.8,-4.25) {Adaptee};
+
+% Top row
+\node[box]       (ctrl)  at (0,   0) {RoomsController};
+\node[interface] (iface) at (5.2, 0) {IVideoProvider};
+
+% Provider row
+\node[provider] (ant) at (2.6,-2.3) {AntMedia\\Provider};
+\node[provider] (nhn) at (7.8,-2.3) {NhnVideo\\Provider};
+
+% External API row
+\node[ext] (am)   at (2.6,-5.0) {AntMedia\\REST-API};
+\node[ext] (nhnv) at (7.8,-5.0) {NHN\\Booking API};
+
+% Controller uses interface
+\draw[arr] (ctrl.east) -- (iface.west);
+
+% Providers implement interface
+\draw[impl] (ant.north) -- (iface.south west);
+\draw[impl] (nhn.north) -- (iface.south east);
+
+% Providers call external APIs
+\draw[arr] (ant.south) -- (am.north);
+\draw[arr] (nhn.south) -- (nhnv.north);
+
+% Legend
+\node[note, align=center] at (5.2,-6.05)
+    {Heltrukken pil = bruker/kaller \quad Stiplet pil = implementerer};
+
+\end{tikzpicture}
+\caption{Adapter-mønsteret i VideoAPI: \texttt{RoomsController} bruker
+\texttt{IVideoProvider}. \texttt{AntMediaProvider} og
+\texttt{NhnVideoProvider} implementerer grensesnittet og oversetter kall
+til de eksterne API-ene.}
+\label{fig:adapter}
+\end{figure}d

@@ -1,0 +1,239 @@
+\section{Eksisterende løsninger og valg av tilnærming}
+\label{sec:eksisterende-loesninger}
+
+Problemet VideoAPI løser kan angripes på flere måter. Dette avsnittet
+gjennomgår tre tilnærminger og forklarer hvorfor provider-basert
+mellomvare ble vurdert som den mest hensiktsmessige løsningen for
+HDOs behov.
+
+Et beslektet eksempel finnes hos Singh~\cite{singh2026videio}, som
+foreslår en generisk WebRTC-komponent for å redusere koblingen mellom
+webapplikasjoner og leverandørspesifikk signaleringslogikk. Forskjellen
+er at denne løsningen plasserer abstraksjonen i klientlaget, mens
+VideoAPI plasserer den i et server-side REST-mellomlag.
+
+HDO benyttet direkte integrasjon som utgangspunkt, der hvert
+klientsystem integrerer mot AntMedia og NHN separat~\cite{hdo_oppgave}.
+Dette eliminerer et ekstra lag, men betyr at autentisering,
+feilhåndtering og domeneoversettelse må implementeres separat per
+motor, og at alle klienter må oppdateres dersom én motor byttes ut.
+Det var nettopp denne dupliseringen og koblingen til konkrete
+videomotorer som motiverte VideoAPI-prosjektet.
+
+API-gateways som Kong og Azure API
+Management~\cite{microsoft-api-gateway} sentraliserer sikkerhet og
+observability, men er primært proxy- og policy-verktøy. De ruter
+forespørsler uten å oversette mellom domenemodeller. Provider-basert
+mellomvare med adapter-mønsteret~\cite{cockburn-hexagonal,
+microsoft-clean-architecture} fungerer samtidig som et
+anti-corruption layer~\cite{microsoft-acl} mellom HDOs kjernemodell
+og de ulike videomotorenes semantikk.
+
+\subsection*{Tilnærming 1: Direkte integrasjon}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    box/.style={
+        rectangle, draw=black, thick, rounded corners=3pt,
+        minimum width=3.2cm, minimum height=1.0cm,
+        align=center, font=\small\ttfamily
+    },
+    motor/.style={box, fill=orange!15},
+    client/.style={box, fill=blue!8},
+    arr/.style={-{Stealth[length=5pt]}, thick},
+    lbl/.style={font=\footnotesize\rmfamily\itshape}
+]
+
+\node[client] (k1) at (0,  0)   {Klient A};
+\node[client] (k2) at (0, -2.5) {Klient B};
+\node[motor]  (am) at (8,  0)   {AntMedia\\Server};
+\node[motor]  (nhn) at (8, -2.5){NHN Video};
+
+\draw[arr] (k1.east) -- (am.west)
+    node[midway, above, lbl] {direkte kall};
+\draw[arr] (k1.east) to[out=-20, in=160] (nhn.west)
+    node[midway, below, lbl] {};
+\draw[arr] (k2.east) to[out=20, in=200] (am.west)
+    node[midway, above, lbl] {};
+\draw[arr] (k2.east) -- (nhn.west)
+    node[midway, below, lbl] {direkte kall};
+
+\end{tikzpicture}
+\caption{Direkte integrasjon: hver klient integrerer mot begge
+videomotorene separat. Endringer i én motor påvirker alle klienter.}
+\label{fig:tilnaerming-direkte}
+\end{figure}
+
+\subsection*{Tilnærming 2: API-gateway}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    box/.style={
+        rectangle, draw=black, thick, rounded corners=3pt,
+        minimum width=3.2cm, minimum height=1.0cm,
+        align=center, font=\small\ttfamily
+    },
+    motor/.style={box, fill=orange!15},
+    client/.style={box, fill=blue!8},
+    gateway/.style={box, fill=gray!20, minimum width=2.8cm},
+    arr/.style={-{Stealth[length=5pt]}, thick},
+    lbl/.style={font=\footnotesize\rmfamily\itshape}
+]
+
+\node[client]  (k1)  at (0,  0)    {Klient A};
+\node[client]  (k2)  at (0, -2.5)  {Klient B};
+\node[gateway] (gw)  at (5, -1.25) {API\\Gateway};
+\node[motor]   (am)  at (10,  0)   {AntMedia\\Server};
+\node[motor]   (nhn) at (10, -2.5) {NHN Video};
+
+\draw[arr] (k1.east) -- (gw.west);
+      node[midway, above, lbl] {ruter};
+\draw[arr] (k2.east) -- (gw.west);
+\draw[arr] (gw.east) to[out=20,  in=180] (am.west)
+    node[midway, above, lbl] {};
+\draw[arr] (gw.east) to[out=-20, in=180] (nhn.west)
+    % node[midway, below, lbl] {ruter};
+
+\node[font=\footnotesize\rmfamily, text=red!70!black]
+    at (5, -3.2) {Ingen semantisk oversettelse};
+
+\end{tikzpicture}
+\caption{API-gateway: ett felles inngangspunkt og sentralisert
+sikkerhet, men gatewayen ruter kun forespørsler videre.
+Domenemismatch mellom AntMedia og NHN løses ikke.}
+\label{fig:tilnaerming-gateway}
+\end{figure}
+
+\subsection*{Tilnærming 3: Provider-basert mellomvare}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    box/.style={
+        rectangle, draw=black, thick, rounded corners=3pt,
+        minimum width=3.2cm, minimum height=1.0cm,
+        align=center, font=\small\ttfamily
+    },
+    motor/.style={box, fill=orange!15},
+    client/.style={box, fill=blue!8},
+    api/.style={box, fill=green!12, minimum width=2.8cm},
+    provider/.style={box, fill=green!8},
+    arr/.style={-{Stealth[length=5pt]}, thick},
+    lbl/.style={font=\footnotesize\rmfamily\itshape}
+]
+
+\node[client]   (k1)   at (0, -1.25)  {Klient};
+\node[api]      (api)  at (4.5,-1.25) {VideoAPI\\(felles API)};
+\node[provider] (ant)  at (9,  0)     {AntMedia\\Provider};
+\node[provider] (nhn)  at (9, -2.5)   {NHN\\Provider};
+\node[motor]    (am)   at (13.5, 0)   {AntMedia\\Server};
+\node[motor]    (nhnb) at (13.5,-2.5) {NHN Video};
+
+\draw[arr] (k1.east)  -- (api.west);
+\draw[arr] (api.east) to[out=20,  in=180] (ant.west)
+ % node[midway, below, lbl] {oversetter};
+\draw[arr] (api.east) to[out=-20, in=180] (nhn.west)
+\draw[arr] (ant.east) -- (am.west);
+\draw[arr] (nhn.east) -- (nhnb.west);
+
+\node[font=\footnotesize\rmfamily, text=green!60!black]
+    at (4.5,-3.2) {Semantisk oversettelse i provider-laget};
+
+\end{tikzpicture}
+\caption{Provider-basert mellomvare: klienten forholder seg til ett
+felles API. Provider-laget oversetter mellom felles modell og
+motorspesifikk semantikk.}
+\label{fig:tilnaerming-videapi}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\caption{Sammenligning av tilnærminger for integrasjon mot heterogene videomotorer.}
+\label{tab:eksisterende-loesninger}
+\setlength{\extrarowheight}{6pt}
+\small
+\begin{tabularx}{\textwidth}{>{\bfseries}X c c c}
+
+\arrayrulecolor{black}
+\toprule
+\rowcolor{gray!25}
+\textbf{Kriterium} &
+\textbf{Direkte integrasjon} &
+\textbf{API-gateway} &
+\textbf{VideoAPI} \\
+
+\rowcolor{gray!25}
+& \textbf{\small(HDOs utgangspunkt)} &
+\textbf{\small(Kong, Azure)} &
+\textbf{\small(valgt løsning)} \\
+\midrule
+
+\rowcolor{white}
+Felles API &
+\textcolor{red!70!black}{\textbf{Nei}} &
+\textcolor{green!60!black}{\textbf{Ja}} &
+\textcolor{green!60!black}{\textbf{Ja}} \\
+
+\rowcolor{gray!10}
+Semantisk oversettelse &
+\textcolor{red!70!black}{\textbf{Nei}} &
+\textcolor{red!70!black}{\textbf{Nei}} &
+\textcolor{green!60!black}{\textbf{Ja}} \\
+
+\rowcolor{white}
+Flermotor-støtte &
+\textcolor{red!70!black}{\textbf{Nei}} &
+\textcolor{orange!70!black}{\textbf{Delvis}} &
+\textcolor{green!60!black}{\textbf{Ja}} \\
+
+\rowcolor{gray!10}
+Provider-utskiftbarhet &
+\textcolor{red!70!black}{\textbf{Nei}} &
+\textcolor{red!70!black}{\textbf{Nei}} &
+\textcolor{green!60!black}{\textbf{Ja}} \\
+
+\rowcolor{white}
+Lav klientkobling &
+\textcolor{red!70!black}{\textbf{Nei}} &
+\textcolor{orange!70!black}{\textbf{Delvis}} &
+\textcolor{green!60!black}{\textbf{Ja}} \\
+
+\rowcolor{gray!10}
+Selvhostet &
+\textcolor{green!60!black}{\textbf{Ja}} &
+\textcolor{orange!70!black}{\textbf{Delvis}} &
+\textcolor{green!60!black}{\textbf{Ja}} \\
+
+\rowcolor{white}
+Lisenskostnad &
+Ingen &
+Varierer &
+Ingen \\
+
+\bottomrule
+\end{tabularx}
+
+\vspace{0.5em}
+\begin{minipage}{\textwidth}
+\footnotesize
+\textit{Felles API}: klientene forholder seg til ett grensesnitt uavhengig av underliggende videomotor.\\
+\textit{Semantisk oversettelse}: løsningen håndterer ulike domenemodeller mellom videomotorene eksplisitt.\\
+\textit{Flermotor-støtte}: løsningen kan rute mot flere videomotorer samtidig.\\
+\textit{Provider-utskiftbarhet}: en videomotor kan byttes eller legges til uten endringer i controller-laget.\\
+\textit{Lav klientkobling}: klientene trenger ikke kjenne til motorspesifikke API-er, autentiseringsmekanismer eller datamodeller.\\
+\textit{Selvhostet}: løsningen driftes i HDOs egen infrastruktur uten ekstern skytjeneste.\\
+\textit{Lisenskostnad}: kostnad knyttet til bruk av løsningen i drift. For API-gatewayer varierer dette mellom åpne og kommersielle produkter.
+\end{minipage}
+\end{table}
+
+Tabell~\ref{tab:eksisterende-loesninger} viser at direkte integrasjon
+ikke gir ett felles API og krever duplisert implementasjon per motor.
+API-gateways løser flere tverrgående infrastrukturbehov, men håndterer
+ikke at AntMedias broadcast-semantikk og NHNs booking-semantikk er
+fundamentalt ulike. Provider-basert mellomvare gir derfor en bedre
+balanse i HDOs kontekst: klientene får ett felles API, mens
+motorspesifikk autentisering, feilhåndtering og domenemapping holdes
+isolert i provider-laget. Hvorvidt arkitekturen faktisk oppfyller
+kravene fra HDO evalueres i kapittel~\ref{ch:diskusjon}.

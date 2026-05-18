@@ -34,6 +34,6 @@ JWT-tokens valideres mot Keycloaks JWKS-endepunkt, som betyr at signaturen verif
 
 \textit{Tilgang på tvers av rom (IDOR-lignende risiko).} Autorisasjon er flat: enhver klient med gyldig JWT og \texttt{api\_access} har samme rettigheter. Rom-ID-er er ikke personlige hemmeligheter i seg selv—kjenner en klient en annens prefikserte rom-ID, kan den i utgangspunktet kalle rom-endepunktene med mindre det hindres utenfor VideoAPI (nettverkssegmentering, egne policies i API-gateway, eller utvidet modell med eierskap per klient). Slik rom-spesifikk isolasjon mellom ulike integrasjonsparter er \emph{utenfor} proof-of-conceptets omfang, men er dokumentert her som bevisst avgrensning.
 
-\textit{Logging av sensitive verdier.} Det er et eksplisitt krav i implementasjonen at JWT-tokens, API-nøkler og pasientinformasjon ikke loggføres (se avsnitt~\ref{sec:errors}); feilmeldinger er også utformet slik at logger primært bærer ressurs-ID-er og tjenestenavn.
+\textit{Logging av sensitive verdier.} Det er et eksplisitt krav i implementasjonen at JWT-tokens, API-nøkler og pasientinformasjon ikke loggføres (jf. delkapittel~\ref{sec:errors}); feilmeldinger er også utformet slik at logger primært bærer ressurs-ID-er og tjenestenavn.
 
 Samlet utgjør autentiseringsdesignet en pragmatisk løsning som oppfyller kravene fra oppdragsgiver, tilpasser seg eksisterende infrastruktur, og legger til rette for at videre utvikling og herding kan skje på oppdragsgivers egne premisser. En STRIDE-basert oppsummering av trusler og mitigasjoner finnes i avsnitt~\ref{sec:trusselmodell}.

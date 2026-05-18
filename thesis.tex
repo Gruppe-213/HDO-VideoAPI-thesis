@@ -26,6 +26,9 @@
 \usepackage{pgfgantt}
 \usepackage{pgf-pie}
 \usepackage{svg}
+\usepackage{tabularx}
+\usepackage{colortbl}
+\usepackage{booktabs}
 
 % Strukturvisning og kodelistinger
 \usepackage{dirtree}
@@ -76,6 +79,25 @@
   morestring=[b]"
 }
 
+\lstdefinelanguage{YAML}{
+  keywords={true, false, null},
+  keywordstyle=\color{blue}\bfseries,
+  sensitive=true,
+  comment=[l]{\#},
+  morestring=[b]',
+  morestring=[b]"
+}
+
+\lstdefinelanguage{Bash}{
+  keywords={if, then, else, fi, for, do, done, while, case, esac,
+    echo, export, cd, mkdir, rm, mv, cp, cat, grep, awk, sed},
+  keywordstyle=\color{blue}\bfseries,
+  sensitive=true,
+  comment=[l]{\#},
+  morestring=[b]',
+  morestring=[b]"
+}
+
 % -----------------------------------------------------------------------------
 % BIBLIOGRAFI OG ORDLISTE
 % -----------------------------------------------------------------------------
@@ -101,7 +123,7 @@
 % FORORDSDEL - sammendrag, abstract, forord
 % -----------------------------------------------------------------------------
 
-\input{chapters/0a-abstract.tex}
+%\input{chapters/0a-abstract.tex}
 \input{chapters/0b-sammendrag.tex}
 \input{chapters/0c-forord.tex}
 
