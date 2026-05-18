@@ -36,7 +36,7 @@
     {\footnotesize RoomsController \textbullet{} AuthController \textbullet{} input-binding}};
 \node[layer, fill=green!10, below=of ctrl] (svc)   {\textbf{Service-lag}\\[1pt]
     {\footnotesize KeycloakService \textbullet{} OAuth2 client credentials}};
-\node[layer, fill=orange!15, below=of svc] (prov)  {\textbf{Provider-lag (plugin-arkitektur)}\\[1pt]
+\node[layer, fill=orange!15, below=of svc] (prov)  {\textbf{Provider-lag (provider-arkitektur)}\\[1pt]
     {\footnotesize IVideoProvider \textbullet{} AntMediaProvider \textbullet{} NHNVideoProvider}};
 \node[layer, fill=gray!15, below=of prov]  (cross) {\textbf{Kryssende bekymringer}\\[1pt]
     {\footnotesize GlobalExceptionHandler \textbullet{} VideoMetrics \textbullet{} HealthChecks}};

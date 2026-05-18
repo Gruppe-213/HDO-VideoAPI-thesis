@@ -1,7 +1,7 @@
 \section{Provider-arkitekturen}
 \label{sec:providers}
 
-Kjernen i plugin-arkitekturen er grensesnittet \texttt{IVideoProvider},
+Kjernen i provider-arkitekturen er grensesnittet \texttt{IVideoProvider},
 som definerer åtte asynkrone metoder for romoperasjoner og
 strømstyring. Ingen metoder har default-implementasjon. En provider som
 ikke støtter en operasjon kaster \texttt{NotSupportedException}, som

@@ -4,12 +4,12 @@
 Forskningsspørsmålet var:
 
 \begin{quote}
-I hvilken grad kan en plugin-basert mellomvarearkitektur standardisere
+I hvilken grad kan en provider-basert mellomvarearkitektur standardisere
 tilgang til AntMedia Server og NHN Video gjennom ett felles API, samtidig
 som backend-spesifikk logikk isoleres fra kjernelogikken i VideoAPI?
 \end{quote}
 
-Resultatet viser at en plugin-basert mellomvarearkitektur i stor grad
+Resultatet viser at en provider-basert mellomvarearkitektur i stor grad
 egner seg for dette formålet, men med noen viktige begrensninger.
 VideoAPI klarer å samle de sentrale romoperasjonene bak ett felles API:
 oppretting, henting og sletting av rom kan gjøres gjennom samme
@@ -40,7 +40,7 @@ arkitekturen mer realistisk som mellomvare i HDOs driftskontekst. Likevel
 må resultatet forstås som et proof-of-concept. Løsningen demonstrerer at
 arkitekturen fungerer, men den dokumenterer ikke full produksjonsmodenhet.
 
-Samlet er svaret derfor at en plugin-basert mellomvarearkitektur i stor
+Samlet er svaret derfor at en provider-basert mellomvarearkitektur i stor
 grad kan standardisere tilgangen til AntMedia og NHN gjennom ett felles
 API, så lenge standardiseringen forstås som en felles API-kontrakt og ikke
 som full semantisk likhet mellom videomotorene. Backend-spesifikk logikk
