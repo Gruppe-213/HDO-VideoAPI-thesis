@@ -11,11 +11,13 @@ Tilnærmingen bygger på tre prinsipper. For det første skal controllerne ikke 
 ASP.NET Core 10 har innebygd støtte for dette mønsteret via \texttt{IExceptionHandler}. I oppstartsekvensen registreres handleren som en tjeneste, og middleware-kjeden aktiverer den rett etter routing:
 
 \begin{lstlisting}[language={[Sharp]C}, caption={Registrering av den globale feil-handleren.}, label={lst:register-handler}]
-// Extensions/VideoApiCoreExtensions.cs
+// HDO-VideoAPI/Extensions/VideoApiCoreExtensions.cs
+
 services.AddProblemDetails();
 services.AddExceptionHandler<GlobalExceptionHandler>();
 
-// Extensions/ApplicationExtensions.cs
+// HDO-VideoAPI/Extensions/ApplicationExtensions.cs
+
 app.UseExceptionHandler();
 \end{lstlisting}
 
@@ -43,28 +45,43 @@ Løsningen er modulær og kan enkelt utvides med nye domenespesifikke exceptions
 \end{table}
 
 \newpage
-I praksis kastes unntakene fra provider-laget og service-laget der feilen faktisk oppdages. Kodeliste~\ref{lst:notfound-throw} viser hvordan AntMedia-provideren oversetter en HTTP-status \texttt{404 Not Found} fra ekstern tjeneste til \texttt{NotFoundException}, og hvordan andre feil pakkes inn som \texttt{ExternalServiceException} med den opprinnelige statuskoden bevart:
+% I praksis kastes unntakene fra provider-laget og service-laget der feilen faktisk oppdages. Kodeliste~\ref{lst:notfound-throw} viser hvordan AntMedia-provideren oversetter en HTTP-status \texttt{404 Not Found} fra ekstern tjeneste til \texttt{NotFoundException}, og hvordan andre feil pakkes inn som \texttt{ExternalServiceException} med den opprinnelige statuskoden bevart:
 
-\begin{lstlisting}[language={[Sharp]C}, caption={Kasting av domeneeksepsjon i AntMediaProvider.}, label={lst:notfound-throw}]
-// Providers/AntMedia/AntMediaProvider.cs
-if (response.StatusCode == HttpStatusCode.NotFound && roomId is not null)
-    throw new NotFoundException("Room", roomId);
+I praksis kastes exceptions fra provider-laget der feilen faktisk oppdages. \texttt{AntMediaProvider} benytter en privat hjelpemetode, \texttt{EnsureSuccessOrThrowAsync}, som kalles etter hvert kall mot den eksterne tjenesten og oversetter HTTP-feil til domenespesifikke exceptions: en \texttt{404 Not Found} blir til \texttt{NotFoundException}, mens andre feil pakkes inn som \texttt{ExternalServiceException} med den opprinnelige statuskoden bevart (kodeliste~\ref{lst:notfound-throw}).
 
-var status = (int)response.StatusCode;
-var body = await response.Content.ReadAsStringAsync(ct);
-throw new ExternalServiceException(
-    "AntMedia",
-    $"AntMedia API returned {status} for {operation}. {body}",
-    status);
+\begin{lstlisting}[language={[Sharp]C}, caption={Kasting av domenespesifik exception i \texttt{AntMediaProvider}.}, label={lst:notfound-throw}]
+// HDO-VideoAPI/Providers/AntMedia/AntMediaProvider.cs
+
+private static async Task EnsureSuccessOrThrowAsync( ... )
+{
+    // Vellykket svar - ingen feil å håndtere
+    if (response.IsSuccessStatusCode)
+        return;
+
+    // 404 oversettes til NotFoundException
+    if (response.StatusCode == HttpStatusCode.NotFound && roomId is not null)
+        throw new NotFoundException("Room", roomId);
+
+    // Alle andre feil - bevarer opprinnelig statuskode og responstekst
+    var status = (int)response.StatusCode;
+    var body = await response.Content.ReadAsStringAsync(ct);
+    throw new ExternalServiceException(
+        "AntMedia",
+        $"AntMedia API returned {status} for {operation}. {body}",
+        status);
+}
 \end{lstlisting}
 
 \subsection{Den globale handleren}
 \label{subsec:errors-handler}
 
-\texttt{GlobalExceptionHandler} implementerer \texttt{IExceptionHandler.TryHandleAsync}. Metoden mottar det fangede exception-et, tilordner det en HTTP-statuskode ved hjelp av et \texttt{switch}-uttrykk (se kodeliste \ref{lst:mapping}), registrerer en metrikk, logger hendelsen med korrekt alvorlighetsgrad og returnerer et \texttt{ProblemDetails}-objekt som JSON til klienten. Koblingen mellom exceptions og HTTP-statuskoder er sentralisert, slik at en ny exception-type kun krever én kodeendring:
+% \texttt{GlobalExceptionHandler} implementerer \texttt{IExceptionHandler.TryHandleAsync}. Metoden mottar det fangede exception-et, tilordner det en HTTP-statuskode ved hjelp av et \texttt{switch}-uttrykk (se kodeliste \ref{lst:mapping}), registrerer en metrikk, logger hendelsen med korrekt alvorlighetsgrad og returnerer et \texttt{ProblemDetails}-objekt som JSON til klienten. Koblingen mellom exceptions og HTTP-statuskoder er sentralisert, slik at en ny exception-type kun krever én kodeendring:
 
-\begin{lstlisting}[language={[Sharp]C}, caption={Tilordning fra exception-type til HTTP-statuskode}, label={lst:mapping}]
-// Middleware/GlobalExceptionHandler.cs
+\texttt{GlobalExceptionHandler} implementerer \texttt{IExceptionHandler.TryHandleAsync}. Metoden mottar det kastede exception-et, slår opp riktig HTTP-statuskode via et \texttt{switch}-uttrykk (kodeliste~\ref{lst:mapping}), registrerer en metrikk, logger hendelsen med korrekt alvorlighetsgrad og returnerer et \texttt{ProblemDetails}-objekt som JSON til klienten. Koblingen mellom exceptions og statuskoder er sentralisert, slik at en ny exception-type kun krever én kodeendring.
+
+\begin{lstlisting}[language={[Sharp]C}, caption={Tilordning fra exception-type til HTTP-statuskode i \texttt{GlobalExceptionHandler}}, label={lst:mapping}]
+// HDO-VideoAPI/Middleware/GlobalExceptionHandler.cs
+
 var (statusCode, errorResponse) = exception switch
 {
     BadRequestException        => (400, new { error = "Bad Request" }),
@@ -78,7 +95,7 @@ var (statusCode, errorResponse) = exception switch
 };
 \end{lstlisting}
 
-I tillegg til de fire domenespesifikke exception-typene håndteres også \texttt{ArgumentException}, \texttt{OperationCanceledException} og \texttt{NotSupportedException} eksplisitt, slik at vanlige rammeverksunntak ikke returneres som ugjennomsiktige \texttt{500}-svar. Den avsluttende \texttt{\_}-armen fungerer som et sikkerhetsnett: Alle unntak som ikke identifiseres eksplisitt, returneres som \texttt{500 Internal Server Error} med en generisk feilmelding.
+I tillegg til de fire domenespesifikke exception-typene håndteres også \texttt{ArgumentException}, \texttt{OperationCanceledException} og \texttt{NotSupportedException} eksplisitt, slik at vanlige rammeverks-exceptions ikke eksponeres som \texttt{500}-svar. Den avsluttende \texttt{\_}-armen fungerer som et sikkerhetsnett: Alle unntak som ikke identifiseres eksplisitt, returneres som \texttt{500 Internal Server Error} med en generisk feilmelding.
 
 \subsection{Svarformat: Problem Details}
 \label{subsec:errors-problemdetails}

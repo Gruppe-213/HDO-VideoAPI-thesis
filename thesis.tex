@@ -21,7 +21,15 @@
 % Figurer, diagrammer og farger
 \usepackage{xcolor}
 \usepackage{tikz}
-\usetikzlibrary{positioning,arrows.meta,calc}
+\usetikzlibrary{positioning,arrows.meta,calc,fadings}
+\tikzfading[
+    name=fadeout,
+    left color=transparent!100,
+    right color=transparent!100,
+    top color=transparent!100,
+    bottom color=transparent!100,
+    center color=transparent!0
+]
 \usepackage{pgfplots}
 \usepackage{pgfgantt}
 \usepackage{pgf-pie}

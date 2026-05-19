@@ -85,7 +85,7 @@ services:
       - "443:8443"
     volumes:
       - ./certs:/app/certs:ro     # TLS-sertifikater, skrivebeskyttet
-    env_file: .env                # Hemmeligheter utenfor versjonskontrollen
+    env_file: .env                # Hemmeligheter
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health/live"]
       interval: 10s
