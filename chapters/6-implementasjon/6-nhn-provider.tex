@@ -1,4 +1,4 @@
-\section{NHNProvider}
+\section{NHNVideoProvider}
 \label{sec:NHN-provider}
 \texttt{NHNVideoProvider} oppretter rom som bookinger i NHN sitt API. I \texttt{CreateRoomAsync}, vist i kodeliste~\ref{lst:nhn-create-room}, settes \texttt{startTime} til gjeldende UTC-tid, mens \texttt{endTime} settes til samme tidspunkt pluss \texttt{MeetingDurationHours} fra konfigurasjonen. Romnavnet benyttes som \texttt{subject}, og \texttt{TemplateId} sendes som møtemal. Etter \texttt{POST}-kallet til \texttt{api/client/v1/booking/} tilordnes booking-ID, emne, status og URL-er til \texttt{VideoRoom}.
 

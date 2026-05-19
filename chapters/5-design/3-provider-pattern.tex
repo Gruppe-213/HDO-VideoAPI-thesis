@@ -19,18 +19,28 @@ gjort backend-forskjellene tydelige, men også flyttet kompleksiteten til
 klienten, som da måtte vite hvilken videomotor som brukes og hvordan responsene
 skal tolkes.
 
+% Den valgte løsningen ble derfor å definere et felles
+% \texttt{IVideoProvider}-grensesnitt. Hver videomotor implementeres som en egen
+% provider som utgjør et \emph{adapter} mot den konkrete videomotor-API-en:
+% adapteren oversetter felles kall (\texttt{CreateRoomAsync}, \texttt{GetRoomAsync},
+% osv.) til backend-spesifikke forespørsler og mapper svar til felles
+% modeller~\cite{refactoringguru_adapter}. Arkitekturen realiserer dermed
+% adapter-mønsteret eksplisitt, med \texttt{IVideoProviderFactory} som velger riktig
+% adapter-instans ut fra klientens valg av videomotor. Controllerne opererer kun mot
+% \texttt{IVideoProvider} og instansierer ikke konkrete provider-klasser direkte,
+% som er den vanlige kombinasjonen adapter + factory~\cite{refactoringguru_adapter}.
+
 Den valgte løsningen ble derfor å definere et felles
 \texttt{IVideoProvider}-grensesnitt. Hver videomotor implementeres som en egen
 provider som utgjør et \emph{adapter} mot den konkrete videomotor-API-en:
 adapteren oversetter felles kall (\texttt{CreateRoomAsync}, \texttt{GetRoomAsync},
-osv.) til backend-spesifikke forespørsler og mapper svar til felles
-modeller~\cite{refactoringguru_adapter}. Arkitekturen realiserer dermed
-adapter-mønsteret eksplisitt, med \texttt{IVideoProviderFactory} som velger riktig
-adapter-instans ut fra klientens valg av videomotor. Controllerne opererer kun mot
-\texttt{IVideoProvider} og instansierer ikke konkrete provider-klasser direkte,
-som er den vanlige kombinasjonen adapter + factory~\cite{refactoringguru_adapter}.
+osv.) til backend-spesifikke forespørsler og mapper svar til felles modeller~\cite{gamma1994}. Arkitekturen
+realiserer dermed adapter-mønsteret eksplisitt, med \texttt{IVideoProviderFactory}
+som velger riktig adapter-instans ut fra klientens valg av videomotor.
+Controllerne opererer kun mot \texttt{IVideoProvider} og instansierer ikke
+konkrete provider-klasser direkte.
 
-Provider-arkitekturen betyr likevel ikke at alle backendene behandles som identiske. Enkelte operasjoner har ulik betydning i de to systemene — start- og stoppoperasjoner passer naturlig med AntMedias broadcast-modell, mens NHN Booking API i større grad beskriver opprettelse og administrasjon av et videomøte. Provider-laget skal derfor isolere forskjellene, ikke skjule dem helt. Nye videomotorer kan legges til ved å implementere \texttt{IVideoProvider}, mens controllerne og klientens API-kontrakt i hovedsak kan beholdes uendret. Kodeliste~\ref{lst:ivideoprovider} viser den fullstendige kontrakten.
+Provider-arkitekturen betyr likevel ikke at alle backendene behandles som identiske. Enkelte operasjoner har ulik betydning i de to systemene --- start- og stoppoperasjoner passer naturlig med AntMedias broadcast-modell, mens NHN Booking API i større grad beskriver opprettelse og administrasjon av et videomøte. Provider-laget skal derfor isolere forskjellene, ikke skjule dem helt. Nye videomotorer kan legges til ved å implementere \texttt{IVideoProvider}, mens controllerne og klientens API-kontrakt i hovedsak kan beholdes uendret. Kodeliste~\ref{lst:ivideoprovider} viser den fullstendige kontrakten.
 \begin{lstlisting}[language=CSharp, caption={Felles provider-kontrakt}, label={lst:ivideoprovider}]
 // HDO-VideoAPI/Providers/IVideoProvider.cs
 

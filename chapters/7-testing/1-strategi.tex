@@ -9,7 +9,7 @@ ved pull requests.
 Den ordinære testsuiten på leveransegrenen omfattet 133 tester, og alle
 passerte ved hver kjøring. På den separate valideringsgrenen
 \texttt{feature/provider-validation} ble testsettet utvidet til 166
-tester for arkitekturvalidering (jf. avsnitt~\ref{sec:provider-validering});
+tester for arkitekturvalidering (jf. delkapittel~\ref{sec:provider-validering});
 dette inngår ikke i hovedleveransen mot HDO.
 
 Testrammeverket var xUnit med Moq for mocking. AntMedia, NHN Video og
@@ -17,12 +17,12 @@ Keycloak var fullstendig mocket i alle automatiserte tester, slik at ingen
 tester krevde tilgang til ekte backend-miljøer. To hjemmelagde
 testkomponenter dekket dette: en lokal
 \texttt{StubHttpMessageHandler}-implementasjon for enhetstesting av
-HTTP-klienter (jf.\ avsnitt~\ref{sec:enhetstester}) og
+HTTP-klienter (jf.\ delkapittel~\ref{sec:enhetstester}) og
 \texttt{CustomWebApplicationFactory} for in-memory integrasjonstesting
-(jf.\ avsnitt~\ref{sec:integrasjonstester}).
+(jf.\ delkapittel~\ref{sec:integrasjonstester}).
 
 Målet var ikke å bevise produksjonsklarhet, men å verifisere at
-proof-of-conceptet oppfylte kravspesifikasjonen og at arkitekturen støttet
+POC-et oppfylte kravspesifikasjonen og at arkitekturen støttet
 utvidelse med nye videomotorer. Teststrategien hadde fire konkrete mål:
 å verifisere kjerneoperasjonene i krav F1.1--F1.5, å teste sentrale feil-
 og sikkerhetsscenarier, å kontrollere integrasjon mot faktiske AntMedia-

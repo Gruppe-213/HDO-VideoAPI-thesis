@@ -1,12 +1,12 @@
 \section{Containerisering}
 \label{sec:docker}
 
-VideoAPI distribueres som en Docker-container. Hele driftsmiljøet, inkludert API, metrikkinnsamling og dashboard, orkestreres av en enkelt \texttt{compose.yaml} i prosjektets rot. Målet med oppsettet er at en hvilken som helst Linux-VM med Docker installert skal kunne starte hele stacken med én kommando, samtidig som tjenestene kjører isolert fra hverandre og uten unødvendige privilegier. Dette oppfyller krav I1.1 \cite{hdo_kravspec} om containerisert leveranse.
+VideoAPI distribueres som en Docker-container. Hele driftsmiljøet, inkludert API, metrikkinnsamling og dashboard, orkestreres av en enkelt \texttt{compose.yaml} i prosjektets rot. Målet med oppsettet er at en hvilken som helst Linux-\gls{vm} med Docker installert skal kunne starte hele stacken med én kommando, samtidig som tjenestene kjører isolert fra hverandre og uten unødvendige privilegier. Dette oppfyller krav I1.1 \cite{hdo_kravspec} om containerisert leveranse.
 
 \subsection{Image-bygging}
 \label{subsec:docker-image}
 
-Dockerfilen til VideoAPI er bygd som et flertrinns-image (multi-stage build) for å holde det endelige imaget lite og fritt for byggeverktøy, som vist i kodeliste~\ref{lst:dockerfile}. Første trinn, \texttt{base}, baseres på \url{mcr.microsoft.com/dotnet/aspnet:10.0} og legger til \texttt{curl} slik at containerens egen helsesjekk kan polle API-et. Andre trinn, \texttt{publish}, bruker det fullstendige .NET 10 SDK-imaget til å gjenopprette pakker og publisere applikasjonen i Release-konfigurasjon. Det ferdige \texttt{final}-trinnet kopierer kun den publiserte utdataen inn i runtime-imaget og setter \texttt{USER \$APP\_UID}, slik at prosessen kjører som en ikke-privilegert bruker. Dette er en anbefalt praksis i offisielle .NET-images for å redusere angrepsflaten \cite{aspnet_rootless}.
+Dockerfilen til VideoAPI er bygd som et flertrinns-image (multi-stage build) for å holde det endelige imaget lite og fritt for byggeverktøy, som vist i kodeliste~\ref{lst:dockerfile}. Første trinn, \texttt{base}, baseres på \url{mcr.microsoft.com/dotnet/aspnet:10.0} og legger til \texttt{curl} slik at containerens egen helsesjekk kan polle API-et. Andre trinn, \texttt{publish}, bruker det fullstendige .NET 10 \gls{sdk}-imaget til å gjenopprette pakker og publisere applikasjonen i Release-konfigurasjon. Det ferdige \texttt{final}-trinnet kopierer kun den publiserte utdataen inn i runtime-imaget og setter \texttt{USER \$APP\_UID}, slik at prosessen kjører som en ikke-privilegert bruker. Dette er en anbefalt praksis i offisielle .NET-images for å redusere angrepsflaten \cite{aspnet_rootless}.
 
 \begin{lstlisting}[
     language={BASH},
@@ -39,7 +39,7 @@ USER $APP_UID   # Kjør som ikke-privilegert bruker
 ENTRYPOINT ["dotnet", "HDO-VideoAPI.dll"]
 \end{lstlisting}
 
-Filtreringen skjer via \texttt{.dockerignore}, som ekskluderer \texttt{.git/}, \texttt{.env}, \texttt{bin/}, \texttt{obj/}, lokale IDE-filer og hemmeligheter. Det forhindrer at sensitive verdier eller utvikleroppsett havner i imaget.
+Filtreringen skjer via \texttt{.dockerignore}, som ekskluderer \texttt{.git/}, \texttt{.env}, \texttt{bin/}, \texttt{obj/}, lokale \gls{ide}-filer og hemmeligheter. Det forhindrer at sensitive verdier eller utvikleroppsett havner i imaget.
 
 \subsection{Compose-stack}
 \label{subsec:docker-compose}
@@ -61,11 +61,9 @@ Stacken som defineres i \texttt{compose.yaml} består av tre tjenester som alle 
 \end{tabular}
 \end{table}
 
-\newpage
-
 % API-tjenesten lytter internt på 8080 (HTTP) og 8443 (HTTPS), og videresendes på host til standardportene 80 og 443. TLS-sertifikater monteres skrivebeskyttet fra hostens \texttt{./certs/}-katalog inn til \texttt{/app/certs} i containeren, slik at sertifikater kan rotere uten at bildet må bygges på nytt. Hemmeligheter (API-nøkler, Keycloak-secrets, Grafana-passord) injiseres via \texttt{env\_file: .env} og forblir utenfor bildet og versjonskontrollen.
 
-\texttt{hdo-videoapi} lytter internt på 8080 (HTTP) og 8443 (HTTPS), og videresendes på host til standardportene 80 og 443. TLS-sertifikater monteres skrivebeskyttet fra hostens \texttt{./certs/}-katalog inn til \texttt{/app/certs} i containeren, slik at sertifikater kan rotere uten at bildet må bygges på nytt. Hemmeligheter injiseres enten direkte via \texttt{env\_file: .env} (\texttt{hdo-videoapi} jf.\ kodeliste~\ref{lst:compose-api}) eller via \texttt{environment:}-nøkler med Compose-variabelinterpolasjon fra \texttt{.env} (\texttt{grafana} jf.\ kodeliste~\ref{lst:compose-observability}), slik at ingen hemmeligheter havner i imaget eller versjonskontrollen.
+\texttt{hdo-videoapi} lytter internt på 8080 (HTTP) og 8443 (HTTPS), og videresendes på host til standardportene 80 og 443. \gls{tls}-sertifikater monteres skrivebeskyttet fra hostens \texttt{./certs/}-katalog inn til \texttt{/app/certs} i containeren, slik at sertifikater kan rotere uten at bildet må bygges på nytt. Hemmeligheter injiseres enten direkte via \texttt{env\_file: .env} (\texttt{hdo-videoapi} jf.\ kodeliste~\ref{lst:compose-api}) eller via \texttt{environment:}-nøkler med Compose-variabelinterpolasjon fra \texttt{.env} (\texttt{grafana} jf.\ kodeliste~\ref{lst:compose-observability}), slik at ingen hemmeligheter havner i imaget eller versjonskontrollen.
 
 %Hemmeligheter (API-nøkler, Keycloak-secrets, Grafana-passord) injiseres via \texttt{env\_file: .env} og forblir utenfor bildet og versjonskontrollen (jf.\ kodeliste~\ref{lst:compose-api}).
 
@@ -119,8 +117,6 @@ Tjenestene starter i kontrollert rekkefølge slik at metrikkstacken ikke logger 
              \texttt{/health/live}}
     \label{fig:compose_startup}
 \end{figure}
-
-\newpage
 
 % Tjenestene starter i kontrollert rekkefølge slik at metrikkstacken ikke logger feil før API-et er klart. \texttt{prometheus} har \texttt{depends\_on: hdo-videoapi} med betingelsen \texttt{service\_healthy}, og \texttt{grafana} har \texttt{depends\_on: prometheus}. Det betyr at Prometheus først starter når API-ets \texttt{/health/live}-endepunkt returnerer HTTP-status \texttt{200 OK}, og at Grafana først starter etter Prometheus. Selve helsesjekken er definert i Compose-filen og bruker \texttt{curl} til å treffe \texttt{/health/live} hvert tiende sekund med fem sekunders timeout og opp til fem nye forsøk før containeren markeres som \texttt{unhealthy}.
 
@@ -179,7 +175,7 @@ Alle tre tjenestene bruker \texttt{restart: unless-stopped}, slik at de kommer o
 \subsection{Ressurskontroll og sikkerhet}
 \label{subsec:docker-security}
 
-For å hindre at en enkelt container uttømmer hostens ressurser, settes \texttt{deploy.resources.limits} per tjeneste: VideoAPI begrenses til 512~MB minne og én CPU-kjerne, Prometheus til 256~MB, og Grafana til 1~GB. Verdiene er forankret i den observerte ressursbruken under last- og integrasjonstesting (se delkapittel~\ref{sec:eval-infrastruktur}), og gir tydelige grenser for systemovervåkningen.
+For å hindre at en enkelt container uttømmer hostens ressurser, settes \texttt{deploy.resources.limits} per tjeneste: VideoAPI begrenses til 512~MB minne og én CPU-kjerne, Prometheus til 256~MB, og Grafana til 1~GB. Verdiene er forankret i den observerte ressursbruken under last- og integrasjonstesting, og gir tydelige grenser for systemovervåkningen.
 
 Sikkerhetsmessig hviler stacken på flere lag. API-et selv kjører som ikke-privilegert bruker (\texttt{UID 1654} i .NET-imaget), TLS-sertifikatene monteres skrivebeskyttet, hemmeligheter ligger kun i \texttt{.env}, og \texttt{appsettings.Docker.json} overstyrer Kestrel-endepunktene til å lytte på portene containeren eksponerer og peker sertifikatstiene til volummonteringen fra host -- filen inneholder ingen hemmeligheter. Prometheus eksponerer ingen autentisering ut av boksen og er derfor tilgjengelig uten tilgangskontroll; Grafana beskyttes av eget brukernavn og passord satt via miljøvariabler.
 

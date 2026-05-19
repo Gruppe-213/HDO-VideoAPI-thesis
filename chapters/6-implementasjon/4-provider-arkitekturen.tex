@@ -6,7 +6,7 @@ som definerer åtte asynkrone metoder for romoperasjoner og
 strømstyring. Ingen metoder har default-implementasjon. En provider som
 ikke støtter en operasjon kaster \texttt{NotSupportedException}, som
 \texttt{GlobalExceptionHandler} videre oversetter til HTTP-status \texttt{501 Not Implemented}. Provider velges
-ved oppslag i ASP.NET Cores keyed DI-container via
+ved oppslag i ASP.NET Cores keyed \gls{di}-container via
 \texttt{VideoProviderFactory}, som normaliserer nøkkelen til lowercase og
 kaster \texttt{ArgumentException} ved ukjent provider. Grensesnittet er vist i kodeliste~\ref{lst:ivideoprovider}.
 
@@ -55,9 +55,9 @@ public static IServiceCollection AddVideoProviders( ... )
 % ikke aktuell. Disse tre metodene kaster \texttt{NotSupportedException},
 % som kodeliste~\ref{lst:nhnsupported} viser.
 
-Siden AntMedia er strømorientert (jf. delkapittel~\ref{sec:antmedia}), bygger \texttt{AntMediaProvider} rundt broadcast-abstraksjonen med tilstandene \texttt{created}, \texttt{broadcasting} og \texttt{finished}. Start og stopp utføres som eksplisitte API-kall, og tilgang skjer via kortlevde WebRTC-tokens med 90 sekunders levetid. \texttt{AntMediaAuthHandler} signerer JWT-tokens lokalt med HMAC-SHA256 og cacher dem i fem minutter, med trådsikker oppdatering via \texttt{SemaphoreSlim}.
+Siden AntMedia er strømorientert (jf. avsnitt~\ref{sec:antmedia}), bygger \texttt{AntMediaProvider} rundt broadcast-abstraksjonen med tilstandene \texttt{created}, \texttt{broadcasting} og \texttt{finished}. Start og stopp utføres som eksplisitte API-kall, og tilgang skjer via kortlevde WebRTC-tokens med 90 sekunders levetid. \texttt{AntMediaAuthHandler} signerer JWT-tokens lokalt med HMAC-SHA256 og cacher dem i fem minutter, med trådsikker oppdatering via \texttt{SemaphoreSlim}.
 
-Siden NHN Video er møteorientert (jf. delkapittel~\ref{sec:nhn}), modelleres et rom som en booking med start- og sluttid der tilgang skjer via en Pexip-basert konferanse-URL med innebygd PIN. Siden møtet er aktivt så lenge bookingen eksisterer, finnes det ingen start- eller stopp-operasjon, og \texttt{SetRoomTokenAsync} er heller ikke aktuell. Disse tre metodene kaster \texttt{NotSupportedException}, som kodeliste~\ref{lst:nhnsupported} viser.
+Siden NHN Video er møteorientert (jf. avsnitt~\ref{sec:nhn}), modelleres et rom som en booking med start- og sluttid der tilgang skjer via en Pexip-basert konferanse-URL med innebygd PIN. Siden møtet er aktivt så lenge bookingen eksisterer, finnes det ingen start- eller stopp-operasjon, og \texttt{SetRoomTokenAsync} er heller ikke aktuell. Disse tre metodene kaster \texttt{NotSupportedException}, som kodeliste~\ref{lst:nhnsupported} viser.
 
 \begin{lstlisting}[language={[Sharp]C}, label=lst:nhnsupported,
   caption={Operasjoner uten semantisk ekvivalent i NHN Video.}]

@@ -6,7 +6,7 @@ VideoAPI er organisert som en lagdelt arkitektur, vist i figur~\ref{fig:lagarkit
 \input{figures/fig-arkitektur}
 
 \begin{description}
-    \item[HTTP-pipeline-laget] håndterer innkommende trafikk og inneholder middleware for blant annet unntakshåndtering, HTTPS, CORS, rate limiting, JWT-autentisering, autorisasjon og Prometheus-metrikker. Disse mekanismene er lagt i pipelinen fordi de gjelder hele API-et, ikke én spesifikk romoperasjon.
+    \item[HTTP-pipeline-laget] håndterer innkommende trafikk og inneholder middleware for blant annet unntakshåndtering, HTTPS, \gls{cors}, rate limiting, JWT-autentisering, autorisasjon og Prometheus-metrikker. Disse mekanismene er lagt i pipelinen fordi de gjelder hele API-et, ikke én spesifikk romoperasjon.
     
     \item[Controller-laget] fungerer som et tynt bindeledd mellom HTTP-kontrakten og provider-laget. Controllerne binder innkommende forespørsler, velger riktig provider og returnerer HTTP-svar, men inneholder ikke backend-spesifikk logikk. Slik kan API-kontrakten holdes stabil selv om integrasjonen mot AntMedia eller NHN endres.
     

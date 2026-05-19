@@ -5,7 +5,7 @@ Backenden bruker Keycloak som ekstern identitetsleverandør for autentisering, b
 
 \subsection{Token-flyt}
 
-Klienter autentiserer seg ved å sende en \texttt{POST}-forespørsel til \texttt{/auth/token}, der \texttt{clientId} og \texttt{clientSecret} inkluderes i request-bodyen. \texttt{AuthController} videresender forespørselen til \texttt{KeycloakService}, som kaller Keycloaks token-endepunkt med \texttt{client\_credentials}-grant og returnerer \texttt{access\_token} til klienten (jf. kodeliste~\ref{lst:auth-controller}--\ref{lst:keycloak-service}). Systemet lagrer ingen rom- eller sesjonsdata server-side. \texttt{NHNTokenCache} mellomlagrer NHN-opplastingstokenet prosessinternt, men ingen videoromtilstand persisteres mellom forespørsler.
+Klienter autentiserer seg ved å sende en \texttt{POST}-forespørsel til \texttt{/auth/token}, der \texttt{clientId} og \texttt{clientSecret} inkluderes i request-bodyen. \texttt{AuthController} videresender forespørselen til \texttt{KeycloakService}, som kaller Keycloaks token-endepunkt med \texttt{client\_credentials}-grant og returnerer \texttt{access\_token} til klienten (jf. kodeliste~\ref{lst:auth-controller}--\ref{lst:keycloak-service}). Systemet lagrer ingen rom- eller sesjonsdata server-side. \texttt{NHNTokenCache} mellomlagrer NHN-tokenet prosessinternt, men ingen videoromtilstand persisteres mellom forespørsler.
 
 \begin{lstlisting}[language={[Sharp]C}, label=lst:auth-controller, caption={\texttt{AuthController.cs} – token-endepunkt}]
 // HDO-VideoAPI/Controllers/AuthController.cs
@@ -82,7 +82,7 @@ public static IServiceCollection AddVideoKeycloak( ... )
     // Krev gyldig token med api_access-claim på alle beskyttede endepunkter
     services.AddAuthorization(options =>
     {
-        options.DefaultPolicy = newAuthorizationPolicyBuilder()
+        options.DefaultPolicy = new AuthorizationPolicyBuilder()
             .RequireAuthenticatedUser()
             .RequireClaim("api_access", "true")
             .Build();
@@ -95,7 +95,7 @@ public static IServiceCollection AddVideoKeycloak( ... )
 
 Alle \texttt{/api/rooms/*}-endepunkter er beskyttet med \texttt{[Authorize]} på kontrollernivå, som vist i kodeliste~\ref{lst:rooms-controller}.
 
-\begin{lstlisting}[language={[Sharp]C}, label=lst:rooms-controller, caption={\texttt{RoomsController.cs} – beskyttede endepunkter}]
+\begin{lstlisting}[language={[Sharp]C}, label=lst:rooms-controller, caption={\texttt{RoomsController.cs} – beskyttede endepunkter (utdrag)}]
 // HDO-VideoAPI/Controllers/RoomsController.cs
 
 // Alle endepunkter krever gyldig JWT med api_access-claim

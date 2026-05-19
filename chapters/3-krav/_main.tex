@@ -1,7 +1,7 @@
 \chapter{Kravspesifikasjon}
 \label{ch:krav}
 
-Dette kapittelet presenterer kravene som lå til grunn for utviklingen av VideoAPI. Kravspesifikasjonen ble utarbeidet av HDO ved prosjektstart, mottatt fra Magne Henriksen og er gjengitt i sin helhet i vedlegg~\ref{app:kravspec}~\cite{hdo_kravspec}. Krav-ID-ene er beholdt for å sikre sporbarhet gjennom design, implementasjon og testing. Der kravene var åpne eller backend-avhengige, beskrives gruppens tolkning i de respektive underkapitlene, og graden av kravoppfyllelse vurderes i kapittel~\ref{ch:diskusjon}.
+Dette kapittelet presenterer kravene som lå til grunn for utviklingen av VideoAPI. Kravspesifikasjonen ble utarbeidet av HDO ved prosjektstart, mottatt fra Magne Henriksen og er gjengitt i sin helhet i vedlegg~\ref{app:kravspec}~\cite{hdo_kravspec}. Krav-ID-ene er beholdt for å sikre sporbarhet gjennom design, implementasjon og testing. Der kravene var åpne eller backend-avhengige, beskrives gruppens tolkning i de respektive underkapitlene, og graden av kravoppfyllelse vurderes i delkapittel~\ref{sec:evaluering}.
 
 Siden HDOs kravspesifikasjon ikke inneholdt en eksplisitt prioritering, ble funksjonelle kjerneoperasjoner, sikkerhet og støtte for begge videomotorer behandlet som må-ha-krav, mens observability og dokumentasjon ble behandlet som viktige støttekrav. Kapittelet dekker kravene i fem kategorier:
 
@@ -49,7 +49,7 @@ Tabell~\ref{tab:krav-oversikt} viser alle kravene med prioritet og evalueringsgr
 \node[uc, fill=green!10]  (delete) at (5.6, -5.1) {Slette videorom};
 \node[uc, fill=orange!10] (start)  at (5.6, -6.8) {Starte videostrøm};
 \node[uc, fill=orange!10] (stop)   at (5.6, -8.5) {Stoppe videostrøm};
-\node[uc, fill=orange!10] (webrtc) at (5.6,-10.0) {Romspesifik tilgang (S1.2)};
+\node[uc, fill=orange!10] (webrtc) at (5.6,-10.0) {Hente romspesifikk tilgang};
 
 % Primæraktør: Klient
 \stickfigure{0.2}{-4.5}{Klient}

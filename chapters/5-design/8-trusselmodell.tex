@@ -2,8 +2,8 @@
 \label{sec:trusselmodell}
 
 Tabell~\ref{tab:stride-videoapi} gir en oversikt over representative trusler mot
-VideoAPI, innførte tiltak og bevisste begrensninger i proof-of-concept-et,
-organisert etter STRIDE-kategoriene~\cite{stride_ms}.
+VideoAPI, innførte tiltak og bevisste begrensninger i POC-et,
+organisert etter STRIDE-kategoriene.
 
 \begin{table}[htbp]
 \centering
@@ -37,8 +37,7 @@ Fullstendig revisjonslogg er ikke implementert. \\
 
 Information disclosure &
 Hemmeligheter eller pasientdata lekker til logger eller klient. &
-JWT, API-nøkler og pasientinformasjon logges ikke
-(jf.\ avsnitt~\ref{sec:errors}). Feilsvar med statuskode \texttt{5xx}
+JWT, API-nøkler og pasientinformasjon logges ikke. Feilsvar med statuskode \texttt{5xx}
 inneholder kun generisk tekst. \\
 
 \addlinespace[6pt]

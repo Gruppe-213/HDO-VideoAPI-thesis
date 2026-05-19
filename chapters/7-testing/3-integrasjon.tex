@@ -2,7 +2,7 @@
 \label{sec:integrasjonstester}
 
 Integrasjonstestene brukte \texttt{WebApplicationFactory<Program>} til å
-starte API-et in-memory uten å åpne en faktisk TCP-port. En
+starte API-et in-memory uten å åpne en faktisk \gls{tcp}-port. En
 \texttt{CustomWebApplicationFactory} erstattet upstream-avhengighetene
 (AntMedia-, NHN- og Keycloak-klientene) med Moq-instanser og simulerte
 autentisering via en egen \texttt{TestAuthHandler} --- en implementasjon

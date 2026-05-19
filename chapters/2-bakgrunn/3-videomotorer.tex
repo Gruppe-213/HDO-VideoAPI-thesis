@@ -12,12 +12,16 @@ De to motorene representerer ulike tilnærminger til videostrømming, noe som p�
 \midrule
 Paradigme         & Strømorientert                  & Møteorientert \\
 Romopprettelse    & \texttt{POST /broadcasts/create} & \texttt{POST /api/client/v1/booking/} \\
-Romidentifikator  & \texttt{streamId}               & \texttt{guestURL} / \texttt{hostURL} \\
+Romidentifikator  & \texttt{streamId}               & \texttt{booking.Id} \\
 Start/stopp       & Eksplisitt via egne endepunkter & Ikke nødvendig \\
 Autentisering     & SHA-256-signert JWT             & OAuth~2.0 password grant \\
-Tokengyldighet    & 5 minutter                      & 14 dager \\
+Tokengyldighet    & 5 minutter{*}                      & 14 dager \\
 \bottomrule
 \end{tabular}
+\begin{tablenotes}
+\footnotesize
+\item {*}5 minutter er levetiden VideoAPI velger; AntMedia validerer kun signatur og exp-claim.
+\end{tablenotes}
 \end{table}
 
 \subsection{AntMedia Server}

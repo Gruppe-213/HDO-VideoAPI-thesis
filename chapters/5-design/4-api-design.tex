@@ -25,9 +25,8 @@ WebRTC-lenker for videorom.
 VideoAPI eksponerer utelukkende et server-side REST API over HTTP uten
 klientbibliotek. Primære konsumenter er backend-tjenester og operatørapplikasjoner;
 enhver HTTP-klient kan integrere mot det. AntMedia og NHN er de to videomotorene
-som er implementert i proof-of-concept-et, men provider-arkitekturen er designet
-for at nye motorer kan legges til uten endringer i API-kontrakten
-(jf.\ avsnitt~\ref{sec:provider-validering}).
+som er implementert i POC-et, men provider-arkitekturen er designet
+for at nye motorer kan legges til uten endringer i API-kontrakten. Dette utdypes nærmere i delkapittel~\ref{sec:provider-validering}
 
 Et sentralt designvalg var hvordan API-et skulle bevare informasjon om hvilken backend et rom tilhører. Løsningen ble å returnere rom-ID-er på formatet \texttt{\{provider\}:\{backendId\}}, for eksempel \texttt{antmedia:abc123} eller \texttt{nhn:24484}. Provider-prefikset fungerer som rutinginformasjon i senere forespørsler, slik at klienten kun trenger å lagre én ID. Kodeliste~\ref{lst:create-room} viser at controlleren holdes tynn: den binder forespørselen, velger provider, delegerer romopprettelsen og prefikser rom-ID-en før svaret returneres.
 \begin{lstlisting}[language=CSharp, caption={Opprettelse av rom — controlleren delegerer til provider-laget.}, label={lst:create-room}]
@@ -85,7 +84,7 @@ backends. AntMedia har en broadcast-modell der start og stopp passer naturlig,
 mens NHN Booking API i større grad beskriver et videomøte som er klart etter
 opprettelse. Slike forskjeller håndteres i provider-laget.
 
-API-et bruker JSON for forespørsler og svar, og responsmodellene er normalisert
+API-et bruker \gls{json} for forespørsler og svar, og responsmodellene er normalisert
 så langt det er hensiktsmessig. Klienten får samme overordnede struktur
 uavhengig av backend, men backend-spesifikke forskjeller skjules ikke dersom de
 påvirker hvordan operasjonen må brukes. Dette gjelder særlig WebRTC-lenker:

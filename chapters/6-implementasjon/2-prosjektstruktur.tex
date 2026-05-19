@@ -1,7 +1,7 @@
 \section{Prosjektstruktur}
 \label{sec:prosjektstruktur}
 
-Løsningen består av ett enkelt .NET-prosjekt med tilhørende testprosjekt, organisert i et flatt mappehierarki der ansvar separeres etter teknisk rolle fremfor funksjonalitet. Figur~\ref{fig:prosjektstruktur} viser de sentrale mappene.
+VideoAPI består av ett enkelt .NET-prosjekt med tilhørende testprosjekt, organisert i et flatt mappehierarki der ansvar separeres etter teknisk rolle fremfor funksjonalitet. Figur~\ref{fig:prosjektstruktur} viser de sentrale mappene.
 
 Kildekoden ligger i rotkatalogen til \texttt{HDO-VideoAPI}-prosjektet. \texttt{Controllers/}-mappen inneholder de to controllerne som eksponerer REST-API-et utad: \texttt{RoomsController} håndterer romoperasjoner, mens \texttt{AuthController} tilbyr et hjelpeendepunkt for tokenhenting.
 Forretningslogikken er fullstendig skilt fra HTTP-laget, ved at kontrollerne delegerer alle operasjoner til en \texttt{IVideoProvider} som instansieres via \texttt{IVideoProviderFactory}.
@@ -31,6 +31,8 @@ noe som gjorde det enkelt å holde oversikt over testdekning under utvikling.
 .3 HealthCheckExtensions.cs.
 .3 KeycloakExtensions.cs.
 .3 ApplicationExtensions.cs.
+.3 HealthEndpointsDocumentFilter.cs.
+.3 BearerSecurityOperationFilter.cs.
 .2 Controllers/.
 .3 RoomsController.cs.
 .3 AuthController.cs.
@@ -40,37 +42,52 @@ noe som gjorde det enkelt å holde oversikt over testdekning under utvikling.
 .3 VideoProviderFactory.cs.
 .3 AntMedia/.
 .4 AntMediaProvider.cs.
-.4 AntMediaAuthHandler.cs.
 .4 AntMediaConfig.cs.
+.4 AntMediaAuthHandler.cs.
+.4 AntMediaBroadcast.cs.
 .3 NHN/.
 .4 NHNVideoProvider.cs.
+.4 NHNConfig.cs.
 .4 NHNAuthHandler.cs.
 .4 NHNTokenCache.cs.
+.4 NHNModels.cs.
 .2 HealthChecks/.
 .2 Metrics/.
 .2 Middleware/.
 .2 Models/.
 .2 Services/.
+.2 Properties/.
+.2 Config/.
+.2 Exceptions/.
 }
 \end{minipage}
 \hfill
 \begin{minipage}[t]{0.48\textwidth}
 \dirtree{%
 .1 HDO-VideoAPI.Tests/.
+.2 Extensions/.
+.3 ApplicationExtensionsSmokeTests.cs.
+.3 HealthCheckExtensionsTests.cs.
+.3 HostingExtensionsTests.cs.
+.3 KeycloakExtensionsTests.cs.
+.3 ProviderExtensionsTests.cs.
 .2 Controllers/.
 .3 RoomsControllerTests.cs.
 .3 AuthControllerTests.cs.
 .3 SecurityBehaviorTests.cs.
 .3 RateLimitingTests.cs.
+.3 HealthControllerProductionTests.cs.
+.3 HealthControllerTests.cs.
 .2 Providers/.
 .3 AntMediaProviderTests.cs.
 .3 AntMediaAuthHandlerTests.cs.
 .3 NHNVideoProviderTests.cs.
+.3 NHNAuthHandlerTests.cs.
 .3 VideoProviderFactoryTests.cs.
-.2 Extensions/.
 .2 HealthChecks/.
 .2 Middleware/.
 .2 Services/.
+.2 Exceptions/.
 .2 CustomWebApplicationFactory.cs.
 }
 \end{minipage}

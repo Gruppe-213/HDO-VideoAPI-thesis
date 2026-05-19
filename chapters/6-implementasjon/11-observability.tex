@@ -189,7 +189,7 @@ Det ble utviklet tre dashboards i Grafana. Overview-dashboardet (figur~\ref{fig:
 \textit{\textbf{NB:} Dashboardene kan åpnes direkte i nettleseren via \url{http://video-backend.hdolab.no:3000/dashboards}. Innloggingsinformasjon deles separat med veileder og sensor.}
 \end{quote}
 
-Containeriseringen av Prometheus og Grafana, inkludert oppstartsrekkefølge og volumer, er beskrevet i delkapittel~\ref{sec:docker}. Samlet gir løsningen en enkel driftsmodell: API-et publiserer helsestatus og metrikker, Prometheus henter og lagrer dem, og Grafana visualiserer dem i ferdige dashboards. Løsningen erstatter ikke logging, men gjør det enklere å oppdage feil tidlig og identifisere hvilken del av systemet som feiler.
+Containeriseringen av Prometheus og Grafana, inkludert oppstartsrekkefølge og volumer, er beskrevet nærmere i delkapittel~\ref{sec:docker}. Samlet gir løsningen en enkel driftsmodell: API-et publiserer helsestatus og metrikker, Prometheus henter og lagrer dem, og Grafana visualiserer dem i ferdige dashboards. Løsningen erstatter ikke logging, men gjør det enklere å oppdage feil tidlig og identifisere hvilken del av systemet som feiler.
 
 % \subsection{Docker Compose-oppsett}
 

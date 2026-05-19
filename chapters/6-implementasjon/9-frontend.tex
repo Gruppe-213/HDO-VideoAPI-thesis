@@ -6,8 +6,7 @@ demonstrere systemet for HDO og verifisere at endepunktene fungerer
 ende-til-ende ble det utviklet en enkel referanseklient i et separat prosjekt.
 Frontenden dekker hele den forventede arbeidsflyten --- innlogging,
 romadministrasjon, sending og visning --- og er bevisst holdt enkel uten
-forretningslogikk utover det API-et selv tilbyr. Den er ikke en del av
-leveransen i seg selv.
+forretningslogikk utover det API-et selv tilbyr. Løsningen er utviklet som en demonstrasjonsleveranse og skal ikke betraktes som en produktleveranse.
 
 \subsection{Teknologivalg}
 \label{subsec:demo-tech}
@@ -49,7 +48,7 @@ rolle med mapper for sider, komponenter, API-kall, hooks og typedefinisjoner.
 Typedefinisjonene speiler API-ets \gls{dto}-er direkte, slik at endringer i
 API-kontrakten typisk gir kompilatorfeil på klientsiden.
 
-Innlogging skjer ved at frontenden sender en forespørsel mot \texttt{/auth/token} endepunktet med \texttt{clientId} og \texttt{clientSecret}, som vist i figur~\ref{fig:frontend-login-dashboard}a. Tokenet lagres i \texttt{sessionStorage} og utløper etter fire minutter, noe kortere enn Keycloaks levetid. Brukeren sendes deretter automatisk tilbake til \texttt{Login} (innloggingssiden) når sesjonen utløper. Alle API-kall går gjennom en felles hjelper som setter \texttt{Authorization}-headeren og håndterer \texttt{401 Unauthorized}-svar sentralt. Etter innlogging vises \texttt{Dashboard} (jf. figur~\ref{fig:frontend-login-dashboard}b), som henter tilgjengelige providers fra \texttt{/health/ready} og lister opp eksisterende rom.
+Innlogging skjer ved at frontenden sender en forespørsel mot \texttt{/auth/token}-endepunktet med \texttt{clientId} og \texttt{clientSecret}, som vist i figur~\ref{fig:frontend-login-dashboard}a. Tokenet lagres i \texttt{sessionStorage} og utløper etter fire minutter, noe kortere enn Keycloaks levetid. Brukeren sendes deretter automatisk tilbake til \texttt{Login} (innloggingssiden) når sesjonen utløper. Alle API-kall går gjennom en felles hjelper som setter \texttt{Authorization}-headeren og håndterer \texttt{401 Unauthorized}-svar sentralt. Etter innlogging vises \texttt{Dashboard} (jf. figur~\ref{fig:frontend-login-dashboard}b), som henter tilgjengelige providers fra \texttt{/health/ready} og lister opp eksisterende rom.
 
 % \begin{figure}[H]
 %     \centering
@@ -148,6 +147,6 @@ videotjeneste, og strømmingen foregår derfor utenfor demo-frontenden.
 \subsection{Konfigurasjon og distribusjon}
 \label{subsec:demo-deploy}
 
-To miljøvariabler styrer tilkoblingen: \texttt{VITE\_API\_BASE\_URL}, som peker på VideoAPI-domenet, og \texttt{VITE\_ANTMEDIA\_BASE\_URL}, som peker på Ant Media-serveren.
+To miljøvariabler styrer tilkoblingen: \texttt{VITE\_API\_BASE\_URL}, som peker på VideoAPI-domenet, og \texttt{VITE\_ANTMEDIA\_BASE\_URL}, som peker på AntMedia Server.
 Siden disse bakes inn i JavaScript-bundlen ved bygging må imaget rebygges ved
 endring. Dockerfilen bruker et flertrinns-bygg der Node kompilerer applikasjonen, og det endelige trinnet baserer seg på \texttt{nginx:alpine}, som kun serverer det statiske resultatet. Dette gir et lite produksjonsimage uten kjøretidsavhengigheter. HTTPS er påkrevd i praksis, siden moderne nettlesere blokkerer kamera- og mikrofontilgang over ukryptert HTTP.

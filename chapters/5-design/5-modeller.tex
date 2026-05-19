@@ -48,7 +48,7 @@ JSON-/C\#-egenskaper i implementasjonen).
 \texttt{Status} & Normalisert status (livssyklus/drift for rommet). \\
 \texttt{StreamUrl} & HLS-strømme-URL (primært AntMedia). \\
 \texttt{RtmpUrl} & RTMP-ingest-URL (primært AntMedia). \\
-\texttt{WebRtcViewerCount}, \texttt{HlsViewerCount}, \texttt{RtmpViewerCount} & Seertall per protokoll fra AntMedia-broadcast. \\
+\texttt{WebRTCViewerCount}, \texttt{HlsViewerCount}, \texttt{RtmpViewerCount} & Seertall per protokoll fra AntMedia-broadcast. \\
 \texttt{GuestUrl} / \texttt{HostUrl} & NHNs klare møte-URL-er for gjest og vert etter booking. \\
 \bottomrule
 \end{tabular}
@@ -82,15 +82,15 @@ JSON-/C\#-egenskaper i implementasjonen).
 \toprule
 \textbf{Felt} & \textbf{Beskrivelse} \\
 \midrule
-\texttt{Token} & AntMedia: kortlivet stream-token; NHN: relevant identifikator eller URL-snippet avhengig av rolle (implementasjonen normaliserer til ett felt). \\
-\texttt{RoomId} & Rom-ID som lenken gjelder for (prefiksert ID etter controller-konvensjon). \\
+\texttt{TokenId} & AntMedia: kortlivet stream-token; NHN: relevant identifikator eller URL-snippet avhengig av rolle (implementasjonen normaliserer til ett felt). \\
+\texttt{StreamId} & Rom/ Stream-ID som lenken gjelder for (prefiksert ID etter controller-konvensjon). \\
 \texttt{Type} & Rolle eller intensjon (f.\,eks.\ avspilling vs.\ vert), brukt av AntMedia-tokenflyten; NHN mapper til gjest-/vert-URL. \\
 \texttt{ExpiresAt} & Utløpstid for token der motor gir det (AntMedia); NHN kan bruke en teknisk «ingen utløp»-markør når booking-URL ikke har tilsvarende semantikk. \\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
 \footnotesize
-\item Eksakt mapping fra NHNs \texttt{GuestUrl}/\texttt{HostUrl} til feltene beskrives i implementasjonskapittelet; klienten skal likevel kun forholde seg til ett felles svarobjekt.
+\item Eksakt mapping fra NHNs \texttt{GuestUrl}/\texttt{HostUrl} til feltene beskrives i delkapittel~\ref{sec:NHN-provider}; klienten skal likevel kun forholde seg til ett felles svarobjekt.
 \end{tablenotes}
 \end{threeparttable}
 \end{table}

@@ -20,8 +20,8 @@ DI-registreringer og de egendefinerte exception-typene ble enhetstestet
 av samme grunn. \texttt{VideoMetrics} ble bevisst utelatt fra
 enhetstestene fordi klassen instrumenterer Prometheus via statiske
 metoder uten testbar logikk; den ble i stedet verifisert indirekte
-gjennom E2E-fase~9 og manuell Grafana-sjekk
-(jf.\ avsnitt~\ref{sec:e2e-testing}).
+gjennom \gls{e2e}-fase~9 og manuell Grafana-sjekk
+(jf.\ delkapittel~\ref{sec:e2e-testing}).
 
 Et eksempel på en happy path-test verifiserte at
 \texttt{CreateRoomAsync} sendte riktig request-body og mappet responsen
@@ -54,8 +54,7 @@ Assert.Equal(500, ex.StatusCode);
 \texttt{NHNVideoProviderTests.UnsupportedOperations\_ThrowNotSupportedException}
 verifiserte at start, stopp og romtoken for NHN kastet
 \texttt{NotSupportedException}.
-\texttt{VideoProviderFactoryTests.GetProvider\_MixedCaseKey\_ReturnsRegisteredProvider}
-bekreftet case-insensitivt provider-oppslag med \texttt{"NhN"} som testdata.
+\texttt{VideoProviderFactoryTests.GetProvider\_MixedCaseKey\_ReturnsRegisteredProvider} bekreftet case-insensitivt provider-oppslag med \texttt{''NhN''} som testdata.
 
 \subsection{Token-håndtering}
 \label{subsec:token-haandtering}

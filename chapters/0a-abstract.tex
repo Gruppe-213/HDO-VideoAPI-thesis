@@ -1,36 +1,37 @@
 \chapter*{Abstract}
-\noindent\textbf{English title:} HDO VideoAPI: A Provider-Based Middleware for
+\noindent\textbf{Title:} HDO VideoAPI: A Provider-Based Middleware for
 Unified Access to Multiple Video Engines in Norwegian Emergency Medicine
 
 \bigskip
 
-\gls{hdo} operates video solutions that serve as decision support for \gls{amk}
-and \gls{lvs} operators in Norway. The solutions are built on two video engines,
-AntMedia Server and \gls{nhn} Video, which cover the same need but have different
-\gls{api}s, authentication mechanisms, and domain models. Parallel integration
-with both engines increases the complexity of operations and further development,
-and raises the barrier to switching providers or adding new video engines.
+In Norwegian emergency medicine, video streaming is used as decision support
+for \gls{amk} and \gls{lvs} operators. The video solution is operated by \gls{hdo}
+and is built on two separate video engines that are technically dissimilar, which
+complicates unified access for client applications.
 
-This thesis investigates whether a \gls{provider}-based \gls{mellomvare} can give
-HDO a single unified API for managing video rooms, while logic specific to each
-video engine is kept separate from the rest of the system. The project was carried
-out as a design and implementation project. The solution was developed in ASP.NET
-Core with dedicated providers for AntMedia Server and NHN Video, \gls{token}-based
-authentication, Docker support, health checks, structured logging, and Prometheus
-metrics.
+This thesis investigates to what extent a \gls{provider}-based middleware
+architecture can expose a single common \gls{api} to clients, while logic specific
+to each video engine is kept isolated from the core. The assessment is made along
+three dimensions: API coverage, backend isolation, and non-functional requirements.
+Limitations arising from heterogeneous domain models are discussed as part of this.
 
-The evaluation consisted of requirements tracing, automated unit and integration
-tests, end-to-end testing against HDO's test environments, and a final evaluation
-from HDO. The architecture covers the core operations of creating, retrieving, and
-deleting video rooms across both engines, and the provider layer isolates most of
-the backend-specific logic. Full standardization is nevertheless difficult when the
-video engines are built on different domain models. This is particularly true for
-starting and stopping video streams, which do not carry the same meaning in
-AntMedia and NHN Video.
+The project was carried out as a design and implementation project with an
+iterative working process. The solution was evaluated through requirements
+traceability, automated tests, end-to-end testing against HDO's test
+environments, architectural validation in which two additional providers were
+added, and a structured final evaluation from the client.
 
-A provider-based middleware reduces the coupling between HDO's client systems and
-the underlying video engines, and makes it easier to support new video platforms in
-the future. The result is a proof-of-concept demonstrating that the architecture is
-feasible in practice. For the solution to be taken into production, it must be
-further developed with stricter authorization, robust token validation, scalability
-testing, and improved error handling against external video engines.
+The results show that the architecture covers the core operations of creating,
+retrieving, and deleting video rooms across both engines, and that backend-specific
+logic can largely be isolated within the provider layer. Full standardization is
+nevertheless difficult when the engines are built on different domain models ---
+this applies in particular to starting and stopping video streams, where the
+semantics are not comparable between the two engines. The non-functional
+requirements for observability, logging, and operability are also met.
+
+The conclusion is that a provider-based middleware is suitable for HDO's
+proof-of-concept context. For the solution to be taken into production, further
+development is required on two fronts: security, in the form of a stricter
+authorization model and production-ready \gls{token} validation; and robustness,
+in the form of load testing and more systematic handling of error states in
+external video engines.

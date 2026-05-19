@@ -28,7 +28,7 @@ For å unngå at provider-koden kaster generiske \texttt{Exception}-objekter som
 
 Løsningen er modulær og kan enkelt utvides med nye domenespesifikke exceptions ved behov, uten endringer i eksisterende håndteringslogikk. Tabell~\ref{tab:domain-exceptions} oppsummerer typene.
 
-\begin{table}[htbp]
+\begin{table}[H]
 \centering
 \caption{Domenespesifikke exceptions og tilhørende HTTP-statuskoder.}
 \label{tab:domain-exceptions}
@@ -45,7 +45,6 @@ Løsningen er modulær og kan enkelt utvides med nye domenespesifikke exceptions
 \end{tabular}
 \end{table}
 
-\newpage
 % I praksis kastes unntakene fra provider-laget og service-laget der feilen faktisk oppdages. Kodeliste~\ref{lst:notfound-throw} viser hvordan AntMedia-provideren oversetter en HTTP-status \texttt{404 Not Found} fra ekstern tjeneste til \texttt{NotFoundException}, og hvordan andre feil pakkes inn som \texttt{ExternalServiceException} med den opprinnelige statuskoden bevart:
 
 I praksis kastes exceptions fra provider-laget der feilen faktisk oppdages. \texttt{AntMediaProvider} benytter en privat hjelpemetode, \texttt{EnsureSuccessOrThrowAsync}, som kalles etter hvert kall mot den eksterne tjenesten og oversetter HTTP-feil til domenespesifikke exceptions: en \texttt{404 Not Found} blir til \texttt{NotFoundException}, mens andre feil pakkes inn som \texttt{ExternalServiceException} med den opprinnelige statuskoden bevart (kodeliste~\ref{lst:notfound-throw}).
@@ -188,14 +187,7 @@ public async ValueTask<bool> TryHandleAsync( ... )
 
 % I tråd med krav O1.1 \cite{hdo_kravspec} logges aldri API-nøkler, JWT-tokens eller annen hemmelig informasjon. Exception-typene er bevisst utformet slik at meldingsfeltet kun inneholder ressurs-ID-er og tjenestenavn, og ikke potensielt sensitive verdier.
 
-Krav O1.1 \cite{hdo_kravspec} stiller krav om at API-nøkler, JWT-tokens
-og annen konfidensiell informasjon ikke skal forekomme i logger.
-Oppfyllelsen er sikret strukturelt: exception-klassene er utformet slik
-at \texttt{Message}-feltet utelukkende inneholder ressurs-ID-er og
-tjenestenavn. Siden \texttt{LogError}/\texttt{LogWarning} kun
-videresender exception-objektet og en statisk streng, kan ingen
-hemmelig informasjon nå logg-destinasjonen selv om en fremtidig
-exception-type skulle konstrueres feil.
+Krav O1.1 \cite{hdo_kravspec} stiller krav om at API-nøkler, JWT-tokens og annen konfidensiell informasjon ikke skal forekomme i logger. Oppfyllelsen er ivaretatt ved at exception-klassene er utformet slik at \texttt{Message}-feltet kun inneholder informasjon som anses nødvendig for feilsøking, som ressurs-ID, tjenestenavn og responskropp fra eksterne tjenester. I \texttt{GlobalExceptionHandler} videresendes exception-objektet direkte til \texttt{LogError}/ \texttt{LogWarning}, slik at detaljert kontekst blir tilgjengelig i loggene. Dette innebærer at responsinnhold fra upstream-tjenester kan logges i sin helhet. Valget ble gjort for å forenkle diagnostisering og feilsøking, og ble vurdert og akseptert i samråd med HDO, under forutsetning av at responsene ikke inneholder API-nøkler, JWT-tokens eller annen sensitiv informasjon.
 
 \subsection{Klientsidens behandling av Problem Details}
 \label{subsec:errors-client}
