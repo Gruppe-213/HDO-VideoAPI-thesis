@@ -222,6 +222,7 @@ export async function apiCall<T>(fn: () => Promise<Response>): Promise<T> {
     return JSON.parse(text);
 }
 
+// Formaterer feilmelding for visning
 export function getErrorMessage(err: unknown): string {
     if (err instanceof ApiError) {
         const trace = err.problem.traceId ? ` (Trace: ${err.problem.traceId})` : '';
