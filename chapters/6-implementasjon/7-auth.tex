@@ -5,7 +5,7 @@ Backenden bruker Keycloak som ekstern identitetsleverandør for autentisering, b
 
 \subsection{Token-flyt}
 
-Klienter autentiserer seg ved å sende en \texttt{POST}-forespørsel til \texttt{/auth/token}, der \texttt{clientId} og \texttt{clientSecret} inkluderes i request-bodyen. \texttt{AuthController} videresender forespørselen til \texttt{KeycloakService}, som kaller Keycloaks token-endepunkt med \texttt{client\_credentials}-grant og returnerer \texttt{access\_token} til klienten (jf. kodeliste~\ref{lst:auth-controller}--\ref{lst:keycloak-service}). Systemet lagrer ingen tokens server-side og er dermed fullstendig tilstandsløst.
+Klienter autentiserer seg ved å sende en \texttt{POST}-forespørsel til \texttt{/auth/token}, der \texttt{clientId} og \texttt{clientSecret} inkluderes i request-bodyen. \texttt{AuthController} videresender forespørselen til \texttt{KeycloakService}, som kaller Keycloaks token-endepunkt med \texttt{client\_credentials}-grant og returnerer \texttt{access\_token} til klienten (jf. kodeliste~\ref{lst:auth-controller}--\ref{lst:keycloak-service}). Systemet lagrer ingen rom- eller sesjonsdata server-side. \texttt{NHNTokenCache} mellomlagrer NHN-opplastingstokenet prosessinternt, men ingen videoromtilstand persisteres mellom forespørsler.
 
 \begin{lstlisting}[language={[Sharp]C}, label=lst:auth-controller, caption={\texttt{AuthController.cs} – token-endepunkt}]
 // HDO-VideoAPI/Controllers/AuthController.cs
