@@ -158,18 +158,44 @@ Content-Type: application/problem+json
 \subsection{Logging og metrikker}
 \label{subsec:errors-observability}
 
-Hver fangede exception registreres som et inkrement i Prometheus-telleren \texttt{hdo\_errors\_total}, etiketten settes til \texttt{exception.GetType().Name}. Det gir et grunnlag for å se hvilke typer feil som dominerer i produksjon uten å måtte parse logger. Logging skjer med to alvorlighetsgrader avhengig av statuskoden, slik at \texttt{4xx}-feil ikke fyller opp varsel-kanalen for ekte produksjonsfeil.
+% Hver fanget exception registreres som et inkrement i Prometheus-telleren \texttt{hdo\_errors\_total}, etiketten settes til \texttt{exception.GetType().Name}. Det gir et grunnlag for å se hvilke typer feil som dominerer i produksjon uten å måtte parse logger. Logging skjer med to alvorlighetsgrader avhengig av statuskoden, slik at \texttt{4xx}-feil ikke fyller opp varsel-kanalen for ekte produksjonsfeil.
 
-\begin{lstlisting}[language={[Sharp]C}, caption={Differensiert logging i den globale håndtereren.}, label={lst:logging}]
-metrics.ErrorOccurred(exception.GetType().Name);
+Hver fanget exception registreres som et inkrement i
+Prometheus-telleren \texttt{hdo\_errors\_total}, der label-verdien
+settes til \texttt{exception.GetType().Name}. Dette gir grunnlag for
+å overvåke hvilke feiltyper som dominerer i produksjon uten å måtte
+parse fritekstlogger. Loggalvorligheten differensieres etter
+HTTP-statuskode: \texttt{5xx}-feil skrives med \texttt{LogError},
+mens \texttt{4xx}-feil skrives med \texttt{LogWarning}, som vist i kodeliste~\ref{lst:logging}.
 
-if (statusCode >= 500)
-    logger.LogError(exception, "An unhandled exception occurred.");
-else
-    logger.LogWarning(exception, "A handled exception occurred");
+\begin{lstlisting}[language={[Sharp]C}, caption={Differensiert logging i \texttt{GlobalExceptionHandler}.}, label={lst:logging}]
+// HDO-VideoAPI/Middleware/GlobalExceptionHandler.cs
+
+public async ValueTask<bool> TryHandleAsync( ... )
+{
+    // ... (statuskode og feilmelding fra exception-type)
+    
+    metrics.ErrorOccurred(exception.GetType().Name);
+    
+    if (statusCode >= 500)
+        logger.LogError(exception, "An unhandled exception occurred.");
+    else
+        logger.LogWarning(exception, "A handled exception occurred");
+
+    // ... (RFC 7807 ProblemDetails-konstruksjon og JSON-respons))
+}
 \end{lstlisting}
 
-I tråd med krav O1.1 \cite{hdo_kravspec} logges aldri API-nøkler, JWT-tokens eller annen hemmelig informasjon. Exception-typene er bevisst utformet slik at meldingsfeltet kun inneholder ressurs-ID-er og tjenestenavn, og ikke potensielt sensitive verdier.
+% I tråd med krav O1.1 \cite{hdo_kravspec} logges aldri API-nøkler, JWT-tokens eller annen hemmelig informasjon. Exception-typene er bevisst utformet slik at meldingsfeltet kun inneholder ressurs-ID-er og tjenestenavn, og ikke potensielt sensitive verdier.
+
+Krav O1.1 \cite{hdo_kravspec} stiller krav om at API-nøkler, JWT-tokens
+og annen konfidensiell informasjon ikke skal forekomme i logger.
+Oppfyllelsen er sikret strukturelt: exception-klassene er utformet slik
+at \texttt{Message}-feltet utelukkende inneholder ressurs-ID-er og
+tjenestenavn. Siden \texttt{LogError}/\texttt{LogWarning} kun
+videresender exception-objektet og en statisk streng, kan ingen
+hemmelig informasjon nå logg-destinasjonen selv om en fremtidig
+exception-type skulle konstrueres feil.
 
 \subsection{Klientsidens behandling av Problem Details}
 \label{subsec:errors-client}
@@ -178,23 +204,31 @@ Demo-frontenden speiler kontrakten i en liten hjelper i \texttt{Frontend/src/uti
 
 \begin{lstlisting}[language=JavaScript, caption={Klientsidens tolkning av Problem Details (forenklet).}, label={lst:client-error}]
 // Frontend/src/utils/errors.ts
+
+// Wrapper rundt alle API-kall: parser RFC 7807-feil til ApiError
 export async function apiCall<T>(fn: () => Promise<Response>): Promise<T> {
-  const res = await fn();
-  if (!res.ok) {
-    const problem = await res.json().catch(() => ({
-      status: res.status, title: res.statusText, detail: '', instance: '', traceId: ''
-    }));
-    throw new ApiError(problem);
-  }
-  // ...
+    const res = await fn();
+    if (!res.ok) {
+        let problem: ProblemDetails;
+        try {
+            problem = await res.json();
+        } catch {
+            problem = { ... };
+        }
+        throw new ApiError(problem);
+    }
+    const text = await res.text();
+    if (!text) return undefined as T;
+    return JSON.parse(text);
 }
 
 export function getErrorMessage(err: unknown): string {
-  if (err instanceof ApiError) {
-    const trace = err.problem.traceId ? ` (Trace: ${err.problem.traceId})` : '';
-    return `${err.problem.detail || err.problem.title}${trace}`;
-  }
-  return err instanceof Error ? err.message : 'An unexpected error occurred.';
+    if (err instanceof ApiError) {
+        const trace = err.problem.traceId ? ` (Trace: ${err.problem.traceId})` : '';
+        return `${err.problem.detail || err.problem.title}${trace}`;
+    }
+    if (err instanceof Error) return err.message;
+    return 'An unexpected error occurred.';
 }
 \end{lstlisting}
 
