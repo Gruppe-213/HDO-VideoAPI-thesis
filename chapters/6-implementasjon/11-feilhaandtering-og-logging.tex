@@ -82,28 +82,34 @@ private static async Task EnsureSuccessOrThrowAsync( ... )
 \begin{lstlisting}[language={[Sharp]C}, caption={Tilordning fra exception-type til HTTP-statuskode i \texttt{GlobalExceptionHandler}}, label={lst:mapping}]
 // HDO-VideoAPI/Middleware/GlobalExceptionHandler.cs
 
-var (statusCode, errorResponse) = exception switch
+public async ValueTask<bool> TryHandleAsync( ... )
 {
-    BadRequestException        => (400, new { error = "Bad Request" }),
-    ArgumentException          => (400, new { error = "Invalid Argument" }),
-    NotFoundException          => (404, new { error = "Resource Not Found" }),
-    OperationCanceledException => (499, new { error = "Request was cancelled" }),
-    NotSupportedException      => (501, new { error = "Not Supported" }),
-    ExternalServiceException   => (502, new { error = "External Service Error" }),
-    ConfigurationException     => (503, new { error = "Service Unavailable due to configuration error" }),
-    _                          => (500, new { error = "An unexpected error occurred." })
-};
+    var (statusCode, errorResponse) = exception switch
+    {
+        BadRequestException        => (400, new { error = "Bad Request" }),
+        ArgumentException          => (400, new { error = "Invalid Argument" }),
+        NotFoundException          => (404, new { error = "Resource Not Found" }),
+        OperationCanceledException => (499, new { error = "Request was cancelled" }),
+        NotSupportedException      => (501, new { error = "Not Supported" }),
+        ExternalServiceException   => (502, new { error = "External Service Error" }),
+        ConfigurationException     => (503, new { error = "Service Unavailable due to configuration error" }),
+        _                          => (500, new { error = "An unexpected error occurred." })
+    };
+
+    // ... (metrikk, logging, RFC 7807 ProblemDetails-konstruksjon og JSON-respons)
+}
 \end{lstlisting}
 
-I tillegg til de fire domenespesifikke exception-typene håndteres også \texttt{ArgumentException}, \texttt{OperationCanceledException} og \texttt{NotSupportedException} eksplisitt, slik at vanlige rammeverks-exceptions ikke eksponeres som \texttt{500}-svar. Den avsluttende \texttt{\_}-armen fungerer som et sikkerhetsnett: Alle unntak som ikke identifiseres eksplisitt, returneres som \texttt{500 Internal Server Error} med en generisk feilmelding.
+I tillegg til de fire domenespesifikke exception-typene håndteres også \texttt{ArgumentException}, \texttt{OperationCanceledException} og \texttt{NotSupportedException} eksplisitt, slik at vanlige rammeverks-exceptions ikke eksponeres som \texttt{500}-svar. Den avsluttende \texttt{\_}-armen fungerer som et sikkerhetsnett og returnerer \texttt{500 Internal Server Error} med en generisk feilmelding for alle exceptions som ikke fanges av de øvrige armene.
 
 \subsection{Svarformat: Problem Details}
 \label{subsec:errors-problemdetails}
 
 Selve responsen bygges som et \texttt{ProblemDetails}-objekt og serialiseres med \texttt{Content-Type: application/problem+json}, slik RFC~7807 krever \cite{rfc7807}. For \texttt{5xx}-feil overskrives \texttt{Detail}-feltet med en generisk tekst, mens \texttt{TraceId} alltid legges inn i utvidelsene. Dette gjør at en supportlogg kan kobles til et bestemt feilrespons uten at sensitive detaljer kommer ut til klienten:
 
-\begin{lstlisting}[language={[Sharp]C}, caption={Bygging av ProblemDetails-respons.}, label={lst:problemdetails}]
-// Middleware/GlobalExceptionHandler.cs
+\begin{lstlisting}[language={[Sharp]C}, caption={Bygging av \texttt{ProblemDetails}-respons.}, label={lst:problemdetails}]
+// HDO-VideoAPI/Middleware/GlobalExceptionHandler.cs
+
 var problemDetails = new ProblemDetails
 {
     Status   = statusCode,
