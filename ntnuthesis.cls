@@ -213,10 +213,16 @@
 
 % Add unnumbered chapters to table of contents and headings
 \let\std@schapter\@schapter
+% \def\@schapter#1{
+%     \std@schapter{#1}
+%     \addcontentsline{toc}{chapter}{#1}
+%     \def\ch@ptermark{#1}
+% }
+
 \def\@schapter#1{
     \std@schapter{#1}
     \addcontentsline{toc}{chapter}{#1}
-    \def\ch@ptermark{#1}
+    \markboth{#1}{#1}
 }
 
 % Dotted line and tighter vertical spacing for chapters in the table of contents
@@ -247,8 +253,9 @@
 \def\ps@ntnuheadings{%
     \let\@evenfoot\@empty
     \let\@oddfoot\@empty
-    \def\@evenhead{\small\thepage\hfil\textit{\@shortauthor: \@shorttitle}}
+    \def\@evenhead{\small\thepage\hfil\textit{\@shorttitle}}
     \def\@oddhead{\small\textit{\ch@ptermark}\hfil\thepage}
+    
     \def\chaptermark##1{\def\ch@ptermark{\chaptername\ \thechapter: ##1}}
 }
 \pagestyle{ntnuheadings}
