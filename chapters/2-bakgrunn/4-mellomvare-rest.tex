@@ -1,7 +1,9 @@
 \section{Mellomvare og REST}
 \label{sec:mellomvare-rest}
 
-Mellomvare er programvare som fungerer som et kommunikasjonslag mellom applikasjoner og tjenester. I stedet for at hver applikasjon må koble seg direkte til alle andre, kobler de seg til mellomvaren, som håndterer ruting, sikkerhet og protokolloversettelse på tvers av systemene \cite{azure_middleware}. Figur~\ref{fig:mellomvare} illustrerer dette prinsippet i kontekst av prosjektet: klienten forholder seg utelukkende til VideoAPI, mens kommunikasjonen med de underliggende videomotorene håndteres internt.
+% Mellomvare er programvare som fungerer som et kommunikasjonslag mellom applikasjoner og tjenester. I stedet for at hver applikasjon må koble seg direkte til alle andre, kobler de seg til mellomvaren, som håndterer ruting, sikkerhet og protokolloversettelse på tvers av systemene \cite{bernstein-middleware}. Figur~\ref{fig:mellomvare} illustrerer dette prinsippet i kontekst av prosjektet: klienten forholder seg utelukkende til VideoAPI, mens kommunikasjonen med de underliggende videomotorene håndteres internt.
+
+Mellomvare er distribuerte systemtjenester med standardiserte programmeringsgrensesnitt og protokoller som befinner seg mellom applikasjonene og de underliggende operativsystem- og nettverkstjenestene, og som maskerer heterogenitet i de underliggende plattformene \cite{bernstein-middleware}. I stedet for at hver applikasjon må koble seg direkte til alle andre, kobler de seg til mellomvaren, som håndterer ruting og protokolloversettelse på tvers av systemene. Figur~\ref{fig:mellomvare} illustrerer dette prinsippet i kontekst av prosjektet: klienten forholder seg utelukkende til VideoAPI, mens kommunikasjonen med de underliggende videomotorene håndteres internt.
 
 \begin{figure}[htbp]
 \centering
