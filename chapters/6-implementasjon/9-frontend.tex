@@ -21,7 +21,7 @@ brukes AntMedias offisielle adapter, som håndterer \gls{ice}-forhandling og
 signalering slik at koden kan konsentrere seg om brukerflyt fremfor
 lavnivå-detaljer.
 
-\begin{table}[h]
+\begin{table}[H]
 \centering
 \caption{Sentrale teknologier i demo-frontenden.}
 \label{tab:frontend-tech}
@@ -51,14 +51,14 @@ API-kontrakten typisk gir kompilatorfeil på klientsiden.
 
 Innlogging skjer ved at frontenden sender en forespørsel mot \texttt{/auth/token} endepunktet med \texttt{clientId} og \texttt{clientSecret}, som vist i figur~\ref{fig:frontend-login-dashboard}a. Tokenet lagres i \texttt{sessionStorage} og utløper etter fire minutter, noe kortere enn Keycloaks levetid. Brukeren sendes deretter automatisk tilbake til \texttt{Login} (innloggingssiden) når sesjonen utløper. Alle API-kall går gjennom en felles hjelper som setter \texttt{Authorization}-headeren og håndterer \texttt{401 Unauthorized}-svar sentralt. Etter innlogging vises \texttt{Dashboard} (jf. figur~\ref{fig:frontend-login-dashboard}b), som henter tilgjengelige providers fra \texttt{/health/ready} og lister opp eksisterende rom.
 
-% \begin{figure}[h]
+% \begin{figure}[H]
 %     \centering
 %     \includegraphics[width=0.9\linewidth]{figures/hdo-login.jpg}
 %     \caption{\texttt{Login} -- innloggingsside.}
 %     \label{fig:frontend-login}
 % \end{figure}
 
-% \begin{figure}[h]
+% \begin{figure}[H]
 %     \centering
 %     \includegraphics[width=0.9\linewidth]{figures/hdo-dashboard.jpg}
 %     \caption{\texttt{Dashboard} -- oversiktsside.}
@@ -99,7 +99,7 @@ som eksempel. Fra \texttt{Dashboard} velger brukeren rommet og kommer til
 \texttt{Room}-siden (jf. figur~\ref{fig:frontend-room}), som viser rommets status og gir
 tilgang til \texttt{Broadcast}- og \texttt{Watch}-lenkene.
 
-\begin{figure}[h]
+\begin{figure}[H]
   \centering
   \includegraphics[width=1\textwidth]{figures/hdo-rom.jpg}
   \caption{\texttt{Room}-siden for \texttt{antmedia-rom-1} med strømalternativer.}
@@ -125,7 +125,7 @@ på avsenderenheten under en aktiv strøm. Samtidig kan en annen deltaker åpne
 nettleseren (figur~\ref{fig:frontend-broadcast-watch}b). Tokenene er generert og verifiseres av AntMedia; verken avsender eller mottaker trenger
 en Keycloak-konto for å delta.
 
-\begin{figure}[h]
+\begin{figure}[H]
   \centering
   \begin{minipage}[c]{0.26\textwidth}
     \centering
