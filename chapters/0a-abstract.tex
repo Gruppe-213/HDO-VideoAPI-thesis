@@ -1,33 +1,36 @@
 \chapter*{Abstract}
-\gls{hdo} drifter videoløsninger som er beslutningsstøtte for \gls{amk}
-og \gls{lvs} i Norge. Løsningene bygger på to videomotorer, AntMedia
-Server og \gls{nhn} Video, som dekker det samme behovet, men har ulike
-\gls{api}-er, autentiseringsmekanismer og domenemodeller. Parallell
-integrasjon mot begge motorene øker kompleksiteten i drift og
-videreutvikling, og hever terskelen for å bytte leverandør eller legge
-til nye videomotorer.
+\noindent\textbf{English title:} HDO VideoAPI: A Provider-Based Middleware for
+Unified Access to Multiple Video Engines in Norwegian Emergency Medicine
 
-Oppgaven undersøker om en \gls{provider}-basert \gls{mellomvare} kan
-gi HDO ett felles API for håndtering av videorom, mens logikk som er
-spesifikk for hver videomotor holdes adskilt fra resten av systemet.
-Prosjektet ble gjennomført som et design- og implementasjonsprosjekt.
-Løsningen ble utviklet i ASP.NET Core med egne providere for AntMedia
-Server og NHN Video, \gls{token}-basert autentisering, Docker-støtte,
-helsesjekker, strukturert logging og Prometheus-metrikker.
+\bigskip
 
-Evalueringen besto av kravsporing, automatiserte enhets- og
-integrasjonstester, ende-til-ende-testing mot HDOs testmiljøer og en
-sluttevaluering fra HDO. Arkitekturen dekker kjerneoperasjonene
-oppretting, henting og sletting av videorom på tvers av begge motorene,
-og provider-laget isolerer det meste av den backend-spesifikke
-logikken. Full standardisering er likevel vanskelig når videomotorene
-bygger på ulike domenemodeller. Det gjelder særlig start og stopp av
-videostrøm, som ikke har samme betydning i AntMedia og NHN Video.
+\gls{hdo} operates video solutions that serve as decision support for \gls{amk}
+and \gls{lvs} operators in Norway. The solutions are built on two video engines,
+AntMedia Server and \gls{nhn} Video, which cover the same need but have different
+\gls{api}s, authentication mechanisms, and domain models. Parallel integration
+with both engines increases the complexity of operations and further development,
+and raises the barrier to switching providers or adding new video engines.
 
-En provider-basert mellomvare reduserer koblingen mellom HDOs
-klientsystemer og de underliggende videomotorene, og gjør det enklere
-å støtte nye videoplattformer i fremtiden. Resultatet er et
-proof-of-concept som viser at arkitekturen er gjennomførbar i praksis.
-Skal løsningen tas i produksjon, må den videreutvikles med strengere
-autorisasjon, robust tokenvalidering, skaleringstesting og bedre
-feilhåndtering mot eksterne videomotorer.
+This thesis investigates whether a \gls{provider}-based \gls{mellomvare} can give
+HDO a single unified API for managing video rooms, while logic specific to each
+video engine is kept separate from the rest of the system. The project was carried
+out as a design and implementation project. The solution was developed in ASP.NET
+Core with dedicated providers for AntMedia Server and NHN Video, \gls{token}-based
+authentication, Docker support, health checks, structured logging, and Prometheus
+metrics.
+
+The evaluation consisted of requirements tracing, automated unit and integration
+tests, end-to-end testing against HDO's test environments, and a final evaluation
+from HDO. The architecture covers the core operations of creating, retrieving, and
+deleting video rooms across both engines, and the provider layer isolates most of
+the backend-specific logic. Full standardization is nevertheless difficult when the
+video engines are built on different domain models. This is particularly true for
+starting and stopping video streams, which do not carry the same meaning in
+AntMedia and NHN Video.
+
+A provider-based middleware reduces the coupling between HDO's client systems and
+the underlying video engines, and makes it easier to support new video platforms in
+the future. The result is a proof-of-concept demonstrating that the architecture is
+feasible in practice. For the solution to be taken into production, it must be
+further developed with stricter authorization, robust token validation, scalability
+testing, and improved error handling against external video engines.
