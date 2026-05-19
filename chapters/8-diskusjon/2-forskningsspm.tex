@@ -9,41 +9,54 @@ tilgang til AntMedia Server og NHN Video gjennom ett felles API, samtidig
 som backend-spesifikk logikk isoleres fra kjernelogikken i VideoAPI?}
 \end{quote}
 
-Resultatet viser at en provider-basert mellomvarearkitektur i stor grad
-egner seg for dette formålet, men med noen viktige begrensninger.
-VideoAPI klarer å samle de sentrale romoperasjonene bak ett felles API:
-oppretting, henting og sletting av rom kan gjøres gjennom samme
-endepunkter uavhengig av videomotor. For klienten gir dette et mer
-standardisert grensesnitt enn direkte integrasjon mot AntMedia og NHN hver
-for seg.
+Svaret struktureres langs de tre dimensjonene etablert i
+kapittel~\ref{ch:introduction} (jf.~\ref{dim:api-dekning}--\ref{dim:nf-krav}).
 
-Samtidig viser prosjektet at standardisering ikke betyr at alle
-videomotorer kan behandles helt likt. AntMedia og NHN har ulike
-domenemodeller. AntMedia er strømorientert, mens NHN er møte- og
-bookingorientert. Derfor finnes det operasjoner, særlig start, stopp og
-romtoken, som ikke har identisk betydning i begge systemer. VideoAPI løser
-dette ved å tilby samme API-flate, men la provider-laget håndtere
-forskjellene og returnere tydelige svar når en operasjon ikke støttes.
+\subsection{Dimensjon 1: API-dekning}
+\label{sec:dim-api-dekning}
 
-Den viktigste styrken i løsningen er isoleringen av backend-spesifikk
-logikk. Controller-laget og de offentlige modellene forblir uavhengige av
-detaljene i AntMedia og NHN. Valideringen med ekstra providere viste også
-at nye videomotorer kunne legges til uten endringer i kjernelogikken.
-Dette støtter hovedideen bak arkitekturen: nye integrasjoner krever
-arbeid, men arbeidet lokaliseres til provider-laget i stedet for å spre
-seg gjennom hele API-et.
+Dimensjon~1 vurderer om ett felles API dekker kjerneoperasjonene fra HDOs
+kravspesifikasjon uavhengig av videomotor. Resultatet viser
+at VideoAPI klarer dette i stor grad: oppretting, henting og sletting av rom
+kan gjøres gjennom samme endepunkter uavhengig av om AntMedia eller NHN
+benyttes. For klienten gir dette et mer standardisert grensesnitt enn direkte
+integrasjon mot begge motorene hver for seg.
 
-De ikke-funksjonelle kravene støtter også forskningsspørsmålet. Løsningen
-har autentisering, containerisering, miljøbasert konfigurasjon,
-helsesjekker, logging og Prometheus/Grafana-metrikker. Dette gjør
-arkitekturen mer realistisk som mellomvare i HDOs driftskontekst. Likevel
-må resultatet forstås som et POC. Løsningen demonstrerer at
-arkitekturen fungerer, men den dokumenterer ikke full produksjonsmodenhet.
+Samtidig viser prosjektet at standardisering ikke betyr at alle videomotorer
+kan behandles helt likt. AntMedia er strømorientert, mens NHN er møte- og
+bookingorientert. Operasjoner som start, stopp og romtoken har derfor ikke
+identisk betydning i begge systemer. VideoAPI løser dette ved å tilby samme
+API-flate, men la provider-laget håndtere forskjellene og returnere tydelige
+svar når en operasjon ikke støttes.
 
-Samlet er svaret derfor at en provider-basert mellomvarearkitektur i stor
-grad kan standardisere tilgangen til AntMedia og NHN gjennom ett felles
-API, så lenge standardiseringen forstås som en felles API-kontrakt og ikke
-som full semantisk likhet mellom videomotorene. Backend-spesifikk logikk
-kan isoleres fra kjernelogikken, men de underliggende forskjellene må
-fortsatt håndteres eksplisitt i provider-laget og dokumenteres for
-klientene.
+\subsection{Dimensjon 2: Backend-isolering}
+\label{sec:dim-backend-isolering}
+
+Dimensjon~2 vurderer om backend-spesifikk logikk kan holdes innenfor
+provider-laget. Den viktigste styrken i løsningen er nettopp denne
+isoleringen: controller-laget og de offentlige modellene forblir uavhengige
+av detaljene i AntMedia og NHN. Valideringen med ekstra providere viste også
+at nye videomotorer kunne legges til uten endringer i kjernelogikken
+(jf. delkapittel~\ref{sec:provider-validering}). Dette støtter hovedideen
+bak arkitekturen: nye integrasjoner krever arbeid, men arbeidet lokaliseres
+til provider-laget i stedet for å spre seg gjennom hele API-et.
+
+\subsection{Dimensjon 3: Ikke-funksjonelle krav}
+\label{sec:dim-nf-krav}
+
+Dimensjon~3 vurderer om sikkerhets-, infrastruktur- og observability-kravene
+er oppfylt på et nivå som er hensiktsmessig for et POC. Løsningen har
+autentisering, containerisering, miljøbasert konfigurasjon, helsesjekker,
+logging og Prometheus/Grafana-metrikker. Dette gjør arkitekturen mer
+realistisk som mellomvare i HDOs driftskontekst. Likevel må resultatet
+forstås som et POC: løsningen demonstrerer at arkitekturen fungerer, men den
+dokumenterer ikke full produksjonsmodenhet.
+
+\subsection{Samlet vurdering}
+
+Samlet er svaret at en provider-basert mellomvarearkitektur i stor grad kan
+standardisere tilgangen til AntMedia og NHN gjennom ett felles API, så lenge
+standardiseringen forstås som en felles API-kontrakt og ikke som full
+semantisk likhet mellom videomotorene. Backend-spesifikk logikk kan isoleres
+fra kjernelogikken, men de underliggende forskjellene må fortsatt håndteres
+eksplisitt i provider-laget og dokumenteres for klientene.

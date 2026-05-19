@@ -7,12 +7,26 @@ NHN gjennom en provider-basert arkitektur. Løsningen støtter
 tokenbasert autentisering, containerisert kjøring, miljøbasert
 konfigurasjon, logging, helsesjekker og Prometheus/Grafana-metrikker.
 
-Forskningsspørsmålet kan besvares positivt, men med forbehold. En
-provider-basert mellomvarearkitektur kan i stor grad standardisere tilgang
-til flere videomotorer og isolere backend-spesifikk logikk fra
-kjernelogikken. Samtidig viser prosjektet at et felles API ikke fjerner
-forskjeller mellom videomotorenes domenemodeller. AntMedia og NHN krever
-fortsatt ulik håndtering i provider-laget.
+Forskningsspørsmålet kan besvares positivt, men med forbehold. Svaret
+struktureres langs de tre dimensjonene fra kapittel~\ref{ch:introduction}
+(jf. avsnitt~\ref{sec:forskningsspm}):
+
+\textbf{Dimensjon~1 (API-dekning; jf.~\ref{dim:api-dekning}):}
+VideoAPI dekker kjerneoperasjonene fra kravspesifikasjonen bak ett felles
+API, men full semantisk likhet mellom AntMedia og NHN er ikke oppnåelig.
+AntMedia og NHN krever fortsatt ulik håndtering i provider-laget for
+operasjoner som start, stopp og romtoken.
+
+\textbf{Dimensjon~2 (backend-isolering; jf.~\ref{dim:backend-isolering}):}
+En provider-basert mellomvarearkitektur kan i stor grad isolere
+backend-spesifikk logikk fra controller-laget og API-kontrakten. Validering
+med ekstra providere bekrefter at nye videomotorer kan legges til uten
+endringer i kjernelogikken.
+
+\textbf{Dimensjon~3 (ikke-funksjonelle krav; jf.~\ref{dim:nf-krav}):}
+Sikkerhets-, infrastruktur- og observability-kravene er i hovedsak oppfylt
+på et nivå som er hensiktsmessig for et POC, men løsningen er ikke
+produksjonsklar uten videre herding av sikkerhet, testing og monitorering.
 
 Løsningen er derfor et godt grunnlag for videre arbeid, men ikke et
 produksjonsklart system. Før reell drift må sikkerheten herdes, testing og

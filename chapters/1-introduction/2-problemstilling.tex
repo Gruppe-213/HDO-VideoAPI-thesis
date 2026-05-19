@@ -1,4 +1,5 @@
 \section{Problemstilling}
+\label{sec:problemstilling}
 Eksisterende løsninger er hver bygget rundt sin egen videomotor, noe som vanskeliggjør både eksponering av et uniformt grensesnitt mot klientene og integrasjon av nye videomotorer. Systemets rolle i akuttmedisinsk infrastruktur innebærer at løsningen må oppfylle strenge krav til sikkerhet, tilgjengelighet, stabilitet og responstid.
 
 % Dette prosjektet utviklet og evaluerte en provider-basert mellomvare, VideoAPI, som standardiserer tilgang til ulike videomotorer. Løsningen ble implementert som proof-of-concept med støtte for AntMedia Server og NHN Video.
@@ -11,9 +12,9 @@ Med dette som utgangspunkt undersøker oppgaven følgende forskningsspørsmål:
 
 For å strukturere evalueringen er forskningsspørsmålet brutt ned i tre dimensjoner:
 \begin{description}
-    \item[Dimensjon 1 - API-dekning] vurderer om ett felles API faktisk dekker kjerneoperasjonene fra HDOs kravspesifikasjon på en måte klientene kan bruke uavhengig av underliggende videomotor.
-    \item[Dimensjon 2 - backend-isolering] vurderer i hvilken grad forskjeller mellom AntMedia Server og NHN Video kan holdes innenfor \gls{provider-laget}, slik at \gls{controller-laget} og API-kontrakten forblir uendret når en ny videomotor legges til.
-    \item[Dimensjon 3 - ikke-funksjonelle krav] vurderer om sikkerhets-, infrastruktur- og observability-kravene fra kravspesifikasjonen er oppfylt på et nivå som er hensiktsmessig for et \gls{poc}.
+    \item[Dimensjon 1 - API-dekning]\label{dim:api-dekning} vurderer om ett felles API faktisk dekker kjerneoperasjonene fra HDOs kravspesifikasjon på en måte klientene kan bruke uavhengig av underliggende videomotor.
+    \item[Dimensjon 2 - backend-isolering]\label{dim:backend-isolering} vurderer i hvilken grad forskjeller mellom AntMedia Server og NHN Video kan holdes innenfor \gls{provider-laget}, slik at \gls{controller-laget} og API-kontrakten forblir uendret når en ny videomotor legges til.
+    \item[Dimensjon 3 - ikke-funksjonelle krav]\label{dim:nf-krav} vurderer om sikkerhets-, infrastruktur- og observability-kravene fra kravspesifikasjonen er oppfylt på et nivå som er hensiktsmessig for et \gls{poc}.
 \end{description}
 
 % \emph{Dimensjon 1
