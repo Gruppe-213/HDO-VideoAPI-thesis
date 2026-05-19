@@ -8,6 +8,10 @@
 % PAKKER
 % -----------------------------------------------------------------------------
 
+% Mikrotypografi – reduserer overfull hbox automatisk
+\usepackage[final,babel]{microtype}
+\setlength{\emergencystretch}{1.5em}
+
 % Layout og sidehåndtering
 \usepackage{float}
 \usepackage{pdflscape}
@@ -21,7 +25,7 @@
 % Figurer, diagrammer og farger
 \usepackage{xcolor}
 \usepackage{tikz}
-\usetikzlibrary{positioning,arrows.meta,calc,fadings}
+\usetikzlibrary{positioning,arrows.meta,calc,fadings,shadings}
 \tikzfading[
     name=fadeout,
     left color=transparent!100,
@@ -31,6 +35,7 @@
     center color=transparent!0
 ]
 \usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
 \usepackage{pgfgantt}
 \usepackage{pgf-pie}
 \usepackage{svg}

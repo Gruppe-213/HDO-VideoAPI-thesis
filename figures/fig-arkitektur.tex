@@ -1,6 +1,7 @@
 \usetikzlibrary{positioning,arrows.meta}
 \begin{figure}[htbp]
 \centering
+\resizebox{\linewidth}{!}{%
 \begin{tikzpicture}[
     >={Stealth[length=2.5mm]},
     node distance=0.55cm,
@@ -66,7 +67,8 @@
 % --- Service to Keycloak (dashed) ---
 \draw[->, dashed, black!60] (svc.east) -- (kc.north);
 
-\end{tikzpicture}
+\end{tikzpicture}%
+}
 \caption{Overordnet lagarkitektur for HDO VideoAPI.}
 \label{fig:lagarkitektur}
 \end{figure}

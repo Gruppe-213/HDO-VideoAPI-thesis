@@ -89,12 +89,10 @@ videomotorene separat. Endringer i én motor påvirker alle klienter.}
 \node[motor]   (nhn) at (10, -2.5) {NHN Video};
 
 \draw[arr] (k1.east) -- (gw.west);
-      node[midway, above, lbl] {ruter};
 \draw[arr] (k2.east) -- (gw.west);
 \draw[arr] (gw.east) to[out=20,  in=180] (am.west)
     node[midway, above, lbl] {};
-\draw[arr] (gw.east) to[out=-20, in=180] (nhn.west)
-    % node[midway, below, lbl] {ruter};
+\draw[arr] (gw.east) to[out=-20, in=180] (nhn.west);
 
 \node[font=\footnotesize\rmfamily, text=red!70!black]
     at (5, -3.2) {Ingen semantisk oversettelse};
@@ -132,9 +130,8 @@ Domenemismatch mellom AntMedia og NHN løses ikke.}
 \node[motor]    (nhnb) at (13.5,-2.5) {NHN Video};
 
 \draw[arr] (k1.east)  -- (api.west);
-\draw[arr] (api.east) to[out=20,  in=180] (ant.west)
- % node[midway, below, lbl] {oversetter};
-\draw[arr] (api.east) to[out=-20, in=180] (nhn.west)
+\draw[arr] (api.east) to[out=20,  in=180] (ant.west);
+\draw[arr] (api.east) to[out=-20, in=180] (nhn.west);
 \draw[arr] (ant.east) -- (am.west);
 \draw[arr] (nhn.east) -- (nhnb.west);
 
