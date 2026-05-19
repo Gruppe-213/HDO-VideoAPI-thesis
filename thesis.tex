@@ -11,6 +11,11 @@
 % Mikrotypografi – reduserer overfull hbox automatisk
 \usepackage[final,babel]{microtype}
 \setlength{\emergencystretch}{1.5em}
+\usepackage{xurl}
+
+% Stavelsesdeling for norske sammensatte ord
+\hyphenation{pro-sjekt-struk-tur ar-beids-strøm-mer rap-port-skri-ving
+             kon-fi-gu-ra-sjon ob-ser-va-bi-li-ty im-ple-men-ta-sjon}
 
 % Layout og sidehåndtering
 \usepackage{float}
@@ -25,15 +30,7 @@
 % Figurer, diagrammer og farger
 \usepackage{xcolor}
 \usepackage{tikz}
-\usetikzlibrary{positioning,arrows.meta,calc,fadings,shadings}
-\tikzfading[
-    name=fadeout,
-    left color=transparent!100,
-    right color=transparent!100,
-    top color=transparent!100,
-    bottom color=transparent!100,
-    center color=transparent!0
-]
+\usetikzlibrary{positioning,arrows.meta,calc,shadings}
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.18}
 \usepackage{pgfgantt}

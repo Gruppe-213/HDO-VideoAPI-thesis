@@ -46,7 +46,7 @@ Filtreringen skjer via \texttt{.dockerignore}, som ekskluderer \texttt{.git/}, \
 
 Stacken som defineres i \texttt{compose.yaml} består av tre tjenester som alle deler et internt Docker-nettverk og kan referere til hverandre på tjenestenavn. Tabell~\ref{tab:compose-services} viser tjenestene og hvordan de eksponeres mot host.
 
-\begin{table}[h]
+\begin{table}[H]
 \centering
 \caption{Tjenester i Compose-stacken for HDO-VideoAPI.}
 \label{tab:compose-services}
@@ -110,7 +110,7 @@ Selv om VideoAPI selv er tilstandsløs (jf.\ krav I1.2 \cite{hdo_kravspec}), ska
 
 Tjenestene starter i kontrollert rekkefølge slik at metrikkstacken ikke logger feil før API-et er klart, som illustrert i figur~\ref{fig:compose_startup}.
 
-\begin{figure}[h]
+\begin{figure}[H]
     \centering
     \includegraphics[width=1\linewidth]{figures/compose_startup.png}
     \caption{Kontrollert oppstartsrekkefølge i Docker Compose-stacken. 

@@ -7,6 +7,7 @@ Figur~\ref{fig:adapter-general} viser den generelle strukturen: en klient forhol
 
 \begin{figure}[H]
 \centering
+\resizebox{\linewidth}{!}{%
 \begin{tikzpicture}[
     box/.style={
         rectangle, draw=black, thick,
@@ -32,7 +33,8 @@ Figur~\ref{fig:adapter-general} viser den generelle strukturen: en klient forhol
 \draw[arr]  (adapter.east)  -- (adaptee.west)
     node[midway, above=4pt, lbl] {delegates to};
 
-\end{tikzpicture}
+\end{tikzpicture}%
+}
 \caption{Adapter-mønsterets generelle struktur.}
 \label{fig:adapter-general}
 \end{figure}

@@ -6,7 +6,7 @@ gjennomgår tre tilnærminger og forklarer hvorfor provider-basert
 mellomvare ble vurdert som den mest hensiktsmessige løsningen for
 HDOs behov.
 
-Et beslektet eksempel finnes hos Singh~\cite{singh2026videio}, som
+Et beslektet eksempel finnes hos Singh~\cite{singh2026video}, som
 foreslår en generisk WebRTC-komponent for å redusere koblingen mellom
 webapplikasjoner og leverandørspesifikk signaleringslogikk. Forskjellen
 er at denne løsningen plasserer abstraksjonen i klientlaget, mens
@@ -108,6 +108,7 @@ Domenemismatch mellom AntMedia og NHN løses ikke.}
 
 \begin{figure}[H]
 \centering
+\resizebox{\linewidth}{!}{%
 \begin{tikzpicture}[
     box/.style={
         rectangle, draw=black, thick, rounded corners=3pt,
@@ -138,7 +139,8 @@ Domenemismatch mellom AntMedia og NHN løses ikke.}
 \node[font=\footnotesize\rmfamily, text=green!60!black]
     at (4.5,-3.2) {Semantisk oversettelse i provider-laget};
 
-\end{tikzpicture}
+\end{tikzpicture}%
+}
 \caption{Provider-basert mellomvare: klienten forholder seg til ett
 felles API. Provider-laget oversetter mellom felles modell og
 motorspesifikk semantikk.}
@@ -147,7 +149,7 @@ motorspesifikk semantikk.}
 
 \begin{table}[H]
 \centering
-\caption{Sammenligning av tilnærminger for integrasjon mot heterogene videomotorer.}
+\caption[Sammenligning av tilnærminger]{Sammenligning av tilnærminger for integrasjon mot heterogene videomotorer.}
 \label{tab:eksisterende-loesninger}
 \setlength{\extrarowheight}{6pt}
 \small
