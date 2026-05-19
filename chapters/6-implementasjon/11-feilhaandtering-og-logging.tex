@@ -105,33 +105,40 @@ I tillegg til de fire domenespesifikke exception-typene håndteres også \texttt
 \subsection{Svarformat: Problem Details}
 \label{subsec:errors-problemdetails}
 
-Selve responsen bygges som et \texttt{ProblemDetails}-objekt og serialiseres med \texttt{Content-Type: application/problem+json}, slik RFC~7807 krever \cite{rfc7807}. For \texttt{5xx}-feil overskrives \texttt{Detail}-feltet med en generisk tekst, mens \texttt{TraceId} alltid legges inn i utvidelsene. Dette gjør at en supportlogg kan kobles til et bestemt feilrespons uten at sensitive detaljer kommer ut til klienten:
+Selve responsen bygges som et \texttt{ProblemDetails}-objekt og serialiseres med \texttt{Content-Type: application/problem+json}, slik RFC~7807 krever \cite{rfc7807}. For \texttt{5xx}-feil overskrives \texttt{Detail}-feltet med en generisk tekst for å unngå at sensitive detaljer eksponeres mot klienten, mens \texttt{traceId} alltid legges inn i utvidelsene slik at en loggoppføring kan kobles til et bestemt feilsvar i ettertid.
 
 \begin{lstlisting}[language={[Sharp]C}, caption={Bygging av \texttt{ProblemDetails}-respons.}, label={lst:problemdetails}]
 // HDO-VideoAPI/Middleware/GlobalExceptionHandler.cs
 
-var problemDetails = new ProblemDetails
+public async ValueTask<bool> TryHandleAsync( ... )
 {
-    Status   = statusCode,
-    Title    = errorResponse.error,
-    Type     = $"https://httpstatuses.com/{statusCode}",
-    Detail   = statusCode >= 500
-                 ? "An internal error occurred. See the logs for more detail."
-                 : exception.Message,
-    Instance = httpContext.Request.Path
-};
-problemDetails.Extensions["traceId"] = httpContext.TraceIdentifier;
+    // ... (statuskode og feilmelding fra exception-type, metrikk og logging)
 
-if (exception is ExternalServiceException ext && ext.StatusCode.HasValue)
-    problemDetails.Extensions["externalStatusCode"] = ext.StatusCode.Value;
+    // Bygge ProblemDetails objekt
+    var problemDetails = new ProblemDetails
+    {
+        Status   = statusCode,
+        Title    = errorResponse.error,
+        Type     = $"https://httpstatuses.com/{statusCode}",
+        Detail   = statusCode >= 500
+                     ? "An internal error occurred. See the logs for more detail."
+                     : exception.Message,
+        Instance = httpContext.Request.Path
+    };
+    problemDetails.Extensions["traceId"] = httpContext.TraceIdentifier;
 
-httpContext.Response.StatusCode = statusCode;
-await httpContext.Response.WriteAsJsonAsync(
-    problemDetails, options: null,
-    contentType: "application/problem+json", cancellationToken);
+    // Bevarer ekstern statuskode for å skille mellom ulike 502-årsaker
+    if (exception is ExternalServiceException ext && ext.StatusCode.HasValue)
+        problemDetails.Extensions["externalStatusCode"] = ext.StatusCode.Value;
+    
+    httpContext.Response.StatusCode = statusCode;
+    await httpContext.Response.WriteAsJsonAsync(
+        problemDetails, options: null,
+        contentType: "application/problem+json", cancellationToken);
+}
 \end{lstlisting}
 
-For \texttt{ExternalServiceException} legges også feltet \texttt{externalStatusCode} til, slik at klienten kan skille mellom for eksempel et \texttt{502 Bad Gateway}-svar som skyldes at AntMedia returnerte \texttt{401 Unauthorized}, og et \texttt{502 Bad Gateway}-svar som skyldes at NHN ga \texttt{500 Internal Server Error}. Et typisk svar fra et oppslag på et ikke-eksisterende rom ser slik ut:
+For \texttt{ExternalServiceException} legges også feltet \texttt{externalStatusCode} til, slik at klienten kan skille mellom ulike årsaker til et \texttt{502 Bad Gateway}-svar --- for eksempel om AntMedia returnerte \texttt{401 Unauthorized} eller NHN ga \texttt{500 Internal Server Error}. Et typisk svar fra et oppslag på et ikke-eksisterende rom ser slik ut:
 
 \begin{lstlisting}[caption={Eksempel på Problem Details-respons fra API-et (HTTP 404).}, label={lst:problem-example}]
 HTTP/1.1 404 Not Found
