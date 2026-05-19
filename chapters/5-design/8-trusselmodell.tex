@@ -1,52 +1,66 @@
 \section{Trusselmodell og avveininger}
 \label{sec:trusselmodell}
 
-For å systematisere sikkerhetsdiskusjonen kan angrep mot VideoAPI grovt innrettes
-mot STRIDE-kategoriene \emph{spoofing}, \emph{tampering}, \emph{repudiation},
-\emph{information disclosure}, \emph{denial of service} og \emph{elevation of
-privilege}~\cite{stride_ms}. Tabell~\ref{tab:stride-videoapi} er ikke en full
-trusselmodelleringsøkt, men en komprimert oversikt over representative risikoer,
-tiltak som er innført, og bevisste begrensninger i proof-of-conceptet.
+Tabell~\ref{tab:stride-videoapi} gir en oversikt over representative trusler mot
+VideoAPI, innførte tiltak og bevisste begrensninger i proof-of-concept-et,
+organisert etter STRIDE-kategoriene~\cite{stride_ms}.
 
 \begin{table}[htbp]
 \centering
 \caption{STRIDE-orientert oversikt over trusler, tiltak og merknader for VideoAPI.}
 \label{tab:stride-videoapi}
-\small
-\begin{tabular}{p{2.6cm} p{4.2cm} p{6.6cm}}
+\begin{tabular}{p{2.8cm} p{5.0cm} p{7.2cm}}
 \toprule
-\textbf{STRIDE} & \textbf{Representativ trussel} & \textbf{Mitigasjon / merknad} \\
+\textbf{STRIDE} & \textbf{Trussel} & \textbf{Tiltak og merknader} \\
 \midrule
+
 Spoofing &
-Uvedkommende utgir seg for en legitim klient eller utsteder falske tokens. &
-OAuth~2.0 client credentials via Keycloak; JWT-signatur verifiseres mot JWKS.
-Issuer- og audience-validering er deaktivert i POC-et slik at deployment kan bytte Keycloak-instans; dette gir rom for feilkonfigurasjon og bør strammes inn i produksjon (se avsnitt~\ref{sec:design-sikkerhet}). \\
-\addlinespace
+Falske tokens eller klienter som utgir seg for legitime aktører. &
+JWT-signatur verifiseres mot Keycloaks JWKS-endepunkt.
+Issuer- og audience-validering er deaktivert i POC-et for å gjøre det enklere
+å bytte Keycloak-instans; bør aktiveres i produksjon. \\
+
+\addlinespace[6pt]
+
 Tampering &
-HTTP-trafikk eller nyttelaster endres underveis. &
-TLS i drift; signerte JWT som bærer autorisasjon. \\
-\addlinespace
+Trafikk eller nyttelaster endres underveis. &
+TLS i drift; JWT-signaturen dekker autorisasjonsdata. \\
+
+\addlinespace[6pt]
+
 Repudiation &
-Klient eller tjeneste benekter å ha utført en handling. &
-Delvis: strukturert logging og sporings-ID i feilsvar (\texttt{traceId}); ikke full revisjonsspor eller signerte logger. \\
-\addlinespace
+En klient benekter å ha utført en handling. &
+Strukturert logging og \texttt{traceId} i feilsvar gir delvis sporbarhet.
+Fullstendig revisjonslogg er ikke implementert. \\
+
+\addlinespace[6pt]
+
 Information disclosure &
-Hemmeligheter eller persondata lekker til logger, metrikker eller klient. &
-Policy om ikke å logge JWT, API-nøkler eller pasientinformasjon (jf.\ avsnitt~\ref{sec:errors}); generiske \texttt{5xx}-detaljer til klient. Rom-ID-er er ikke hemmeligholdt mellom autoriserte klienter (flat modell). \\
-\addlinespace
+Hemmeligheter eller pasientdata lekker til logger eller klient. &
+JWT, API-nøkler og pasientinformasjon logges ikke
+(jf.\ avsnitt~\ref{sec:errors}). Feilsvar med statuskode \texttt{5xx}
+inneholder kun generisk tekst. \\
+
+\addlinespace[6pt]
+
 Denial of service &
-Ressursuttømming eller flom mot token- eller rom-endepunkter. &
-Rate limiting (global og skjerpet mot \texttt{/auth/token}); stateless API som kan skaleres horisontalt; avhengighet til eksterne motorers kapasitet. \\
-\addlinespace
+Ressursuttømming mot token- eller rom-endepunkter. &
+Rate limiting globalt og skjerpet mot \texttt{/auth/token}.
+Stateless design gjør horisontal skalering mulig. \\
+
+\addlinespace[6pt]
+
 Elevation of privilege &
-Eskalering av privilegier eller tilgang til andre klienters rom. &
-Ett flatt tilgangsnivå (\texttt{api\_access}); ingen per-rom eierskap eller leietenger mellom klienter. Alle med gyldig token kan teoretisk operere på et kjent rom-ID (IDOR-lignende risiko mellom klienter med samme rettighet)—utenfor POC-omfang å skille multi-tenant klienter. \\
+En klient får tilgang til andre klienters rom. &
+Flat tilgangsmodell: alle med gyldig \texttt{api\_access}-token
+har identiske rettigheter. En klient som kjenner en annen klients
+rom-ID kan i prinsippet operere på den — skille mellom leietakere
+er utenfor POC-omfanget. \\
+
 \bottomrule
 \end{tabular}
 \end{table}
 
-Avveiningen mellom fleksibel Keycloak-integrasjon og streng token-validering
-illustrerer at sikkerhetsnivået er tilpasset et midlertidig leveranseoppsett:
-signaturvalidering gir beskyttelse mot token-forfalskning, mens manglende
-issuer/audience-sjekk og flat autorisasjon representerer teknisk gjeld for videre
-herding hos oppdragsgiver.
+Signaturvalidering gir beskyttelse mot token-forfalskning, men deaktivert
+issuer/audience-sjekk og flat autorisasjon er teknisk gjeld som bør adresseres
+før produksjonssetting.
