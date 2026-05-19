@@ -1,0 +1,9 @@
+\section{API-dokumentasjon}
+\label{sec:api-doc}
+
+Alle endepunkter i VideoAPI er dokumentert gjennom Swagger UI, som genereres automatisk fra \gls{xml}-kommentarer og attributter i kildekoden. Dette oppfyller krav O1.1~\cite{hdo_kravspec} om at API-et skal ha maskinlesbar og interaktiv dokumentasjon, og gjør det enklere for oppdragsgiver og fremtidige utviklere å utforske og teste tjenesten uten ekstern verktøy.
+
+\subsection{Teknisk oppsett}
+\label{subsec:api-doc-oppsett}
+
+Dokumentasjonen bygger på biblioteket Swashbuckle og registreres i \texttt{VideoApiCoreExtensions.cs} via \texttt{AddSwaggerGen}. Tittelen settes til "HDO Video API v1" med en kort beskrivelse av formålet og en merknad om at beskyttede endepunkter krever et Bearer JWT. Swagger UI aktiveres av \texttt{UseSwagger()} og \texttt{UseSwaggerUI()} i pipeline-konfigurasjonen (\texttt{ApplicationExtensions.cs}) og er tilgjengelig på \texttt{/swagger} så lenge applikasjonen kjører. For at Swashbuckle skal inkludere XML-kommentarene som er skrevet over kontrollere og metodesignaturer, er \texttt{<GenerateDocumentationFile>true</GenerateDocumentationFile>} aktivert i prosjektfilen. Kommentarene lastes inn med \texttt{IncludeXmlComments} og vises som beskrivelsetekst direkte i grensesnittet.
