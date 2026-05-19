@@ -16,7 +16,7 @@ VideoAPI er organisert som en lagdelt arkitektur, vist i figur~\ref{fig:lagarkit
     
     \item[Kryssende bekymringer] som feilhåndtering, metrikker og helsesjekker behandles utenfor kjerneflyten for romoperasjoner. Arkitekturen er også stateless: API-et lagrer ikke videorom eller sesjonsdata mellom forespørsler, men lar slik tilstand ligge hos de eksterne videomotorene. Dette støtter horisontal skalering og er i tråd med krav~I1.2~\cite{hdo_kravspec}.
 \end{description}
-
+\newpage
 \begin{lstlisting}[language=CSharp, caption={Oppstartskonfigurasjon delegert til navngitte extension-metoder}, label={lst:program-startup}]
 // HDO-VideoAPI/Program.cs
 

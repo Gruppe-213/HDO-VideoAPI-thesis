@@ -31,7 +31,6 @@ adapter-instans ut fra klientens valg av videomotor. Controllerne opererer kun m
 som er den vanlige kombinasjonen adapter + factory~\cite{refactoringguru_adapter}.
 
 Provider-arkitekturen betyr likevel ikke at alle backendene behandles som identiske. Enkelte operasjoner har ulik betydning i de to systemene — start- og stoppoperasjoner passer naturlig med AntMedias broadcast-modell, mens NHN Booking API i større grad beskriver opprettelse og administrasjon av et videomøte. Provider-laget skal derfor isolere forskjellene, ikke skjule dem helt. Nye videomotorer kan legges til ved å implementere \texttt{IVideoProvider}, mens controllerne og klientens API-kontrakt i hovedsak kan beholdes uendret. Kodeliste~\ref{lst:ivideoprovider} viser den fullstendige kontrakten.
-
 \begin{lstlisting}[language=CSharp, caption={Felles provider-kontrakt}, label={lst:ivideoprovider}]
 // HDO-VideoAPI/Providers/IVideoProvider.cs
 

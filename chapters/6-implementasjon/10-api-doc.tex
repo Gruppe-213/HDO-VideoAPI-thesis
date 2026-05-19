@@ -1,9 +1,113 @@
 \section{API-dokumentasjon}
 \label{sec:api-doc}
 
-Alle endepunkter i VideoAPI er dokumentert gjennom Swagger UI, som genereres automatisk fra \gls{xml}-kommentarer og attributter i kildekoden. Dette oppfyller krav O1.1~\cite{hdo_kravspec} om at API-et skal ha maskinlesbar og interaktiv dokumentasjon, og gjør det enklere for oppdragsgiver og fremtidige utviklere å utforske og teste tjenesten uten ekstern verktøy.
+VideoAPI eksponerer en interaktiv dokumentasjon gjennom Swagger~UI, som genereres automatisk fra \gls{xml}-kommentarer i kildekoden og OpenAPI-metadata registrert ved oppstart. Det gjør at alle endepunkter, parametre og svarskjemaer alltid er i synk med den faktiske implementasjonen --- uten manuell vedlikehold av ekstern dokumentasjon.
+
+Figur~\ref{fig:swagger-ui} viser grensesnittet slik det fremstår i en kjørende instans. Endepunktene er gruppert etter (\texttt{Auth}, \texttt{Rooms}, \texttt{Health}), og hvert endepunkt kan ekspanderes for å se parametre, forespørsels- og svarskjemaer, og eksempelresponser. Klienten kan autentisere seg direkte via «Authorize»-knappen ved å lime inn et JWT og deretter sende forespørsler mot de beskyttede endepunktene uten å forlate nettleseren.
+
+\begin{figure}[H]
+  \centering
+  % TODO: erstatt filnavn med faktisk skjermbilde-fil
+  \includegraphics[width=0.95\linewidth]{figures/swagger-ui.jpg}
+  \caption{Swagger~UI for VideoAPI med endepunkter gruppert etter tag.}
+  \label{fig:swagger-ui}
+\end{figure}
 
 \subsection{Teknisk oppsett}
-\label{subsec:api-doc-oppsett}
+\label{subsec:apidoc-oppsett}
 
-Dokumentasjonen bygger på biblioteket Swashbuckle og registreres i \texttt{VideoApiCoreExtensions.cs} via \texttt{AddSwaggerGen}. Tittelen settes til "HDO Video API v1" med en kort beskrivelse av formålet og en merknad om at beskyttede endepunkter krever et Bearer JWT. Swagger UI aktiveres av \texttt{UseSwagger()} og \texttt{UseSwaggerUI()} i pipeline-konfigurasjonen (\texttt{ApplicationExtensions.cs}) og er tilgjengelig på \texttt{/swagger} så lenge applikasjonen kjører. For at Swashbuckle skal inkludere XML-kommentarene som er skrevet over kontrollere og metodesignaturer, er \texttt{<GenerateDocumentationFile>true</GenerateDocumentationFile>} aktivert i prosjektfilen. Kommentarene lastes inn med \texttt{IncludeXmlComments} og vises som beskrivelsetekst direkte i grensesnittet.
+% Dokumentasjonen bygger på biblioteket Swashbuckle og registreres i \texttt{VideoApiCoreExtensions.cs} via \texttt{AddSwaggerGen}. Tittelen settes til "HDO Video API v1" med en kort beskrivelse av formålet og en merknad om at beskyttede endepunkter krever et Bearer JWT. Swagger UI aktiveres av \texttt{UseSwagger()} og \texttt{UseSwaggerUI()} i pipeline-konfigurasjonen (\texttt{ApplicationExtensions.cs}) og er tilgjengelig på \texttt{/swagger} så lenge applikasjonen kjører. For at Swashbuckle skal inkludere XML-kommentarene som er skrevet over kontrollere og metodesignaturer, er \texttt{<GenerateDocumentationFile>true</GenerateDocumentationFile>} aktivert i prosjektfilen. Kommentarene lastes inn med \texttt{IncludeXmlComments} og vises som beskrivelsetekst direkte i grensesnittet.
+
+Swagger registreres i \texttt{VideoApiCoreExtensions} via \texttt{AddSwaggerGen} og aktiveres i middleware-kjeden i \texttt{ApplicationExtensions.cs}:
+
+\begin{lstlisting}[language={[Sharp]C}, caption={Registrering og aktivering av Swagger.}, label={lst:swagger-register}]
+// HDO-VideoAPI/Extensions/VideoApiCoreExtensions.cs
+
+services.AddEndpointsApiExplorer();
+services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title       = "HDO Video API",
+        Version     = "v1",
+        Description = " ... "
+    });
+    // ...
+});
+ 
+// HDO-VideoAPI/Extensions/ApplicationExtensions.cs
+
+app.UseSwagger();
+app.UseSwaggerUI();
+\end{lstlisting}
+
+For at XML-kommentarene over controllere og metodesignaturer skal vises som beskrivelsestekst i grensesnittet, er \texttt{<GenerateDocumentationFile>true</GenerateDocumentationFile>} slått på i prosjektfilen. Kommentarfilen lastes inn av Swashbuckle ved oppstart:
+ 
+\begin{lstlisting}[language={[Sharp]C}, caption={Innlasting av XML-kommentarer.}, label={lst:swagger-xml}]
+// HDO-VideoAPI/Extensions/VideoApiCoreExtensions.cs
+
+options.IncludeXmlComments(
+    Path.Combine(AppContext.BaseDirectory, $"{typeof(Program).Assembly.GetName().Name}.xml"));
+\end{lstlisting}
+
+\subsection{Sikkerhetsdefinisjon}
+\label{subsec:apidoc-security}
+
+Endepunkter merket med \texttt{[Authorize]} krever et gyldig Bearer JWT. Sikkerhetsskjemaet defineres én gang og kobles globalt til alle operasjoner:
+
+\begin{lstlisting}[language={[Sharp]C}, caption={Definisjon av Bearer-sikkerhetsskjema.}, label={lst:swagger-security}]
+// HDO-VideoAPI/Extensions/VideoApiCoreExtensions.cs
+
+options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+{
+    Type          = SecuritySchemeType.Http,
+    Scheme        = "bearer",
+    BearerFormat  = "JWT",
+    Description   = " ... "
+});
+options.AddSecurityRequirement(doc => new OpenApiSecurityRequirement
+{
+    { new OpenApiSecuritySchemeReference("Bearer", doc), [] }
+});
+\end{lstlisting}
+
+Det globale sikkerhetskravet ville merket samtlige operasjoner med hengelås, inkludert åpne endepunkter som \texttt{POST /auth/token} og helseendepunktene. \texttt{BearerSecurityOperationFilter} retter opp dette: filteret inspiserer refleksjonsmetadata for hvert endepunkt og setter sikkerhetskravet til tomt dersom operasjonen mangler \texttt{[Authorize]}-attributt eller er eksplisitt merket \texttt{[AllowAnonymous]}. I praksis betyr det at kun de faktisk beskyttede rom-endepunktene vises med hengelås i grensesnittet, mens token- og helseendepunktene fremstår som åpne.
+
+\subsection{Manuell innføring av helseendepunkter}
+\label{subsec:apidoc-health}
+ 
+Helseendepunktene \texttt{/health/live} og \texttt{/health/ready} registreres med \texttt{MapHealthChecks}, som ikke passerer gjennom den kontrollerspesifikke endepunktoppdagingen Swashbuckle benytter. De legges derfor til manuelt av \texttt{HealthEndpointsDocumentFilter}, et \texttt{IDocumentFilter} som skriver sti-elementene direkte inn i OpenAPI-dokumentet med korrekte svarstatuser og kravhenvisninger i sammendragsteksten:
+ 
+\begin{lstlisting}[language={[Sharp]C}, caption={Manuell innføring av helseendepunkter i OpenAPI-dokumentet.}, label={lst:swagger-health}]
+// HDO-VideoAPI/Extensions/HealthEndpointsDocumentFilter.cs
+
+public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)
+{
+    // Initialiser stier dersom dokumentet er tomt
+    swaggerDoc.Paths ??= new OpenApiPaths();
+
+    var healthTag = new HashSet<OpenApiTagReference> { new("Health", null, null) };
+ 
+    var livePath = new OpenApiPathItem();
+    livePath.AddOperation(HttpMethod.Get, new OpenApiOperation
+    {
+        Tags     = healthTag,
+        Security = [],
+        Summary  = "Liveness check. Check if the API running. Requirement O1.2",
+        Description = " ... ",
+        Responses = new OpenApiResponses
+        {
+            ["200"] = new OpenApiResponse { Description = "Healthy" },
+            ["404"] = new OpenApiResponse { Description = "Not found" }
+        }
+    });
+    // Legg stien direkte inn i OpenAPI-dokumentet
+    swaggerDoc.Paths["/health/live"] = livePath;
+    
+    // ... (tilsvarende for /health/ready)
+}
+\end{lstlisting}
+ 
+Resultatet er at alle endepunkter — inkludert de som ikke er registrert som
+kontrollere — fremstår konsekvent i Swagger~UI, og at dokumentasjonen
+automatisk holder seg oppdatert uten manuell vedlikehold.
