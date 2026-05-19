@@ -8,7 +8,7 @@ klassenivå og eksponerer syv endepunkter under \texttt{/api/rooms} som
 dekker kravene F1.1--F1.5 og S1.2 \cite{hdo_kravspec}. Videomotor velges via et prefiks kodet inn i ressurs-ID-en: Ved opprettelse sendes ønsket provider i request-bodyen og inkluderes i den returnerte ID-en på formen \texttt{provider:rawId}. På øvrige endepunkter parses
 prefikset ut av \texttt{roomId} og brukes til å slå opp riktig
 \texttt{IVideoProvider} via \texttt{IVideoProviderFactory}.
-Feilhåndtering er sentralisert i \texttt{GlobalExceptionHandler}, som tilordner domenespesifikke exceptions fra provider-laget til HTTP-statuskoder og returnerer standardiserte feilsvar basert på RFC~7807 ProblemDetails-formatet.
+Feilhåndtering er sentralisert i \texttt{GlobalExceptionHandler}, som tilordner domenespesifikke exceptions fra provider-laget til HTTP-statuskoder og returnerer standardiserte feilsvar basert på RFC~7807 ProblemDetails-formatet. Denne ble obsoletet av RFC 9457 i 2023, men endringene er hovedsakelig redaksjonelle og påvirker ikke det vi har implementert i prosjektet.
 
 \texttt{AuthController} har ett endepunkt, \texttt{POST /auth/token},
 som henter et Bearer-token via OAuth~2.0 client credentials-flyten.
